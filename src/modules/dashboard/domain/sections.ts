@@ -19,4 +19,5 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
   { id: "platforms", title: "Platforms", description: "Shared subscriptions and who owes what." },
   { id: "templates", title: "Recurring templates", description: "What opening a month copies into it. Changes apply to months opened from now on; months already opened keep their items." },
   { id: "tags", title: "Tags", description: "Your own labels for expenses, income and templates. They never change a total." },
+  { id: "security", title: "Security", description: "Your passkeys and the devices signed in right now. Your authenticator app and recovery codes keep working alongside them." },
 ];

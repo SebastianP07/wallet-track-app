@@ -18,6 +18,7 @@ const SPANS: Record<string, string> = {
   platforms: "md:col-span-3 lg:col-span-7",
   templates: "md:col-span-6 lg:col-span-8",
   tags: "md:col-span-6 lg:col-span-4",
+  security: "md:col-span-6 lg:col-span-12",
 };
 
 interface SectionGridProps {

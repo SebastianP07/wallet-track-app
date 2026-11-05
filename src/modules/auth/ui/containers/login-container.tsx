@@ -9,9 +9,11 @@ import {
   totpCodeSchema,
 } from "../../domain/credentials";
 import type { LoginStage } from "../../domain/login-flow";
+import { browserPasskeys } from "../../infrastructure/browser-passkeys";
 import { httpAuthRepository } from "../../infrastructure/http-auth-repository";
 import { EnrollmentQr } from "../components/enrollment-qr";
 import { LoginLayout } from "../components/login-layout";
+import { PasskeyStep } from "../components/passkey-step";
 import { PasswordForm } from "../components/password-form";
 import { RecoveryCodesDisplay } from "../components/recovery-codes-display";
 import { CODE_INPUT_PROPS, SingleFieldForm } from "../components/single-field-form";
@@ -19,6 +21,11 @@ import { Button } from "@/shared/ui/button";
 
 const STAGE_COPY: Record<LoginStage["name"], { eyebrow: string; title: string; description?: string }> = {
   password: { eyebrow: "Sign in", title: "Welcome back" },
+  passkey: {
+    eyebrow: "Second factor",
+    title: "Use your passkey",
+    description: "Confirm with your device's screen lock or your security key.",
+  },
   totp: {
     eyebrow: "Second factor",
     title: "Enter your code",
@@ -46,8 +53,9 @@ const STAGE_COPY: Record<LoginStage["name"], { eyebrow: string; title: string; d
 
 export function LoginContainer() {
   const goToDashboard = useCallback(() => window.location.replace("/"), []);
-  const { stage, failure, isPending, submit, goTo, clearFailure } = useLoginFlow(
+  const { stage, failure, isPending, passkeyAvailable, submit, goTo, clearFailure } = useLoginFlow(
     httpAuthRepository,
+    browserPasskeys,
     goToDashboard,
   );
   const copy = STAGE_COPY[stage.name];
@@ -58,6 +66,12 @@ export function LoginContainer() {
     </Button>
   );
 
+  const usePasskeyInstead = passkeyAvailable ? (
+    <Button variant="link" className="px-0" onClick={() => goTo({ name: "passkey" })}>
+      Use your passkey
+    </Button>
+  ) : null;
+
   return (
     <LoginLayout eyebrow={copy.eyebrow} title={copy.title} description={copy.description}>
       {stage.name === "password" ? (
@@ -67,6 +81,22 @@ export function LoginContainer() {
           onInvalid={clearFailure}
           onSubmit={(credentials) => submit({ operation: "password", credentials })}
         />
+      ) : null}
+
+      {stage.name === "passkey" ? (
+        <PasskeyStep
+          failure={failure}
+          pending={isPending}
+          onStart={() => submit({ operation: "passkey" })}
+        >
+          <Button variant="link" className="px-0" onClick={() => goTo({ name: "totp" })}>
+            Use your authenticator
+          </Button>
+          <Button variant="link" className="px-0" onClick={() => goTo({ name: "recovery-code" })}>
+            Use a recovery code
+          </Button>
+          {startOver}
+        </PasskeyStep>
       ) : null}
 
       {stage.name === "totp" ? (
@@ -81,6 +111,7 @@ export function LoginContainer() {
           onInvalid={clearFailure}
           onSubmit={(value) => submit({ operation: "totp", value })}
         >
+          {usePasskeyInstead}
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "recovery-code" })}>
             Use a recovery code
           </Button>
@@ -106,6 +137,7 @@ export function LoginContainer() {
           onInvalid={clearFailure}
           onSubmit={(value) => submit({ operation: "recovery-code", value })}
         >
+          {usePasskeyInstead}
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "totp" })}>
             Use your authenticator
           </Button>

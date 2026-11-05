@@ -6,6 +6,7 @@ import { AccountSectionContainer } from "@/modules/accounts/ui/containers/accoun
 import { useSession } from "@/modules/auth/application/use-session";
 import type { User } from "@/modules/auth/domain/types";
 import { httpAuthRepository } from "@/modules/auth/infrastructure/http-auth-repository";
+import { SecuritySectionContainer } from "@/modules/auth/ui/containers/security-section-container";
 import { CardChargeSectionContainer } from "@/modules/cards/ui/containers/card-charge-section-container";
 import { ExpenseSectionContainer } from "@/modules/expenses/ui/containers/expense-section-container";
 import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-section-container";
@@ -107,6 +108,7 @@ export function DashboardContainer({
           savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,
           templates: <TemplateSectionContainer onSessionEnded={goToLogin} />,
           tags: <TagSectionContainer onSessionEnded={goToLogin} />,
+          security: <SecuritySectionContainer onSessionEnded={goToLogin} />,
         }}
       />
     </main>

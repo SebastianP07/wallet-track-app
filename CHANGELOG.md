@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.14.0 — 2026-11-05 — Passkeys and active sessions
+
+- Login: when the owner has a passkey, the second-factor step offers it first, one tap away, with links to the authenticator and
+  a recovery code, and from those back to the passkey. Nothing prompts until the owner taps. A cancelled or timed out prompt stays
+  on the step with a message and costs no attempt. A browser with no WebAuthn goes straight to the code, saying why.
+- Dashboard: a Security section, the last one. Passkeys can be added, renamed and removed, and adding or removing asks for an
+  authenticator or recovery code in the same form. Sessions show device, address, last seen, started, `This device` and
+  `Second factor pending`, and ending one asks first. Ending the current one signs out.
+- A rejected code and an ended session both answer 401, so the section asks the API again before sending anyone to login.
+- A registration that fails after its proof, cancelled at the prompt or refused, says that nothing was added and the code is spent.
+- `navigator.credentials` is called directly in `browser-passkeys.ts`, behind the `PasskeyAuthenticator` port, with no new
+  dependency. The CSP is unchanged.
+- These mutations opt out of the dashboard refresh, since no write here moves a KPI.
+- Refreshed the vendored contract and its types. No new automated tests (T7).
+
 ## 0.13.0 — 2026-11-05 — Dashboard
 
 - Replaced the placeholder Overview with eight KPIs from `GET /dashboard`: Total actual, To pay, To arrive, Left over, Savings,

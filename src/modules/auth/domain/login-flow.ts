@@ -2,6 +2,7 @@ import type { LoginStep, MfaEnrollment } from "./types";
 
 export type LoginStage =
   | { name: "password" }
+  | { name: "passkey" }
   | { name: "totp" }
   | { name: "recovery-code" }
   | { name: "enrollment-secret" }
@@ -9,5 +10,12 @@ export type LoginStage =
   | { name: "recovery-codes"; codes: string[] };
 
 export function stageAfterPassword(nextStep: LoginStep): LoginStage {
-  return nextStep === "enroll_mfa" ? { name: "enrollment-secret" } : { name: "totp" };
+  switch (nextStep) {
+    case "enroll_mfa":
+      return { name: "enrollment-secret" };
+    case "passkey":
+      return { name: "passkey" };
+    case "totp":
+      return { name: "totp" };
+  }
 }

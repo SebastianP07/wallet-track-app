@@ -84,6 +84,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/login/passkey/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Login step 2: start a passkey assertion
+         * @description Requires the session from step 1. Stores a random challenge bound to that session, which works once and expires in 2 minutes, replacing any earlier one. 409 if the owner has no passkey, so the login falls back to TOTP. 429 while the second factor is locked.
+         */
+        post: operations["startPasskeyLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login/passkey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Login step 2: passkey assertion
+         * @description Requires the session from step 1. Consumes the session's challenge whatever the outcome, then checks origin, RP ID, challenge, signature, user verification and sign count. A rejected assertion is the generic 401 and counts toward the second-factor lockout.
+         */
+        post: operations["loginWithPasskey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/mfa/enrollment": {
         parameters: {
             query?: never;
@@ -189,6 +229,143 @@ export interface paths {
         put?: never;
         /** Log out every session */
         post: operations["logoutAll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the owner's active sessions
+         * @description Sessions neither revoked nor expired, most recently seen first. A session still waiting for its second factor is listed with `mfaPending`, because it means someone passed the password step. Token hashes never leave the server.
+         */
+        get: operations["listSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke a session
+         * @description Ends that session at once. Revoking the current session also clears its cookie, like logging out.
+         */
+        delete: operations["revokeSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passkeys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the owner's passkeys
+         * @description Oldest first. Credential IDs and public keys never leave the server.
+         */
+        get: operations["listPasskeys"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passkeys/registration/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start registering a passkey
+         * @description Requires a full session and a current second-factor proof, so a stolen session cannot silently add a credential. The proof is consumed here, and only then is a challenge stored, bound to this session, working once and expiring in 2 minutes. A rejected proof is the generic 401 and counts toward the second-factor lockout.
+         */
+        post: operations["startPasskeyRegistration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passkeys/registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish registering a passkey
+         * @description Consumes the session's registration challenge whatever the outcome, then checks origin, RP ID, challenge and user verification. A missing, used, expired or foreign challenge and a rejected attestation are the generic 401. 409 if that credential is already registered.
+         */
+        post: operations["finishPasskeyRegistration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passkeys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename a passkey */
+        patch: operations["renamePasskey"];
+        trace?: never;
+    };
+    "/auth/passkeys/{id}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove a passkey
+         * @description Requires a current second-factor proof, sent in the body, which is why this is not a DELETE. The proof is consumed only if the passkey existed. A rejected proof is the generic 401 and counts toward the second-factor lockout. TOTP and recovery codes keep working after the last passkey goes.
+         */
+        post: operations["removePasskey"];
         delete?: never;
         options?: never;
         head?: never;
@@ -780,10 +957,10 @@ export interface components {
         };
         LoginStep: {
             /**
-             * @description `enroll_mfa` on first login, when MFA is not set up yet.
+             * @description `enroll_mfa` on first login, when MFA is not set up yet. `passkey` when the owner has one: it is the preferred factor, and TOTP and recovery codes still work.
              * @enum {string}
              */
-            nextStep: "totp" | "enroll_mfa";
+            nextStep: "passkey" | "totp" | "enroll_mfa";
         };
         TotpCodeRequest: {
             code: string;
@@ -821,6 +998,123 @@ export interface components {
         };
         RecoveryCodeStatus: {
             remaining: number;
+        };
+        /** @description A current second factor. `code` is 6 digits for `totp` and up to 64 characters for `recovery_code`. Using it consumes it. */
+        SecondFactorProof: {
+            /** @enum {string} */
+            method: "totp" | "recovery_code";
+            code: string;
+        };
+        PasskeyDescriptor: {
+            /** @constant */
+            type: "public-key";
+            /** @description Credential ID, base64url. */
+            id: string;
+            transports?: string[];
+        };
+        /** @description WebAuthn creation options in their JSON form, as `parseCreationOptionsFromJSON` takes them. */
+        PasskeyCreationOptions: {
+            publicKey: {
+                rp: {
+                    id: string;
+                    name: string;
+                };
+                user: {
+                    /** @description User handle, base64url. */
+                    id: string;
+                    name: string;
+                    displayName: string;
+                };
+                /** @description Base64url. */
+                challenge: string;
+                pubKeyCredParams: {
+                    /** @constant */
+                    type: "public-key";
+                    alg: number;
+                }[];
+                /** @description Milliseconds. */
+                timeout?: number;
+                excludeCredentials?: components["schemas"]["PasskeyDescriptor"][];
+                authenticatorSelection?: {
+                    authenticatorAttachment?: string;
+                    requireResidentKey?: boolean;
+                    residentKey?: string;
+                    userVerification?: string;
+                };
+                attestation?: string;
+            };
+        };
+        /** @description WebAuthn request options in their JSON form, as `parseRequestOptionsFromJSON` takes them. */
+        PasskeyAssertionOptions: {
+            publicKey: {
+                /** @description Base64url. */
+                challenge: string;
+                /** @description Milliseconds. */
+                timeout?: number;
+                rpId?: string;
+                allowCredentials?: components["schemas"]["PasskeyDescriptor"][];
+                userVerification?: string;
+            };
+        };
+        /** @description A `PublicKeyCredential` in its JSON form. Binary values are base64url. Verified by the server, so its shape is checked there. */
+        PasskeyCredentialResponse: {
+            id: string;
+            rawId: string;
+            /** @constant */
+            type: "public-key";
+            authenticatorAttachment?: string;
+            clientExtensionResults?: {
+                [key: string]: unknown;
+            };
+            response: {
+                clientDataJSON: string;
+                /** @description Registration only. */
+                attestationObject?: string;
+                /** @description Registration only. */
+                transports?: string[];
+                /** @description Assertion only. */
+                authenticatorData?: string;
+                /** @description Assertion only. */
+                signature?: string;
+                /** @description Assertion only. */
+                userHandle?: string | null;
+            };
+        };
+        PasskeyAssertionRequest: {
+            credential: components["schemas"]["PasskeyCredentialResponse"];
+        };
+        PasskeyRegistrationRequest: {
+            name: components["schemas"]["Name"];
+            credential: components["schemas"]["PasskeyCredentialResponse"];
+        };
+        PasskeyRename: {
+            name: components["schemas"]["Name"];
+        };
+        Passkey: {
+            id: components["schemas"]["Id"];
+            name: components["schemas"]["Name"];
+            createdAt: components["schemas"]["Timestamp"];
+            /** @description Null until it first completes a login. */
+            lastUsedAt: components["schemas"]["Timestamp"] | null;
+        };
+        PasskeyList: {
+            items: components["schemas"]["Passkey"][];
+        };
+        Session: {
+            id: components["schemas"]["Id"];
+            /** @description Of the request that started the session. */
+            userAgent: string | null;
+            /** @description Client address of the request that started the session. */
+            ip: string | null;
+            createdAt: components["schemas"]["Timestamp"];
+            lastSeenAt: components["schemas"]["Timestamp"];
+            /** @description Whether this is the session making the request. */
+            current: boolean;
+            /** @description The password was accepted and the second factor has not been passed yet. */
+            mfaPending: boolean;
+        };
+        SessionList: {
+            items: components["schemas"]["Session"][];
         };
         /**
          * @description `savings` accounts count toward Savings instead of Current total (D9).
@@ -1401,6 +1695,65 @@ export interface operations {
             429: components["responses"]["TooManyRequests"];
         };
     };
+    startPasskeyLogin: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Options for `navigator.credentials.get()`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeyAssertionOptions"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    loginWithPasskey: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasskeyAssertionRequest"];
+            };
+        };
+        responses: {
+            /** @description Assertion accepted. The session is rotated and fully authenticated. */
+            200: {
+                headers: {
+                    "Set-Cookie": components["headers"]["SetSessionCookie"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
     startMfaEnrollment: {
         parameters: {
             query?: never;
@@ -1563,6 +1916,203 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    listSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The active sessions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    revokeSession: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session revoked. */
+            204: {
+                headers: {
+                    "Set-Cookie": components["headers"]["SetSessionCookie"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listPasskeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The registered passkeys. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeyList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    startPasskeyRegistration: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SecondFactorProof"];
+            };
+        };
+        responses: {
+            /** @description Options for `navigator.credentials.create()`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeyCreationOptions"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    finishPasskeyRegistration: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasskeyRegistrationRequest"];
+            };
+        };
+        responses: {
+            /** @description Passkey registered. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Passkey"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    renamePasskey: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasskeyRename"];
+            };
+        };
+        responses: {
+            /** @description Passkey renamed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Passkey"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    removePasskey: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SecondFactorProof"];
+            };
+        };
+        responses: {
+            /** @description Passkey removed. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
     getMe: {

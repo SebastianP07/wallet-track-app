@@ -18,6 +18,13 @@ export const httpAuthRepository: AuthRepository = {
     const body: Schemas["RecoveryCodeRequest"] = { code };
     return apiPost<Schemas["User"]>("/auth/login/recovery-code", body);
   },
+  startPasskeyLogin() {
+    return apiPost<Schemas["PasskeyAssertionOptions"]>("/auth/login/passkey/options");
+  },
+  loginWithPasskey(credential) {
+    const body: Schemas["PasskeyAssertionRequest"] = { credential };
+    return apiPost<Schemas["User"]>("/auth/login/passkey", body);
+  },
   startMfaEnrollment(enrollmentSecret) {
     const body: Schemas["MfaEnrollmentStartRequest"] = { enrollmentSecret };
     return apiPost<Schemas["MfaEnrollment"]>("/auth/mfa/enrollment", body);

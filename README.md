@@ -18,7 +18,7 @@ The BFF and the API must agree on three things, or logging in fails. Start the A
 with these values, then run `pnpm dev` here and open <http://localhost:3000>, not `127.0.0.1`:
 
 ```sh
-make dev INSECURE_DEV_COOKIES=true TRUSTED_PROXIES=127.0.0.1/32,::1/128 ALLOWED_ORIGINS=http://localhost:3000
+make dev INSECURE_DEV_COOKIES=true TRUSTED_PROXIES=127.0.0.1/32,::1/128 ALLOWED_ORIGINS=http://localhost:3000 WEBAUTHN_RP_ID=localhost WEBAUTHN_RP_ORIGINS=http://localhost:3000
 ```
 
 | Setting | Why |
@@ -26,6 +26,7 @@ make dev INSECURE_DEV_COOKIES=true TRUSTED_PROXIES=127.0.0.1/32,::1/128 ALLOWED_
 | `INSECURE_DEV_COOKIES=true` (API) | Plain HTTP cannot hold `__Host-` cookies. The session becomes `dev-session` |
 | `TRUSTED_PROXIES` (API) | Must cover the BFF's address, or the API ignores `X-Forwarded-For` and every client shares one password lockout and one rate limit |
 | `ALLOWED_ORIGINS` (API) and `APP_ORIGIN` (here) | Must hold the same origin. The BFF forwards `Origin`, and the API answers 403 to one it does not list |
+| `WEBAUTHN_RP_ID`, `WEBAUTHN_RP_ORIGINS` (API) | The API refuses to start without them. The origins must include `APP_ORIGIN`, or every passkey is rejected. Browsers allow WebAuthn over plain HTTP only on `localhost`, one more reason not to use `127.0.0.1` |
 
 To create the owner and log in the first time, see the backend README.
 
@@ -76,6 +77,17 @@ visibility, so logging out everywhere reaches other tabs.
 
 The login steps live in React state only. Reloading during the second factor returns to the password step.
 Recovery codes stay in memory until acknowledged, and leaving the page first triggers the browser's warning.
+
+## Passkeys
+
+When the owner has a passkey, Login offers it first in the second-factor step, and it can always fall back to the
+authenticator or a recovery code. The prompt opens only on a tap, never by surprise. A cancelled
+prompt stays on the step, and a browser with no WebAuthn goes straight to the code. The Dashboard's Security section adds,
+renames and removes passkeys, and lists and ends sessions. Adding or removing a passkey asks for a code in the same form.
+
+`src/modules/auth/infrastructure/browser-passkeys.ts` calls `navigator.credentials` directly, converting the API's base64url
+JSON by hand, so there is no WebAuthn dependency, and the CSP needs no change. A rejected code and an ended session both answer
+401, so the section asks the API again before sending anyone to `/login`.
 
 ## Commands
 
@@ -135,7 +147,7 @@ The theme is dark only, on near-black `#0a0a0a`, with marigold as the one accent
 components active. Fonts are self-hosted from `@fontsource-variable` packages, so no page contacts a font CDN.
 
 `QueryProvider` invalidates the dashboard query after every mutation, successful or not, so a new write cannot forget to.
-Only logging out opts out, through `meta.keepsDashboard`.
+Logging out and the Security section opt out, through `meta.keepsDashboard`.
 
 MSW is not installed: the real API is available, so Phase 3 was built and checked against it.
 

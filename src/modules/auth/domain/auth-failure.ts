@@ -1,5 +1,6 @@
 export type AuthOperation =
   | "password"
+  | "passkey"
   | "totp"
   | "recovery-code"
   | "enrollment-secret"
@@ -8,6 +9,7 @@ export type AuthOperation =
 
 const REJECTED: Record<AuthOperation, string> = {
   password: "That email and password were not accepted.",
+  passkey: "That passkey was not accepted. Try again, use a code instead, or start over if this has taken a while.",
   totp: "That code was not accepted. Try the next one, or start over if this has taken a while.",
   "recovery-code": "That recovery code was not accepted. Try another, or start over.",
   "enrollment-secret": "That enrollment secret was not accepted, or it has expired.",
