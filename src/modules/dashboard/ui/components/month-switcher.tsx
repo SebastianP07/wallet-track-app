@@ -1,6 +1,12 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { monthName, shiftYearMonth, yearOf } from "../../domain/year-month";
+import {
+  hasNextMonth,
+  hasPreviousMonth,
+  monthName,
+  shiftYearMonth,
+  yearOf,
+} from "@/modules/periods/domain/year-month";
 import { Button } from "@/shared/ui/button";
 
 interface MonthSwitcherProps {
@@ -17,6 +23,7 @@ export function MonthSwitcher({ period, onChange }: MonthSwitcherProps) {
       <Button
         variant="outline"
         className="px-0"
+        disabled={!hasPreviousMonth(period)}
         aria-label={`Previous month, ${monthName(previous)} ${yearOf(previous)}`}
         onClick={() => onChange(previous)}
       >
@@ -34,6 +41,7 @@ export function MonthSwitcher({ period, onChange }: MonthSwitcherProps) {
       <Button
         variant="outline"
         className="px-0 md:ml-auto"
+        disabled={!hasNextMonth(period)}
         aria-label={`Next month, ${monthName(next)} ${yearOf(next)}`}
         onClick={() => onChange(next)}
       >

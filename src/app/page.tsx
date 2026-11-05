@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getServerSession } from "@/modules/auth/infrastructure/server-session";
-import { currentYearMonth, parseYearMonth } from "@/modules/dashboard/domain/year-month";
+import { currentYearMonth, parseYearMonth } from "@/modules/periods/domain/year-month";
 import { DashboardContainer } from "@/modules/dashboard/ui/containers/dashboard-container";
 import { MessageScreen } from "@/shared/ui/message-screen";
 
@@ -24,10 +24,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     );
   }
   const { period } = await searchParams;
+  const currentPeriod = currentYearMonth(new Date());
   return (
     <DashboardContainer
       initialUser={session.user}
-      initialPeriod={parseYearMonth(period) ?? currentYearMonth(new Date())}
+      initialPeriod={parseYearMonth(period) ?? currentPeriod}
+      currentPeriod={currentPeriod}
     />
   );
 }

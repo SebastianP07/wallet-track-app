@@ -1,4 +1,6 @@
-const YEAR_MONTH = /^[0-9]{4}-(0[1-9]|1[0-2])$/;
+const YEAR_MONTH = /^[2-9][0-9]{3}-(0[1-9]|1[0-2])$/;
+const FIRST_MONTH = "2000-01";
+const LAST_MONTH = "9999-12";
 const TIME_ZONE = "America/Bogota";
 
 function format(year: number, month: number): string {
@@ -28,6 +30,14 @@ export function shiftYearMonth(yearMonth: string, months: number): string {
   const [year, month] = parts(yearMonth);
   const index = year * 12 + (month - 1) + months;
   return format(Math.floor(index / 12), (index % 12) + 1);
+}
+
+export function hasPreviousMonth(yearMonth: string): boolean {
+  return yearMonth > FIRST_MONTH;
+}
+
+export function hasNextMonth(yearMonth: string): boolean {
+  return yearMonth < LAST_MONTH;
 }
 
 export function monthName(yearMonth: string): string {

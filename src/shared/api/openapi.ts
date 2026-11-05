@@ -455,7 +455,7 @@ export interface paths {
         head?: never;
         /**
          * Edit a template
-         * @description Affects future months only. An active `card_charge` template must have a card, so removing its card or reactivating one without a card returns 400.
+         * @description Affects future months only. An active `card_charge` template must have a card, so removing its card or reactivating one without a card returns 400. As on create, `dueDay` is only for `fixed` templates and `cardId` only for `card_charge` ones; anything else returns 400.
          */
         patch: operations["updateRecurringTemplate"];
         trace?: never;
@@ -744,7 +744,7 @@ export interface components {
          */
         NonNegativeMoney: number;
         /**
-         * @description A month, as YYYY-MM.
+         * @description A month, as YYYY-MM, from 2000-01 on.
          * @example 2026-11
          */
         YearMonth: string;

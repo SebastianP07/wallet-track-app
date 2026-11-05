@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.0 — 2026-11-04 — Periods and templates
+
+- Added `src/modules/periods`. Under the month switcher, the month now shows its status: not opened, with an "Open
+  month" action; open, with a "Close month" action and a confirmation that says what will happen; or closed. Added a
+  link back to the current month.
+- Added the Dashboard's Recurring templates section: inline add, edit, activate, deactivate and delete for fixed,
+  income and card charge templates. Changes are optimistic and a failure undoes only its own edit. Opening and closing
+  wait for the server.
+- Card selection lists the cards that exist. With none, the select and Save are disabled and a hint says why.
+- The switcher stops at the contract's limits, and `?period=` below 2000-01 falls back to the current month. Moved
+  `year-month.ts` from `dashboard` to `periods`, and `SelectField` gained an `error`. `account-forms` exports its
+  `nameField`.
+- The contract gives no item count for a period, so none is shown. Refreshed the vendored contract and its types. No
+  new dependencies. No new automated tests (T7).
+
 ## 0.6.0 — 2026-11-04 — Accounts and savings
 
 - Added `src/modules/accounts` and the Dashboard's Accounts and Savings sections: inline add, rename and update
