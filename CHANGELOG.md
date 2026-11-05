@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0 — 2026-11-04 — Accounts and savings
+
+- Added `src/modules/accounts` and the Dashboard's Accounts and Savings sections: inline add, rename and update
+  balance, delete with a confirmation step, and empty, loading and error states. Balances are current values, so
+  the month switcher does not touch them.
+- Totals only ever come from the backend (D1). Optimistic updates change the rows, and the total dims until the
+  refetch brings it back in step. A failure undoes only its own edit and shows an error.
+- `formatCOP` shows whole pesos with Colombian separators. The amount input takes typed separators and negatives, and
+  refuses decimals rather than guess at them. It uses a decimal keypad with a sign button, because iOS gives that
+  keypad no minus key.
+- Added `apiPatch` and `apiDelete`, a `destructive` button variant, `SelectField` and a `trailing` slot on `Field`.
+  Split the section placeholder into `SectionFrame` and `SectionPlaceholder`.
+- No new dependencies. No new automated tests (T7).
+
 ## 0.5.0 — 2026-11-04 — Auth frontend
 
 - Added the Login route: password, TOTP, recovery code, first-time MFA enrollment with a locally drawn QR code and

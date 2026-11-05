@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 
+import { AccountSectionContainer } from "@/modules/accounts/ui/containers/account-section-container";
 import { useSession } from "@/modules/auth/application/use-session";
 import type { User } from "@/modules/auth/domain/types";
 import { httpAuthRepository } from "@/modules/auth/infrastructure/http-auth-repository";
@@ -38,7 +39,12 @@ export function DashboardContainer({ initialUser, initialPeriod }: DashboardCont
         onLogoutAll={() => logOut("all-devices")}
       />
       <MonthSwitcher period={period} onChange={changePeriod} />
-      <SectionGrid />
+      <SectionGrid
+        sections={{
+          accounts: <AccountSectionContainer group="spendable" onSessionEnded={goToLogin} />,
+          savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,
+        }}
+      />
     </main>
   );
 }

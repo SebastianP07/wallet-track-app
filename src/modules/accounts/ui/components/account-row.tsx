@@ -1,0 +1,126 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "cn";
+
+import { KIND_LABELS } from "../../domain/account-groups";
+import { formatCOP } from "../../domain/money";
+import { isPendingAccount } from "../../domain/optimistic-list";
+import type { Account } from "../../domain/types";
+import { AccountBalanceForm } from "./account-balance-form";
+import { AccountNameForm } from "./account-name-form";
+import { Button } from "@/shared/ui/button";
+
+const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
+
+type RowMode = "view" | "rename" | "balance" | "confirm-delete";
+
+interface AccountRowProps {
+  account: Account;
+  onRename: (name: string) => void;
+  onSetBalance: (balance: number) => void;
+  onDelete: () => void;
+}
+
+export function AccountRow({ account, onRename, onSetBalance, onDelete }: AccountRowProps) {
+  const [mode, setMode] = useState<RowMode>("view");
+  const pending = isPendingAccount(account);
+  const toView = () => setMode("view");
+
+  return (
+    <li className="flex flex-col gap-1 border-t border-rule py-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col">
+          <span className="font-medium wrap-anywhere">{account.name}</span>
+          <span className="text-xs text-muted-foreground">{KIND_LABELS[account.kind]}</span>
+        </div>
+        <span
+          className={cn(
+            "shrink-0 text-right font-mono text-sm leading-6 whitespace-nowrap",
+            account.balance < 0 && "text-destructive",
+          )}
+        >
+          {formatCOP(account.balance)}
+        </span>
+      </div>
+
+      {mode === "view" ? (
+        <div className="flex flex-wrap items-center">
+          <Button
+            variant="link"
+            className={ACTION}
+            disabled={pending}
+            aria-label={`Update balance of ${account.name}`}
+            onClick={() => setMode("balance")}
+          >
+            Update balance
+          </Button>
+          <Button
+            variant="link"
+            className={ACTION}
+            disabled={pending}
+            aria-label={`Rename ${account.name}`}
+            onClick={() => setMode("rename")}
+          >
+            Rename
+          </Button>
+          <Button
+            variant="link"
+            className={ACTION}
+            disabled={pending}
+            aria-label={`Delete ${account.name}`}
+            onClick={() => setMode("confirm-delete")}
+          >
+            Delete
+          </Button>
+        </div>
+      ) : null}
+
+      {mode === "rename" ? (
+        <AccountNameForm
+          name={account.name}
+          onCancel={toView}
+          onSubmit={(name) => {
+            onRename(name);
+            toView();
+          }}
+        />
+      ) : null}
+
+      {mode === "balance" ? (
+        <AccountBalanceForm
+          balance={account.balance}
+          onCancel={toView}
+          onSubmit={(balance) => {
+            onSetBalance(balance);
+            toView();
+          }}
+        />
+      ) : null}
+
+      {mode === "confirm-delete" ? (
+        <div className="flex flex-col gap-2 pt-1">
+          <p className="text-sm">
+            Delete <span className="font-medium wrap-anywhere">{account.name}</span> for good? This
+            can&apos;t be undone.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={() => {
+                onDelete();
+                toView();
+              }}
+            >
+              Delete
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={toView}>
+              Keep it
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </li>
+  );
+}

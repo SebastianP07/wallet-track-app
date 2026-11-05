@@ -50,10 +50,10 @@ export async function apiGet<T>(path: string): Promise<T> {
   return parse<T>(await send(path, { method: "GET" }));
 }
 
-export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+async function sendMutation<T>(method: string, path: string, body?: unknown): Promise<T> {
   const attempt = async (token: string) =>
     send(path, {
-      method: "POST",
+      method,
       headers: {
         "X-CSRF-Token": token,
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
@@ -65,4 +65,16 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   // A 403 means the token check ran before the handler, so a retry cannot repeat any effect.
   const response = first.status === 403 ? await attempt(await fetchCsrfToken()) : first;
   return parse<T>(response);
+}
+
+export function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  return sendMutation<T>("POST", path, body);
+}
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  return sendMutation<T>("PATCH", path, body);
+}
+
+export function apiDelete(path: string): Promise<void> {
+  return sendMutation<void>("DELETE", path);
 }

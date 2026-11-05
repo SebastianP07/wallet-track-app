@@ -4,6 +4,8 @@ import { cn } from "cn";
 const VARIANTS = {
   primary:
     "bg-primary text-primary-foreground font-semibold hover:brightness-110 active:brightness-95",
+  destructive:
+    "bg-destructive text-primary-foreground font-semibold hover:brightness-110 active:brightness-95",
   outline: "border border-input text-foreground hover:bg-accent",
   link: "text-muted-foreground underline underline-offset-4 hover:text-foreground",
 } as const;

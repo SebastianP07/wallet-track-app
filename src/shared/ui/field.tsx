@@ -5,9 +5,10 @@ interface FieldProps extends ComponentProps<"input"> {
   label: string;
   hint?: ReactNode;
   error?: string;
+  trailing?: ReactNode;
 }
 
-export function Field({ label, hint, error, className, ...inputProps }: FieldProps) {
+export function Field({ label, hint, error, trailing, className, ...inputProps }: FieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -23,16 +24,19 @@ export function Field({ label, hint, error, className, ...inputProps }: FieldPro
           {hint}
         </p>
       ) : null}
-      <input
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
-        className={cn(
-          "min-h-12 w-full rounded-md border border-input bg-card px-3 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring aria-invalid:border-destructive",
-          className,
-        )}
-        {...inputProps}
-      />
+      <div className="flex gap-2">
+        <input
+          id={id}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy || undefined}
+          className={cn(
+            "min-h-12 w-full min-w-0 rounded-md border border-input bg-card px-3 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring aria-invalid:border-destructive",
+            className,
+          )}
+          {...inputProps}
+        />
+        {trailing}
+      </div>
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}
