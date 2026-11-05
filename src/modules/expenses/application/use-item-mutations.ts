@@ -49,7 +49,7 @@ export function useItemMutations({
         tagId: item.tagId ?? null,
         templateId: null,
         personId: null,
-        cardId: null,
+        cardId: item.kind === "card_charge" ? item.cardId : null,
         status: "pending",
         doneAt: null,
         urgency: "none",
@@ -112,7 +112,8 @@ export function useItemMutations({
       if (!previous) {
         return { next: list, undo: (current) => current };
       }
-      const undone = isClosed ? ("overdue" as const) : ("pending" as const);
+      // A card charge never becomes overdue (D3), whatever its month.
+      const undone = isClosed && previous.kind !== "card_charge" ? ("overdue" as const) : ("pending" as const);
       const next: PeriodItem = done
         ? { ...previous, status: "done", doneAt: new Date().toISOString() }
         : { ...previous, status: undone, doneAt: null };

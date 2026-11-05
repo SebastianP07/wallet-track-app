@@ -319,7 +319,7 @@ export interface paths {
         };
         /**
          * Sum card charges per card
-         * @description Informational; never part of To pay, Outgoing or Balance (D3).
+         * @description Informational; never part of To pay, Outgoing or Balance (D3). Counts every card charge of the month, whatever its status. Every card has a row, with total 0 if it has no charges. Charges whose card was deleted are gathered in one last row with `cardId` and `cardName` null, which exists only when there are such charges, and they count toward `total`.
          */
         get: operations["getCardChargeTotals"];
         put?: never;
@@ -925,7 +925,7 @@ export interface components {
             tagId?: components["schemas"]["Id"] | null;
         };
         PeriodItemCreate: components["schemas"]["ExpenseItemCreate"] | components["schemas"]["IncomeItemCreate"] | components["schemas"]["CardChargeItemCreate"];
-        /** @description `kind` and `status` cannot be edited; the done endpoints change `status`. `dueDate` is refused on income items, which have none. */
+        /** @description `kind` and `status` cannot be edited; the done endpoints change `status`. `dueDate` is refused on income and card charge items, which have none. `cardId` moves a card charge to another card, including one whose card was deleted, but null cannot remove it (400); any other kind refuses a card. */
         PeriodItemUpdate: {
             name?: components["schemas"]["Name"];
             amount?: components["schemas"]["NonNegativeMoney"];
@@ -2013,7 +2013,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Item is done. */
+            /** @description Item is done. On a card charge this only records that the charge was seen, and moves no total (D3). */
             200: {
                 headers: {
                     [name: string]: unknown;

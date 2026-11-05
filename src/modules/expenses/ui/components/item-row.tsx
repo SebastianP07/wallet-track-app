@@ -18,7 +18,7 @@ type RowMode = "view" | "edit" | "confirm-delete";
 interface ItemRowProps {
   item: PeriodItem;
   tags: Tag[];
-  doneWord: "paid" | "received";
+  doneWord: "paid" | "received" | "charged";
   details: ReactNode;
   renderEditForm: (close: () => void) => ReactNode;
   onSetDone: (done: boolean) => void;

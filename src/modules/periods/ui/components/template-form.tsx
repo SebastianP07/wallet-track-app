@@ -110,8 +110,11 @@ export function TemplateForm({
           />
           {hasNoCards ? (
             <p className="text-sm text-muted-foreground">
-              There are no credit cards yet, and a card charge needs one. Managing cards is not
-              available yet, so this can&apos;t be saved for now.
+              A card charge needs a card, and there are none yet. Add one in{" "}
+              <a href="#card-charges" className="text-foreground underline underline-offset-4">
+                Card charges
+              </a>
+              , and it will show up here without losing what you typed.
             </p>
           ) : null}
           {loadFailed ? (

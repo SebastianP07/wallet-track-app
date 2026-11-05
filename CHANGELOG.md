@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.10.0 — 2026-11-04 — Credit cards
+
+- Added `src/modules/cards`: the Dashboard's Card charges section, with charges grouped by card, each card's monthly total
+  and the month's total from the backend (D1), inline add, edit and delete with a confirmation step, and a toggle that
+  says Expected or Charged. A note states that these charges are informational and that the real outflow is the
+  statement payment, registered as an occasional expense (D3).
+- Cards are created, edited and deleted inline in the same section, in any month state, with no new pages or menus. The
+  delete confirmation states that the card's active templates become inactive and that existing charges stay.
+- Charges whose card was deleted appear under Deleted card, and editing one can move it to another card. A card total that
+  has not caught up, or could not be loaded, shows a dash and never a number computed here.
+- The tag filter hides cards left with no matching charges, and the totals keep covering the whole month (D5). Card totals
+  refresh with the month's items, because their query sits under the same key.
+- The recurring template form no longer dead-ends with no cards: it links to Card charges and picks up a new card without
+  losing what was typed.
+- `ItemSection` gained an optional `renderItems`, `DoneToggle` and `ItemRow` the word "charged", and `useItemMutations` keeps
+  a new charge's card and shows undo on a card charge as pending in a closed month. No change for other sections.
+- `CREDIT_CARDS_KEY` moved to the shared query keys, so templates and cards read one list.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.9.0 — 2026-11-04 — Income
 
 - Added `src/modules/income`: the Dashboard's Income section, with To arrive from the backend (D1), an expected or

@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/button";
 interface DoneToggleProps {
   name: string;
   // What being done is called on this kind of item.
-  word: "paid" | "received";
+  word: "paid" | "received" | "charged";
   done: boolean;
   disabled: boolean;
   onToggle: () => void;

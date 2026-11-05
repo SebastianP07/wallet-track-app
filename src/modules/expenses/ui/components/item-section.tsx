@@ -23,6 +23,8 @@ interface ItemSectionProps {
   failure: string | null;
   reload: () => void;
   renderRow: (item: PeriodItem) => ReactNode;
+  // For a section that lays out its rows some other way than one plain list.
+  renderItems?: (items: PeriodItem[]) => ReactNode;
   renderAddForm: (close: () => void) => ReactNode;
 }
 
@@ -40,6 +42,7 @@ export function ItemSection({
   failure,
   reload,
   renderRow,
+  renderItems,
   renderAddForm,
 }: ItemSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
@@ -90,6 +93,8 @@ export function ItemSection({
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
           {isFiltered ? copy.filtered : copy.empty}
         </p>
+      ) : renderItems ? (
+        renderItems(items)
       ) : (
         <ul className="flex flex-col">{items.map(renderRow)}</ul>
       )}

@@ -11,11 +11,10 @@ import {
 } from "../domain/optimistic-templates";
 import type { Template, TemplateCreate, TemplateList, TemplateUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
-import { RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
+import { CREDIT_CARDS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
 const TEMPLATES_KEY = RECURRING_TEMPLATES_KEY;
-const CARDS_KEY = ["credit-cards"];
 
 export function useTemplateSection(repository: TemplatesRepository, onSessionEnded: () => void) {
   const [failure, setFailure] = useState<string | null>(null);
@@ -27,7 +26,7 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     retry,
   });
   const cardsQuery = useQuery({
-    queryKey: CARDS_KEY,
+    queryKey: CREDIT_CARDS_KEY,
     queryFn: () => repository.listCards(),
     retry,
   });
