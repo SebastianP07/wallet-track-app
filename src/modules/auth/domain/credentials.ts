@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/shared/validation/zod";
 
 export const passwordLoginSchema = z.object({
   email: z.string().trim().pipe(z.email({ error: "Enter a valid email address." })),

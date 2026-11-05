@@ -9,6 +9,8 @@ import { needsCardToActivate } from "../../domain/template-groups";
 import type { Template, TemplateUpdate } from "../../domain/types";
 import { TemplateForm, type CardChoices } from "./template-form";
 import { formatCopInput, formatCOP } from "@/modules/accounts/domain/money";
+import type { Tag } from "@/modules/tags/domain/types";
+import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { Button } from "@/shared/ui/button";
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
@@ -34,16 +36,18 @@ function detailOf(template: Template, cardChoices: CardChoices): string | null {
 interface TemplateRowProps {
   template: Template;
   cardChoices: CardChoices;
+  tags: Tag[];
   onUpdate: (changes: TemplateUpdate) => void;
   onDelete: () => void;
 }
 
-export function TemplateRow({ template, cardChoices, onUpdate, onDelete }: TemplateRowProps) {
+export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }: TemplateRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
   const pending = isPendingTemplate(template);
   const blockedFromActivating = !template.active && needsCardToActivate(template);
   const toView = () => setMode("view");
   const detail = detailOf(template, cardChoices);
+  const tag = tags.find(({ id }) => id === template.tagId);
 
   return (
     <li className="flex flex-col gap-1 border-t border-rule py-2">
@@ -53,6 +57,7 @@ export function TemplateRow({ template, cardChoices, onUpdate, onDelete }: Templ
           <span className="text-xs text-muted-foreground">
             {[detail, template.active ? null : "Inactive"].filter(Boolean).join(" · ")}
           </span>
+          {tag ? <TagLabel name={tag.name} color={tag.color} /> : null}
         </div>
         <span
           className={cn(
@@ -108,9 +113,11 @@ export function TemplateRow({ template, cardChoices, onUpdate, onDelete }: Templ
             amount: formatCopInput(template.amount),
             dueDay: template.dueDay === null ? "" : String(template.dueDay),
             cardId: template.cardId ?? "",
+            tagId: template.tagId ?? "",
           }}
           canChooseKind={false}
           cardChoices={cardChoices}
+          tags={tags}
           submitLabel="Save changes"
           onCancel={toView}
           onSubmit={(draft) => {

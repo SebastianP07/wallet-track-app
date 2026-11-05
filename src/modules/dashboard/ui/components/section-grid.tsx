@@ -17,6 +17,7 @@ const SPANS: Record<string, string> = {
   savings: "md:col-span-3 lg:col-span-5",
   overdue: "md:col-span-3 lg:col-span-7",
   templates: "md:col-span-6 lg:col-span-12",
+  tags: "md:col-span-6 lg:col-span-12",
 };
 
 interface SectionGridProps {

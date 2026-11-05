@@ -940,6 +940,8 @@ export interface components {
             pending: components["schemas"]["NonNegativeMoney"];
         };
         PeriodItemTotals: {
+            /** @description Por pagar: pending fixed + occasional items of the month (D1). Excludes card charges (D3) and overdue items (D7). */
+            toPay: components["schemas"]["NonNegativeMoney"];
             fixed: components["schemas"]["ItemKindTotal"];
             occasional: components["schemas"]["ItemKindTotal"];
             income: components["schemas"]["ItemKindTotal"];

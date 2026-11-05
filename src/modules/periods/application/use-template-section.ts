@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { TemplatesRepository } from "./periods-repository";
 import { describeTemplateFailure } from "../domain/failures";
@@ -10,63 +10,12 @@ import {
   withTemplate,
 } from "../domain/optimistic-templates";
 import type { Template, TemplateCreate, TemplateList, TemplateUpdate } from "../domain/types";
-import { ApiError } from "@/shared/api/http-client";
+import { statusOf } from "@/shared/api/http-client";
+import { RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
+import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
-const TEMPLATES_KEY = ["recurring-templates"];
+const TEMPLATES_KEY = RECURRING_TEMPLATES_KEY;
 const CARDS_KEY = ["credit-cards"];
-const NO_CONNECTION_STATUS = 0;
-
-const statusOf = (error: unknown) =>
-  error instanceof ApiError ? error.status : NO_CONNECTION_STATUS;
-
-interface OptimisticChange<Result> {
-  next: TemplateList;
-  // Each undoes only its own edit, so a failure never discards another edit still in flight.
-  undo: (list: TemplateList) => TemplateList;
-  confirm?: (list: TemplateList, result: Result) => TemplateList;
-}
-
-function useOptimisticMutation<Variables, Result>(options: {
-  mutationFn: (variables: Variables) => Promise<Result>;
-  change: (list: TemplateList, variables: Variables) => OptimisticChange<Result>;
-  onStart: () => void;
-  onFailure: (error: unknown) => void;
-}) {
-  const queryClient = useQueryClient();
-  const update = (apply: (list: TemplateList) => TemplateList) =>
-    queryClient.setQueryData<TemplateList>(TEMPLATES_KEY, (list) => list && apply(list));
-
-  return useMutation({
-    mutationKey: TEMPLATES_KEY,
-    mutationFn: options.mutationFn,
-    onMutate: async (variables) => {
-      options.onStart();
-      await queryClient.cancelQueries({ queryKey: TEMPLATES_KEY });
-      const list = queryClient.getQueryData<TemplateList>(TEMPLATES_KEY);
-      if (!list) {
-        return null;
-      }
-      const change = options.change(list, variables);
-      queryClient.setQueryData(TEMPLATES_KEY, change.next);
-      return change;
-    },
-    onSuccess: (result, _variables, change) => {
-      if (change?.confirm) {
-        update((list) => change.confirm!(list, result));
-      }
-    },
-    onError: (error, _variables, change) => {
-      if (change) {
-        update(change.undo);
-      }
-      options.onFailure(error);
-    },
-    onSettled: () =>
-      queryClient.isMutating({ mutationKey: TEMPLATES_KEY }) === 1
-        ? queryClient.invalidateQueries({ queryKey: TEMPLATES_KEY })
-        : undefined,
-  });
-}
 
 export function useTemplateSection(repository: TemplatesRepository, onSessionEnded: () => void) {
   const [failure, setFailure] = useState<string | null>(null);
@@ -99,7 +48,8 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     setFailure(describeTemplateFailure(statusOf(error)));
   };
 
-  const create = useOptimisticMutation<TemplateCreate, Template>({
+  const create = useOptimisticMutation<TemplateList, TemplateCreate, Template>({
+    queryKey: TEMPLATES_KEY,
     mutationFn: (template) => repository.create(template),
     change: (list, template) => {
       const now = new Date().toISOString();
@@ -110,7 +60,7 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
         amount: template.amount,
         dueDay: template.kind === "fixed" ? template.dueDay : null,
         cardId: template.kind === "card_charge" ? template.cardId : null,
-        tagId: null,
+        tagId: template.tagId ?? null,
         active: template.active,
         createdAt: now,
         updatedAt: now,
@@ -125,7 +75,8 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     onFailure,
   });
 
-  const update = useOptimisticMutation<{ id: string; changes: TemplateUpdate }, Template>({
+  const update = useOptimisticMutation<TemplateList, { id: string; changes: TemplateUpdate }, Template>({
+    queryKey: TEMPLATES_KEY,
     mutationFn: ({ id, changes }) => repository.update(id, changes),
     change: (list, { id, changes }) => {
       const previous = list.items.find((template) => template.id === id);
@@ -142,7 +93,8 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     onFailure,
   });
 
-  const remove = useOptimisticMutation<string, void>({
+  const remove = useOptimisticMutation<TemplateList, string, void>({
+    queryKey: TEMPLATES_KEY,
     mutationFn: (id) => repository.remove(id),
     change: (list, id) => {
       const index = list.items.findIndex((template) => template.id === id);

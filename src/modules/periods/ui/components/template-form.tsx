@@ -10,6 +10,7 @@ import {
 } from "../../domain/template-forms";
 import { TEMPLATE_KIND_LABELS, TEMPLATE_KINDS } from "../../domain/template-groups";
 import type { CreditCard, TemplateCreate } from "../../domain/types";
+import type { Tag } from "@/modules/tags/domain/types";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
@@ -26,6 +27,7 @@ interface TemplateFormProps {
   // A template's kind never changes, so only a new one can choose it.
   canChooseKind: boolean;
   cardChoices: CardChoices;
+  tags: Tag[];
   submitLabel: string;
   pending?: boolean;
   onSubmit: (template: TemplateCreate) => void;
@@ -36,6 +38,7 @@ export function TemplateForm({
   defaultValues,
   canChooseKind,
   cardChoices,
+  tags,
   submitLabel,
   pending = false,
   onSubmit,
@@ -121,6 +124,14 @@ export function TemplateForm({
           ) : null}
         </div>
       ) : null}
+      <SelectField
+        label="Tag"
+        options={[
+          { value: "", label: "No tag" },
+          ...tags.map((tag) => ({ value: tag.id, label: tag.name })),
+        ]}
+        {...register("tagId")}
+      />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending || cardIsUnavailable}>
           {pending ? "Saving…" : submitLabel}

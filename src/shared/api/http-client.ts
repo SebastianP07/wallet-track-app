@@ -11,6 +11,10 @@ export class ApiError extends Error {
   }
 }
 
+export function statusOf(error: unknown): number {
+  return error instanceof ApiError ? error.status : NETWORK_FAILURE_STATUS;
+}
+
 async function send(path: string, init: RequestInit): Promise<Response> {
   try {
     return await fetch(`${BASE_PATH}${path}`, {
@@ -75,6 +79,10 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return sendMutation<T>("PATCH", path, body);
 }
 
-export function apiDelete(path: string): Promise<void> {
-  return sendMutation<void>("DELETE", path);
+export function apiPut<T>(path: string): Promise<T> {
+  return sendMutation<T>("PUT", path);
+}
+
+export function apiDelete<T = void>(path: string): Promise<T> {
+  return sendMutation<T>("DELETE", path);
 }

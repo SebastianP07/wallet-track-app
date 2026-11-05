@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.8.0 — 2026-11-04 — Expenses and tags
+
+- Added `src/modules/expenses`: the Dashboard's Fixed and Occasional expenses sections, with a one-tap paid toggle,
+  inline add, edit and delete with a confirmation step, and an editable due date. Changes are optimistic and a failure
+  undoes only its own edit. Quick taps on the toggle reach the server in order.
+- The Overview shows To pay and its subtotals. These numbers and the urgency level only ever come from the backend (D1,
+  D11). Urgency has a word and an icon as well as its color.
+- Added `src/modules/tags`: an inline Tags section, a filter above the sections, and a tag field on expenses and on the
+  recurring template form. Tag colors are drawn as an SVG attribute, because the CSP allows no inline styles.
+- A month with no period points to the existing Open month action. A closed month keeps its toggle, edit and delete, and
+  loses Add, which the contract refuses. Opening or closing a month refreshes its items.
+- Moved the optimistic mutation hook to `src/shared/query/use-optimistic-mutation.ts`, with no change for accounts or
+  templates, and `statusOf` to the HTTP client. Added `apiPut`.
+- Schemas now import zod from `src/shared/validation/zod.ts`, which sets `jitless`: zod's eval probe was being reported
+  as a CSP violation, on every page with a form, since Phase 3.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.7.0 — 2026-11-04 — Periods and templates
 
 - Added `src/modules/periods`. Under the month switcher, the month now shows its status: not opened, with an "Open

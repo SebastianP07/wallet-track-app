@@ -3,6 +3,8 @@
 import { useTemplateSection } from "../../application/use-template-section";
 import { httpTemplatesRepository } from "../../infrastructure/http-periods-repository";
 import { TemplateSection } from "../components/template-section";
+import { useTagList } from "@/modules/tags/application/use-tag-list";
+import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
 
 interface TemplateSectionContainerProps {
   onSessionEnded: () => void;
@@ -10,5 +12,6 @@ interface TemplateSectionContainerProps {
 
 export function TemplateSectionContainer({ onSessionEnded }: TemplateSectionContainerProps) {
   const section = useTemplateSection(httpTemplatesRepository, onSessionEnded);
-  return <TemplateSection {...section} />;
+  const { tags } = useTagList(httpTagsRepository);
+  return <TemplateSection tags={tags} {...section} />;
 }

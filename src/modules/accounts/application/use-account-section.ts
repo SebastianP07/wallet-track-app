@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useQuery } from "@tanstack/react-query";
 
 import type { AccountsRepository } from "./accounts-repository";
 import { describeAccountFailure } from "../domain/account-failure";
@@ -11,63 +11,10 @@ import {
   withReplacedAccount,
 } from "../domain/optimistic-list";
 import type { Account, AccountCreate, AccountList, AccountUpdate } from "../domain/types";
-import { ApiError } from "@/shared/api/http-client";
+import { statusOf } from "@/shared/api/http-client";
+import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
 const ACCOUNTS_KEY = ["accounts"];
-const NO_CONNECTION_STATUS = 0;
-
-const statusOf = (error: unknown) =>
-  error instanceof ApiError ? error.status : NO_CONNECTION_STATUS;
-
-interface OptimisticChange<Result> {
-  next: AccountList;
-  // Each undoes only its own edit, so a failure never discards another edit still in flight.
-  undo: (list: AccountList) => AccountList;
-  confirm?: (list: AccountList, result: Result) => AccountList;
-}
-
-function useOptimisticMutation<Variables, Result>(options: {
-  mutationFn: (variables: Variables) => Promise<Result>;
-  change: (list: AccountList, variables: Variables) => OptimisticChange<Result>;
-  onStart: () => void;
-  onFailure: (error: unknown) => void;
-}) {
-  const queryClient = useQueryClient();
-  const update = (apply: (list: AccountList) => AccountList) =>
-    queryClient.setQueryData<AccountList>(ACCOUNTS_KEY, (list) => list && apply(list));
-
-  return useMutation({
-    mutationKey: ACCOUNTS_KEY,
-    mutationFn: options.mutationFn,
-    onMutate: async (variables) => {
-      options.onStart();
-      await queryClient.cancelQueries({ queryKey: ACCOUNTS_KEY });
-      const list = queryClient.getQueryData<AccountList>(ACCOUNTS_KEY);
-      if (!list) {
-        return null;
-      }
-      const change = options.change(list, variables);
-      queryClient.setQueryData(ACCOUNTS_KEY, change.next);
-      return change;
-    },
-    onSuccess: (result, _variables, change) => {
-      if (change?.confirm) {
-        update((list) => change.confirm!(list, result));
-      }
-    },
-    onError: (error, _variables, change) => {
-      if (change) {
-        update(change.undo);
-      }
-      options.onFailure(error);
-    },
-    // The last one to finish refetches; the totals only ever come from there (D1).
-    onSettled: () =>
-      queryClient.isMutating({ mutationKey: ACCOUNTS_KEY }) === 1
-        ? queryClient.invalidateQueries({ queryKey: ACCOUNTS_KEY })
-        : undefined,
-  });
-}
 
 // Both sections read the one accounts query. Balances are current values, so the month is not part of it.
 export function useAccountSection(
@@ -100,7 +47,8 @@ export function useAccountSection(
     setFailure(describeAccountFailure(statusOf(error)));
   };
 
-  const create = useOptimisticMutation<AccountCreate, Account>({
+  const create = useOptimisticMutation<AccountList, AccountCreate, Account>({
+    queryKey: ACCOUNTS_KEY,
     mutationFn: (account) => repository.create(account),
     change: (list, account) => {
       const now = new Date().toISOString();
@@ -121,7 +69,8 @@ export function useAccountSection(
     onFailure,
   });
 
-  const update = useOptimisticMutation<{ id: string; changes: AccountUpdate }, Account>({
+  const update = useOptimisticMutation<AccountList, { id: string; changes: AccountUpdate }, Account>({
+    queryKey: ACCOUNTS_KEY,
     mutationFn: ({ id, changes }) => repository.update(id, changes),
     change: (list, { id, changes }) => {
       const previous = list.items.find((account) => account.id === id);
@@ -138,7 +87,8 @@ export function useAccountSection(
     onFailure,
   });
 
-  const remove = useOptimisticMutation<string, void>({
+  const remove = useOptimisticMutation<AccountList, string, void>({
+    queryKey: ACCOUNTS_KEY,
     mutationFn: (id) => repository.remove(id),
     change: (list, id) => {
       const index = list.items.findIndex((account) => account.id === id);

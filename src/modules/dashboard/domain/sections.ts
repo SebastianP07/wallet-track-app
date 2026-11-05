@@ -18,4 +18,5 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
   { id: "savings", title: "Savings", description: "Savings accounts, kept apart from spendable money.", rows: 2 },
   { id: "overdue", title: "Overdue", description: "Items left unsettled by closed months.", rows: 2 },
   { id: "templates", title: "Recurring templates", description: "What opening a month copies into it. Changes apply to months opened from now on; months already opened keep their items.", rows: 4 },
+  { id: "tags", title: "Tags", description: "Your own labels for expenses and templates. They never change a total.", rows: 2 },
 ];

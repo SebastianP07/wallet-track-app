@@ -5,13 +5,9 @@ import type { PeriodsRepository } from "./periods-repository";
 import { describePeriodFailure } from "../domain/failures";
 import { findPeriod, withPeriod } from "../domain/period-list";
 import type { Period, PeriodList } from "../domain/types";
-import { ApiError } from "@/shared/api/http-client";
+import { statusOf } from "@/shared/api/http-client";
+import { PERIOD_ITEMS_KEY, PERIODS_KEY } from "@/shared/api/query-keys";
 
-const PERIODS_KEY = ["periods"];
-const NO_CONNECTION_STATUS = 0;
-
-const statusOf = (error: unknown) =>
-  error instanceof ApiError ? error.status : NO_CONNECTION_STATUS;
 
 // Opening and closing wait for the server: what they do to a month's items is not something to
 // show before it has happened. Every month reads the one list, so a month with no period is
@@ -48,7 +44,12 @@ export function usePeriodStatus(
       }
       setFailure(describePeriodFailure(statusOf(error)));
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: PERIODS_KEY }),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: PERIODS_KEY }),
+        // Opening creates the month's items, and closing turns the pending ones overdue.
+        queryClient.invalidateQueries({ queryKey: PERIOD_ITEMS_KEY }),
+      ]),
   };
   const open = useMutation({ mutationFn: () => repository.open(period), ...mutationOptions });
   const close = useMutation({ mutationFn: () => repository.close(period), ...mutationOptions });

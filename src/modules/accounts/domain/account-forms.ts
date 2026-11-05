@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/shared/validation/zod";
 
 import { parseCopInput } from "./money";
 

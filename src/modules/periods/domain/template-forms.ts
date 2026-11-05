@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/shared/validation/zod";
 
 import type { TemplateCreate, TemplateUpdate } from "./types";
 import { nameField } from "@/modules/accounts/domain/account-forms";
@@ -19,6 +19,7 @@ export const templateFormSchema = z
     amount: z.string(),
     dueDay: z.string(),
     cardId: z.string(),
+    tagId: z.string(),
   })
   .superRefine((values, context) => {
     if (parseAmount(values.amount) === null) {
@@ -42,13 +43,14 @@ export const templateFormSchema = z
   .transform((values): TemplateCreate => {
     const { kind, name } = values;
     const amount = parseAmount(values.amount) ?? 0;
+    const tagId = values.tagId || null;
     switch (kind) {
       case "fixed":
-        return { kind, name, amount, dueDay: Number(values.dueDay.trim()), active: true };
+        return { kind, name, amount, dueDay: Number(values.dueDay.trim()), tagId, active: true };
       case "income":
-        return { kind, name, amount, active: true };
+        return { kind, name, amount, tagId, active: true };
       case "card_charge":
-        return { kind, name, amount, cardId: values.cardId, active: true };
+        return { kind, name, amount, cardId: values.cardId, tagId, active: true };
     }
   });
 
@@ -56,13 +58,13 @@ export type TemplateFormValues = z.input<typeof templateFormSchema>;
 
 // The kind never changes on an edit, so it is not part of the changes.
 export function toTemplateUpdate(draft: TemplateCreate): TemplateUpdate {
-  const { name, amount } = draft;
+  const { name, amount, tagId } = draft;
   switch (draft.kind) {
     case "fixed":
-      return { name, amount, dueDay: draft.dueDay };
+      return { name, amount, tagId, dueDay: draft.dueDay };
     case "income":
-      return { name, amount };
+      return { name, amount, tagId };
     case "card_charge":
-      return { name, amount, cardId: draft.cardId };
+      return { name, amount, tagId, cardId: draft.cardId };
   }
 }

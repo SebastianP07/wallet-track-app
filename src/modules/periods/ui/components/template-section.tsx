@@ -10,13 +10,15 @@ import {
 import type { CreditCard, Template, TemplateCreate, TemplateUpdate } from "../../domain/types";
 import { TemplateForm } from "./template-form";
 import { TemplateRow } from "./template-row";
+import type { Tag } from "@/modules/tags/domain/types";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
-const NEW_TEMPLATE = { kind: "fixed", name: "", amount: "", dueDay: "", cardId: "" } as const;
+const NEW_TEMPLATE = { kind: "fixed", name: "", amount: "", dueDay: "", cardId: "", tagId: "" } as const;
 
 interface TemplateSectionProps {
   templates: Template[];
+  tags: Tag[];
   cards: CreditCard[];
   cardsAreLoading: boolean;
   cardsLoadFailed: boolean;
@@ -34,6 +36,7 @@ interface TemplateSectionProps {
 
 export function TemplateSection({
   templates,
+  tags,
   cards,
   cardsAreLoading,
   cardsLoadFailed,
@@ -108,6 +111,7 @@ export function TemplateSection({
                         key={template.id}
                         template={template}
                         cardChoices={cardChoices}
+                        tags={tags}
                         onUpdate={(changes) => updateTemplate(template.id, changes)}
                         onDelete={() => deleteTemplate(template.id)}
                       />
@@ -126,6 +130,7 @@ export function TemplateSection({
             defaultValues={NEW_TEMPLATE}
             canChooseKind
             cardChoices={cardChoices}
+            tags={tags}
             submitLabel="Save"
             pending={isCreating}
             onCancel={() => setIsAdding(false)}
