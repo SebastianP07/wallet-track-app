@@ -5,6 +5,7 @@ import { monthItemsKey, monthItemsListKey } from "./use-expense-list";
 import { describeExpenseFailure } from "../domain/failures";
 import type { ItemCreate, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { OVERDUE_ITEMS_KEY } from "@/shared/api/query-keys";
 import { pendingRowId, withoutRow, withReplacedRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
@@ -26,7 +27,12 @@ export function useItemMutations({
 }: ItemMutationOptions) {
   const [failure, setFailure] = useState<string | null>(null);
 
-  const keys = { queryKey: monthItemsListKey(period, tagId), syncKey: monthItemsKey(period) };
+  const keys = {
+    queryKey: monthItemsListKey(period, tagId),
+    syncKey: monthItemsKey(period),
+    // Toggling, editing or deleting an item of a closed month changes the overdue list.
+    refreshes: [monthItemsKey(period), OVERDUE_ITEMS_KEY],
+  };
   const onStart = () => setFailure(null);
   const onFailure = (error: unknown) => {
     if (statusOf(error) === 401) {

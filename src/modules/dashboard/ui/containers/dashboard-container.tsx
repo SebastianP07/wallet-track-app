@@ -10,6 +10,7 @@ import { CardChargeSectionContainer } from "@/modules/cards/ui/containers/card-c
 import { ExpenseSectionContainer } from "@/modules/expenses/ui/containers/expense-section-container";
 import { ToPayContainer } from "@/modules/expenses/ui/containers/to-pay-container";
 import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-section-container";
+import { OverdueSectionContainer } from "@/modules/overdue/ui/containers/overdue-section-container";
 import { monthName, yearOf } from "@/modules/periods/domain/year-month";
 import { PeriodStatusContainer } from "@/modules/periods/ui/containers/period-status-container";
 import { TemplateSectionContainer } from "@/modules/periods/ui/containers/template-section-container";
@@ -99,6 +100,7 @@ export function DashboardContainer({
             <CardChargeSectionContainer key={period} period={period} tagId={tagId} onSessionEnded={goToLogin} />
           ),
           platforms: <PlatformSectionContainer key={period} period={period} onSessionEnded={goToLogin} />,
+          overdue: <OverdueSectionContainer tagId={tagId} onSessionEnded={goToLogin} />,
           accounts: <AccountSectionContainer group="spendable" onSessionEnded={goToLogin} />,
           savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,
           templates: <TemplateSectionContainer onSessionEnded={goToLogin} />,

@@ -21,9 +21,10 @@ interface ItemRowProps {
   doneWord: "paid" | "received" | "charged";
   details: ReactNode;
   deleteNote?: string;
-  renderEditForm: (close: () => void) => ReactNode;
+  // A row without these has only its done toggle.
+  renderEditForm?: (close: () => void) => ReactNode;
+  onDelete?: () => void;
   onSetDone: (done: boolean) => void;
-  onDelete: () => void;
 }
 
 export function ItemRow({
@@ -65,7 +66,7 @@ export function ItemRow({
           {tag ? <TagLabel name={tag.name} color={tag.color} /> : null}
         </div>
 
-        {mode === "view" ? (
+        {mode === "view" && renderEditForm && onDelete ? (
           <div className="flex flex-wrap items-center">
             <Button
               variant="link"
@@ -88,7 +89,7 @@ export function ItemRow({
           </div>
         ) : null}
 
-        {mode === "edit" ? renderEditForm(toView) : null}
+        {mode === "edit" ? renderEditForm?.(toView) : null}
 
         {mode === "confirm-delete" ? (
           <div className="flex flex-col gap-2 pt-1">
@@ -101,7 +102,7 @@ export function ItemRow({
                 variant="destructive"
                 className="flex-1"
                 onClick={() => {
-                  onDelete();
+                  onDelete?.();
                   toView();
                 }}
               >

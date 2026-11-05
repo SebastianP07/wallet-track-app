@@ -961,9 +961,9 @@ export interface components {
         };
         OverdueItemList: {
             items: components["schemas"]["PeriodItem"][];
-            /** @description Sum of overdue expenses. */
+            /** @description Sum of overdue expenses across every closed month, stopping at the money bound if they add up past it. */
             expenseTotal: components["schemas"]["NonNegativeMoney"];
-            /** @description Sum of overdue income. */
+            /** @description Sum of overdue income across every closed month, stopping at the money bound if they add up past it. */
             incomeTotal: components["schemas"]["NonNegativeMoney"];
         };
         /** @enum {string} */

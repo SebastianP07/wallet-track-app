@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.12.0 — 2026-11-05 — Overdue list
+
+- Added `src/modules/overdue`: the Dashboard's Overdue section. The same list shows whatever month is selected, grouped into
+  expenses to pay and income to receive under the backend's totals (D1), each row with name, amount, original month and kind.
+- One tap marks a row paid or received: it leaves at once, returns in place if the request fails, and the totals follow the
+  refetch. Editing, deleting and undoing stay where the original month displays the item.
+- The tag filter narrows the rows, while the totals keep covering the whole list, as a month's do (D5).
+- `OVERDUE_ITEMS_KEY` sits under the items key, so closing a month and platform, tag or card writes refresh the list. A write
+  to a month's item refreshes it too, and settling from the list refreshes every month's items and people.
+- Split `ItemList` out of `ItemSection` for a list with no add form or month states. `ItemRow`'s edit and delete became
+  optional, and `useOptimisticMutation` gained `refreshes`.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.11.0 — 2026-11-05 — Shared platforms
 
 - Added `src/modules/platforms`: the Dashboard's Platforms section. Platforms show cost, per-member share, members and card.

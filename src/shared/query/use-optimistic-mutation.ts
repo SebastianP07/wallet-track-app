@@ -12,6 +12,8 @@ export function useOptimisticMutation<List, Variables, Result>(options: {
   queryKey: QueryKey;
   // What counts as the same work, for lists kept in several cache entries. Defaults to queryKey.
   syncKey?: QueryKey;
+  // What the change can make out of date, refetched once the last of this work finishes. Defaults to syncKey.
+  refreshes?: QueryKey[];
   // Mutations in one scope reach the server in order, for changes where the last tap must win.
   scope?: string;
   mutationFn: (variables: Variables) => Promise<Result>;
@@ -20,7 +22,7 @@ export function useOptimisticMutation<List, Variables, Result>(options: {
   onFailure: (error: unknown) => void;
 }) {
   const queryClient = useQueryClient();
-  const { queryKey, syncKey = queryKey, scope } = options;
+  const { queryKey, syncKey = queryKey, refreshes = [syncKey], scope } = options;
   const update = (apply: (list: List) => List) =>
     queryClient.setQueryData<List>(queryKey, (list) => list && apply(list));
 
@@ -53,7 +55,7 @@ export function useOptimisticMutation<List, Variables, Result>(options: {
     // The last one to finish refetches; the totals only ever come from there (D1).
     onSettled: () =>
       queryClient.isMutating({ mutationKey: syncKey }) === 1
-        ? queryClient.invalidateQueries({ queryKey: syncKey })
+        ? Promise.all(refreshes.map((key) => queryClient.invalidateQueries({ queryKey: key })))
         : undefined,
   });
 }

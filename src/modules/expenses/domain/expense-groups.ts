@@ -1,12 +1,15 @@
 import type { ExpenseKind, PeriodItem, PeriodItemList } from "./types";
 
-export interface ItemSectionCopy {
-  add: string;
+export interface ItemListCopy {
   empty: string;
   filtered: string;
-  notOpened: string;
   loadFailed: string;
   refreshFailed: string;
+}
+
+export interface ItemSectionCopy extends ItemListCopy {
+  add: string;
+  notOpened: string;
   closed: string;
   summary: string;
 }
