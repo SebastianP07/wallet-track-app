@@ -8,7 +8,6 @@ import type { User } from "@/modules/auth/domain/types";
 import { httpAuthRepository } from "@/modules/auth/infrastructure/http-auth-repository";
 import { CardChargeSectionContainer } from "@/modules/cards/ui/containers/card-charge-section-container";
 import { ExpenseSectionContainer } from "@/modules/expenses/ui/containers/expense-section-container";
-import { ToPayContainer } from "@/modules/expenses/ui/containers/to-pay-container";
 import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-section-container";
 import { OverdueSectionContainer } from "@/modules/overdue/ui/containers/overdue-section-container";
 import { monthName, yearOf } from "@/modules/periods/domain/year-month";
@@ -23,6 +22,8 @@ import { Button } from "@/shared/ui/button";
 import { DashboardHeader } from "../components/dashboard-header";
 import { MonthSwitcher } from "../components/month-switcher";
 import { SectionGrid } from "../components/section-grid";
+import { ChartsContainer } from "./charts-container";
+import { OverviewContainer } from "./overview-container";
 
 interface DashboardContainerProps {
   initialUser: User;
@@ -74,7 +75,8 @@ export function DashboardContainer({
       </div>
       <SectionGrid
         sections={{
-          kpis: <ToPayContainer period={period} tagId={tagId} onSessionEnded={goToLogin} />,
+          kpis: <OverviewContainer period={period} onSessionEnded={goToLogin} />,
+          charts: <ChartsContainer key={period} period={period} onSessionEnded={goToLogin} />,
           "fixed-expenses": (
             <ExpenseSectionContainer
               key={period}

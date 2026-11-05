@@ -12,9 +12,8 @@ import {
 } from "../domain/optimistic-list";
 import type { Account, AccountCreate, AccountList, AccountUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { ACCOUNTS_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
-
-const ACCOUNTS_KEY = ["accounts"];
 
 // Both sections read the one accounts query. Balances are current values, so the month is not part of it.
 export function useAccountSection(

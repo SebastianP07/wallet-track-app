@@ -73,6 +73,8 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: var(--signal);
+    --chart-fixed: #b8860b;
+    --chart-occasional: #3b98cf;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -143,6 +145,8 @@
   & > :nth-child(8) { animation-delay: 280ms; }
   & > :nth-child(9) { animation-delay: 320ms; }
   & > :nth-child(10) { animation-delay: 360ms; }
+  & > :nth-child(11) { animation-delay: 400ms; }
+  & > :nth-child(12) { animation-delay: 440ms; }
 }
 
 @media (prefers-reduced-motion: reduce) {

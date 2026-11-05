@@ -32,6 +32,7 @@ export function useSession(
   }, [error, onSessionEnded]);
 
   const { mutate: logOut, isPending } = useMutation({
+    meta: { keepsDashboard: true },
     mutationFn: (scope: "this-device" | "all-devices") =>
       scope === "all-devices" ? repository.logoutAll() : repository.logout(),
     onMutate: () => setLogoutFailure(null),

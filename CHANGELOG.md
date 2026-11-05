@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.13.0 — 2026-11-05 — Dashboard
+
+- Replaced the placeholder Overview with eight KPIs from `GET /dashboard`: Total actual, To pay, To arrive, Left over, Savings,
+  Coming in, Going out and Balance. Every number is the backend's (D1), tags do not narrow them (D5), and a closed month says
+  how it treats its overdue items. A month not opened shows its balances, from `GET /accounts`, and a dash for the rest.
+- Added the Charts section: a To pay donut, bars for Total actual, To pay, Left over and Savings, and the upcoming due list.
+  Each chart has a table of exact values beside it, slices are named on the chart, negative amounts carry their sign, and
+  zero months get a sentence rather than an empty chart. Colors were run through the palette validator for the dark surface.
+- Recharts loads client-only through `next/dynamic`, so no `style` attribute reaches the server-rendered HTML and the CSP is
+  unchanged.
+- `QueryProvider` invalidates the dashboard query after every mutation, settled either way. Only logging out opts out.
+- Layout pass: Savings moved beside Accounts, Overdue beside Income, and Card charges beside Platforms in a wider slot, with
+  section numbers following. On tablet the lists run in two columns. Dropped `SectionPlaceholder`, now unused.
+- Removed `ToPayContainer` and `ToPaySummary`, replaced by the Overview. `ACCOUNTS_KEY` joined the shared query keys.
+- Added `recharts` 3.10.1 and its peer `react-is` 19.3.1. Refreshed the vendored contract and its types. No new automated
+  tests (T7).
+
 ## 0.12.0 — 2026-11-05 — Overdue list
 
 - Added `src/modules/overdue`: the Dashboard's Overdue section. The same list shows whatever month is selected, grouped into

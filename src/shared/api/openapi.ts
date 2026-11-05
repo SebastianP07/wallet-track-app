@@ -1170,7 +1170,7 @@ export interface components {
             toPay: components["schemas"]["NonNegativeMoney"];
             /** @description Por llegar: pending income items of the month (D1). Excludes overdue items (D7). */
             toReceive: components["schemas"]["NonNegativeMoney"];
-            /** @description Sobrante: currentTotal - toPay + toReceive. */
+            /** @description Sobrante: currentTotal - toPay + toReceive, stopping at the money bound in either direction. Writes bound balances and items apart, not this sum. */
             surplus: components["schemas"]["Money"];
             /** @description Ahorro: sum of savings balances now (D9). */
             savings: components["schemas"]["Money"];

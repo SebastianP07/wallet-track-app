@@ -2,27 +2,26 @@ import type { ReactNode } from "react";
 
 import { DASHBOARD_SECTIONS } from "../../domain/sections";
 import { SectionFrame } from "./section-frame";
-import { SectionPlaceholder } from "./section-placeholder";
 
-// Stacked on mobile; on larger screens the main money sections get the wider columns.
+// Stacked on mobile. Wider screens pair sections of like height, so no row is held open by one tall
+// neighbour, and the two longest of a pair take the wider slot.
 const SPANS: Record<string, string> = {
   kpis: "md:col-span-6 lg:col-span-12",
-  charts: "md:col-span-6 lg:col-span-7",
-  accounts: "md:col-span-6 lg:col-span-5",
-  "fixed-expenses": "md:col-span-6 lg:col-span-7",
-  "occasional-expenses": "md:col-span-3 lg:col-span-5",
-  income: "md:col-span-3 lg:col-span-4",
-  "card-charges": "md:col-span-3 lg:col-span-4",
-  platforms: "md:col-span-3 lg:col-span-4",
+  charts: "md:col-span-6 lg:col-span-12",
+  accounts: "md:col-span-3 lg:col-span-7",
   savings: "md:col-span-3 lg:col-span-5",
-  overdue: "md:col-span-3 lg:col-span-7",
-  templates: "md:col-span-6 lg:col-span-12",
-  tags: "md:col-span-6 lg:col-span-12",
+  "fixed-expenses": "md:col-span-3 lg:col-span-7",
+  "occasional-expenses": "md:col-span-3 lg:col-span-5",
+  income: "md:col-span-3 lg:col-span-7",
+  overdue: "md:col-span-3 lg:col-span-5",
+  "card-charges": "md:col-span-3 lg:col-span-5",
+  platforms: "md:col-span-3 lg:col-span-7",
+  templates: "md:col-span-6 lg:col-span-8",
+  tags: "md:col-span-6 lg:col-span-4",
 };
 
 interface SectionGridProps {
-  // The sections that have been built, by section id; the rest stay placeholders.
-  sections: Partial<Record<string, ReactNode>>;
+  sections: Record<string, ReactNode>;
 }
 
 export function SectionGrid({ sections }: SectionGridProps) {
@@ -35,7 +34,7 @@ export function SectionGrid({ sections }: SectionGridProps) {
           position={index + 1}
           className={SPANS[section.id]}
         >
-          {sections[section.id] ?? <SectionPlaceholder rows={section.rows} />}
+          {sections[section.id]}
         </SectionFrame>
       ))}
     </div>

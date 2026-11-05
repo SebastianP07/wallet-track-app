@@ -61,6 +61,8 @@ from the right of the incoming `X-Forwarded-For`, and everything further left is
 - Every page renders on demand, which the root layout forces. A prerendered page would have no nonce.
 - Never use a server-rendered `style` attribute or inline `<style>`; production blocks them. That is why the app
   has its own `not-found.tsx` and `error.tsx`: Next.js's defaults use inline styles.
+- Charts stay client-rendered: Recharts writes `style` attributes, so `chart-panels.tsx` loads it through `next/dynamic` with
+  `ssr: false`. In the browser React sets those through the DOM, which the CSP allows.
 - Development relaxes the policy with `'unsafe-eval'`, `'unsafe-inline'` styles and the HMR WebSocket.
 
 `upgrade-insecure-requests` is added only when `APP_ORIGIN` is `https://`.
@@ -119,6 +121,7 @@ Read when the server starts, from the environment or `.env.local`. `.env.example
 | `src/proxy.ts` | CSP nonce and the redirect of requests with no session cookie |
 | `src/app` | Next routes only: thin pages, the `/api` BFF route, `/healthz`, global theme |
 | `src/modules/<module>` | `domain`, `application`, `infrastructure`, `ui/containers`, `ui/components`. Today: `accounts`, `auth`, `cards`, `dashboard`, `expenses`, `income`, `overdue`, `periods`, `platforms`, `tags` |
+| `src/modules/dashboard` | The Overview and Charts sections, from one query of `GET /dashboard`, and the grid of all sections |
 | `src/shared/ui` | Design system: `card` from shadcn/ui (`pnpm dlx shadcn add <name>`), the rest written by hand so they need no Radix |
 | `src/shared/api` | `openapi.ts`, generated from the contract and never edited by hand, and the browser HTTP client with CSRF handling |
 | `src/shared/query` | The optimistic mutation hook and row helpers, on TanStack Query |
@@ -130,6 +133,9 @@ Read when the server starts, from the environment or `.env.local`. `.env.example
 The theme is dark only, on near-black `#0a0a0a`, with marigold as the one accent. There is no light palette:
 `src/app/globals.css` defines the tokens once, and `<html class="dark">` keeps the `dark:` variants of shadcn
 components active. Fonts are self-hosted from `@fontsource-variable` packages, so no page contacts a font CDN.
+
+`QueryProvider` invalidates the dashboard query after every mutation, successful or not, so a new write cannot forget to.
+Only logging out opts out, through `meta.keepsDashboard`.
 
 MSW is not installed: the real API is available, so Phase 3 was built and checked against it.
 
