@@ -8,6 +8,7 @@ import { statusOf } from "@/shared/api/http-client";
 import {
   CREDIT_CARDS_KEY,
   PERIOD_ITEMS_KEY,
+  PLATFORMS_KEY,
   RECURRING_TEMPLATES_KEY,
 } from "@/shared/api/query-keys";
 
@@ -58,7 +59,11 @@ export function useCardSection(repository: CardsRepository, onSessionEnded: () =
   const remove = useMutation({
     mutationFn: (id: string) => repository.remove(id),
     ...mutationOptions,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: RECURRING_TEMPLATES_KEY }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: RECURRING_TEMPLATES_KEY }),
+        queryClient.invalidateQueries({ queryKey: PLATFORMS_KEY }),
+      ]),
   });
 
   return {

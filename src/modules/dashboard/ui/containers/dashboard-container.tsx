@@ -13,6 +13,7 @@ import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-se
 import { monthName, yearOf } from "@/modules/periods/domain/year-month";
 import { PeriodStatusContainer } from "@/modules/periods/ui/containers/period-status-container";
 import { TemplateSectionContainer } from "@/modules/periods/ui/containers/template-section-container";
+import { PlatformSectionContainer } from "@/modules/platforms/ui/containers/platform-section-container";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
 import { TagFilter } from "@/modules/tags/ui/components/tag-filter";
@@ -97,6 +98,7 @@ export function DashboardContainer({
           "card-charges": (
             <CardChargeSectionContainer key={period} period={period} tagId={tagId} onSessionEnded={goToLogin} />
           ),
+          platforms: <PlatformSectionContainer key={period} period={period} onSessionEnded={goToLogin} />,
           accounts: <AccountSectionContainer group="spendable" onSessionEnded={goToLogin} />,
           savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,
           templates: <TemplateSectionContainer onSessionEnded={goToLogin} />,

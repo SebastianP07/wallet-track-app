@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.11.0 — 2026-11-05 — Shared platforms
+
+- Added `src/modules/platforms`: the Dashboard's Platforms section. Platforms show cost, per-member share, members and card.
+  People show what they owe per month, billing frequency, last payment date and coverage end, all from the backend (D1).
+- The paid check opens an inline confirmation with the date and months covered, defaulting to the person's frequency. On a
+  covered month it offers to remove the payment covering it. The owner has no check.
+- People and platforms are added, edited and deleted inline, and members toggle with one tap, in any month state, with no
+  new pages or menus.
+- Person-linked income rows say Shared platforms, and their delete confirmation says the payment stays. People sit under the
+  month's query key, so toggling or deleting an income row refreshes them, and every platforms write refreshes the items.
+- `ItemRow` gained an optional `deleteNote`. Deleting a card also refreshes platforms. `PLATFORMS_KEY` joined the shared
+  query keys.
+- Fixed: `http-client.ts` now reads the body of every error response, including a 403 it retries, so Chromium no longer keeps
+  those responses in flight. Errors behave as before.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.10.0 — 2026-11-04 — Credit cards
 
 - Added `src/modules/cards`: the Dashboard's Card charges section, with charges grouped by card, each card's monthly total

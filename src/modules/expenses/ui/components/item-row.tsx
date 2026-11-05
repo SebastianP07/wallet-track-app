@@ -20,6 +20,7 @@ interface ItemRowProps {
   tags: Tag[];
   doneWord: "paid" | "received" | "charged";
   details: ReactNode;
+  deleteNote?: string;
   renderEditForm: (close: () => void) => ReactNode;
   onSetDone: (done: boolean) => void;
   onDelete: () => void;
@@ -30,6 +31,7 @@ export function ItemRow({
   tags,
   doneWord,
   details,
+  deleteNote = "Its template, if it has one, stays.",
   renderEditForm,
   onSetDone,
   onDelete,
@@ -91,8 +93,8 @@ export function ItemRow({
         {mode === "confirm-delete" ? (
           <div className="flex flex-col gap-2 pt-1">
             <p className="text-sm">
-              Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?
-              Its template, if it has one, stays.
+              Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?{" "}
+              {deleteNote}
             </p>
             <div className="flex gap-2">
               <Button

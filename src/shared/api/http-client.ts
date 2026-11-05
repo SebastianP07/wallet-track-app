@@ -33,8 +33,18 @@ function toApiError(response: Response): ApiError {
   return new ApiError(response.status, Number.isNaN(retryAfter) ? null : retryAfter);
 }
 
+// Chromium keeps a response in flight until its body is read, and the status says all a caller needs.
+async function drain(response: Response): Promise<void> {
+  try {
+    await response.arrayBuffer();
+  } catch {
+    // The connection failing now changes nothing: the error being reported is the status.
+  }
+}
+
 async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    await drain(response);
     throw toApiError(response);
   }
   return (response.status === 204 ? undefined : await response.json()) as T;
@@ -67,8 +77,11 @@ async function sendMutation<T>(method: string, path: string, body?: unknown): Pr
 
   const first = await attempt(csrfToken ?? (await fetchCsrfToken()));
   // A 403 means the token check ran before the handler, so a retry cannot repeat any effect.
-  const response = first.status === 403 ? await attempt(await fetchCsrfToken()) : first;
-  return parse<T>(response);
+  if (first.status !== 403) {
+    return parse<T>(first);
+  }
+  await drain(first);
+  return parse<T>(await attempt(await fetchCsrfToken()));
 }
 
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {

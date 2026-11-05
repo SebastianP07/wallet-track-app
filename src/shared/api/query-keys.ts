@@ -4,3 +4,4 @@ export const RECURRING_TEMPLATES_KEY = ["recurring-templates"];
 export const TAGS_KEY = ["tags"];
 export const CREDIT_CARDS_KEY = ["credit-cards"];
 export const PERIOD_ITEMS_KEY = ["period-items"];
+export const PLATFORMS_KEY = ["platforms"];

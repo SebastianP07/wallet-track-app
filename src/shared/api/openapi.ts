@@ -365,7 +365,10 @@ export interface paths {
         get: operations["getPeriodItem"];
         put?: never;
         post?: never;
-        /** Delete an item */
+        /**
+         * Delete an item
+         * @description A payment linked to a person-linked income item stays, as history, with its coverage.
+         */
         delete: operations["deletePeriodItem"];
         options?: never;
         head?: never;
@@ -386,13 +389,13 @@ export interface paths {
         get?: never;
         /**
          * Mark an item paid or received
-         * @description Idempotent. Never changes an account balance (D6). An overdue item stays in its original month (D7).
+         * @description Idempotent. Never changes an account balance (D6). An overdue item stays in its original month (D7). On a person-linked income item this records that person's payment in the same transaction (D4, D8), dated within the item's month and covering their `billingMonths`.
          */
         put: operations["markPeriodItemDone"];
         post?: never;
         /**
          * Undo paid or received
-         * @description Idempotent.
+         * @description Idempotent. On a person-linked income item this removes the payment linked to it, and no other, in the same transaction (D4, D8).
          */
         delete: operations["unmarkPeriodItemDone"];
         options?: never;
@@ -600,7 +603,7 @@ export interface paths {
         put?: never;
         /**
          * Record a payment
-         * @description The backend computes `amount` and `coveredUntil` (D1, D8), and marks the person's income item of that month received (D4).
+         * @description The backend computes `amount` and `coveredUntil` (D1, D8), and marks the person's income item of the month of `paidAt` received, if one is waiting (D4). Coverage counts from that month and does not stack on earlier coverage. 400 for someone who owes nothing, the owner included.
          */
         post: operations["recordPlatformPayment"];
         delete?: never;
@@ -619,7 +622,10 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete a mistaken payment */
+        /**
+         * Delete a mistaken payment
+         * @description Returns the income item this payment settled, if any, to pending, or to overdue in a closed month. Never touches another payment.
+         */
         delete: operations["deletePlatformPayment"];
         options?: never;
         head?: never;
@@ -1085,8 +1091,12 @@ export interface components {
             /** @description Sum of this person's rounded platform shares (D10). Always 0 for the owner. */
             monthlyOwed: components["schemas"]["NonNegativeMoney"];
             lastPaymentDate: components["schemas"]["Date"] | null;
-            /** @description Last day covered by the latest payment (D8). */
+            /** @description Last day covered by the payment that reaches furthest, so a shorter payment made later takes nothing away (D8). */
             coveredUntil: components["schemas"]["Date"] | null;
+            /** @description Only with the `period` query parameter. Whether any payment covers that month. */
+            coveredInPeriod?: boolean;
+            /** @description Only with the `period` query parameter, when a payment covers that month. The most recent one that does, which is the one to delete to undo it. */
+            periodPaymentId?: components["schemas"]["Id"];
             createdAt: components["schemas"]["Timestamp"];
             updatedAt: components["schemas"]["Timestamp"];
         };
@@ -2468,7 +2478,10 @@ export interface operations {
     };
     listPeople: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Adds `coveredInPeriod` and `periodPaymentId` for this month, which need not be opened. */
+                period?: components["schemas"]["YearMonth"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2484,6 +2497,7 @@ export interface operations {
                     "application/json": components["schemas"]["PersonList"];
                 };
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
         };
     };

@@ -5,6 +5,9 @@ import type { PeriodItem, PeriodItemUpdate } from "@/modules/expenses/domain/typ
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
 import type { Tag } from "@/modules/tags/domain/types";
 
+const PLATFORM_ITEM_DELETE_NOTE =
+  "A payment recorded for it stays, with its coverage. Opening the month again won't bring this item back.";
+
 interface IncomeRowProps {
   item: PeriodItem;
   tags: Tag[];
@@ -21,7 +24,15 @@ export function IncomeRow({ item, tags, onSetDone, onUpdate, onDelete }: IncomeR
       doneWord="received"
       onSetDone={onSetDone}
       onDelete={onDelete}
-      details={<IncomeStatusBadge status={item.status} />}
+      deleteNote={item.personId ? PLATFORM_ITEM_DELETE_NOTE : undefined}
+      details={
+        <>
+          <IncomeStatusBadge status={item.status} />
+          {item.personId ? (
+            <span className="text-xs whitespace-nowrap text-muted-foreground">Shared platforms</span>
+          ) : null}
+        </>
+      }
       renderEditForm={(close) => (
         <IncomeForm
           defaultValues={{
