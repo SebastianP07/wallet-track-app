@@ -3,7 +3,7 @@ import { cn } from "cn";
 
 import type { PeriodItem } from "../../domain/types";
 
-const BADGE = "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap";
+export const BADGE = "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap";
 const RED = "border-red-400/70 text-red-400";
 const YELLOW = "border-yellow-300/60 text-yellow-300";
 

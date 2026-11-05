@@ -68,7 +68,7 @@ export function TagSection({
 
       {tags.length === 0 ? (
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-          No tags yet. Add one to group expenses your way.
+          No tags yet. Add one to group expenses and income your way.
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3">

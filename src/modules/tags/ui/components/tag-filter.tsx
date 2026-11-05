@@ -24,7 +24,7 @@ export function TagFilter({ tags, selectedId, onChange }: TagFilterProps) {
     return null;
   }
   return (
-    <div role="group" aria-label="Filter expenses by tag" className="flex flex-wrap items-center gap-2">
+    <div role="group" aria-label="Filter items by tag" className="flex flex-wrap items-center gap-2">
       <span className="font-mono text-xs tracking-wide text-muted-foreground uppercase">Filter</span>
       <button
         type="button"

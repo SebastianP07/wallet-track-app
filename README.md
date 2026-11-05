@@ -118,7 +118,7 @@ Read when the server starts, from the environment or `.env.local`. `.env.example
 | `server.mjs` | Custom server: establishes the client address, then hands over to Next.js |
 | `src/proxy.ts` | CSP nonce and the redirect of requests with no session cookie |
 | `src/app` | Next routes only: thin pages, the `/api` BFF route, `/healthz`, global theme |
-| `src/modules/<module>` | `domain`, `application`, `infrastructure`, `ui/containers`, `ui/components`. Today: `accounts`, `auth`, `dashboard`, `expenses`, `periods`, `tags` |
+| `src/modules/<module>` | `domain`, `application`, `infrastructure`, `ui/containers`, `ui/components`. Today: `accounts`, `auth`, `dashboard`, `expenses`, `income`, `periods`, `tags` |
 | `src/shared/ui` | Design system: `card` from shadcn/ui (`pnpm dlx shadcn add <name>`), the rest written by hand so they need no Radix |
 | `src/shared/api` | `openapi.ts`, generated from the contract and never edited by hand, and the browser HTTP client with CSRF handling |
 | `src/shared/query` | The optimistic mutation hook and row helpers, on TanStack Query |

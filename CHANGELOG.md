@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.0 — 2026-11-04 — Income
+
+- Added `src/modules/income`: the Dashboard's Income section, with To arrive from the backend (D1), an expected or
+  received toggle, inline add, edit and delete with a confirmation step, and the tag filter. Income has no due date field
+  and no urgency badge; each row says Expected, Received or Overdue in words.
+- Changes are optimistic and a failure undoes only its own edit. Undo in a closed month shows Overdue, and that month
+  loses Add.
+- So the sections share one implementation, `useItemMutations`, `ItemRow` and `ItemSection` were extracted from the
+  expenses module, and `PaidToggle` became `DoneToggle`, with no change for Fixed and Occasional. Income reuses the
+  expenses repository, since both talk to the same endpoints and the same cached month list.
+- The tag filter's accessible name and the Tags copy now mention income as well as expenses.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.8.0 — 2026-11-04 — Expenses and tags
 
 - Added `src/modules/expenses`: the Dashboard's Fixed and Occasional expenses sections, with a one-tap paid toggle,

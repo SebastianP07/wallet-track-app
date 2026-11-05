@@ -8,6 +8,7 @@ import type { User } from "@/modules/auth/domain/types";
 import { httpAuthRepository } from "@/modules/auth/infrastructure/http-auth-repository";
 import { ExpenseSectionContainer } from "@/modules/expenses/ui/containers/expense-section-container";
 import { ToPayContainer } from "@/modules/expenses/ui/containers/to-pay-container";
+import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-section-container";
 import { monthName, yearOf } from "@/modules/periods/domain/year-month";
 import { PeriodStatusContainer } from "@/modules/periods/ui/containers/period-status-container";
 import { TemplateSectionContainer } from "@/modules/periods/ui/containers/template-section-container";
@@ -88,6 +89,9 @@ export function DashboardContainer({
               tagId={tagId}
               onSessionEnded={goToLogin}
             />
+          ),
+          income: (
+            <IncomeSectionContainer key={period} period={period} tagId={tagId} onSessionEnded={goToLogin} />
           ),
           accounts: <AccountSectionContainer group="spendable" onSessionEnded={goToLogin} />,
           savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,

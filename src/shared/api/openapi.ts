@@ -925,7 +925,7 @@ export interface components {
             tagId?: components["schemas"]["Id"] | null;
         };
         PeriodItemCreate: components["schemas"]["ExpenseItemCreate"] | components["schemas"]["IncomeItemCreate"] | components["schemas"]["CardChargeItemCreate"];
-        /** @description `kind` and `status` cannot be edited; the done endpoints change `status`. */
+        /** @description `kind` and `status` cannot be edited; the done endpoints change `status`. `dueDate` is refused on income items, which have none. */
         PeriodItemUpdate: {
             name?: components["schemas"]["Name"];
             amount?: components["schemas"]["NonNegativeMoney"];
@@ -942,6 +942,8 @@ export interface components {
         PeriodItemTotals: {
             /** @description Por pagar: pending fixed + occasional items of the month (D1). Excludes card charges (D3) and overdue items (D7). */
             toPay: components["schemas"]["NonNegativeMoney"];
+            /** @description Por llegar: pending income items of the month (D1). Excludes received and overdue items (D7). */
+            toReceive: components["schemas"]["NonNegativeMoney"];
             fixed: components["schemas"]["ItemKindTotal"];
             occasional: components["schemas"]["ItemKindTotal"];
             income: components["schemas"]["ItemKindTotal"];

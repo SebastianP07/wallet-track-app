@@ -1,13 +1,33 @@
 import type { ExpenseKind, PeriodItem, PeriodItemList } from "./types";
 
-export const EXPENSE_COPY: Record<ExpenseKind, { add: string; empty: string; filtered: string; notOpened: string }> = {
+export interface ItemSectionCopy {
+  add: string;
+  empty: string;
+  filtered: string;
+  notOpened: string;
+  loadFailed: string;
+  refreshFailed: string;
+  closed: string;
+  summary: string;
+}
+
+const EXPENSE_STATES = {
+  loadFailed: "These expenses could not be loaded.",
+  refreshFailed: "Showing the last expenses received; they could not be refreshed.",
+  closed: "This month is closed, so it takes no new items. Its items can still be paid, edited or deleted.",
+  summary: "To pay",
+};
+
+export const EXPENSE_COPY: Record<ExpenseKind, ItemSectionCopy> = {
   fixed: {
+    ...EXPENSE_STATES,
     add: "Add fixed expense",
     empty: "No fixed expenses this month.",
     filtered: "No fixed expenses with this tag.",
     notOpened: "Open this month to see its fixed expenses.",
   },
   occasional: {
+    ...EXPENSE_STATES,
     add: "Add occasional expense",
     empty: "No occasional expenses this month.",
     filtered: "No occasional expenses with this tag.",

@@ -6,7 +6,9 @@ import { parseCopInput } from "@/modules/accounts/domain/money";
 const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const FIRST_DUE_DATE = "2000-01-01";
 
-function parseAmount(raw: string): number | null {
+export const ITEM_AMOUNT_MESSAGE = "Enter whole pesos, zero or more, like 1.250.000. No decimals.";
+
+export function parseItemAmount(raw: string): number | null {
   const parsed = parseCopInput(raw);
   return parsed.ok && parsed.value >= 0 ? parsed.value : null;
 }
@@ -25,12 +27,8 @@ export interface ExpenseDraft {
 export const expenseFormSchema = z
   .object({ name: nameField, amount: z.string(), dueDate: z.string(), tagId: z.string() })
   .superRefine((values, context) => {
-    if (parseAmount(values.amount) === null) {
-      context.addIssue({
-        code: "custom",
-        path: ["amount"],
-        message: "Enter whole pesos, zero or more, like 1.250.000. No decimals.",
-      });
+    if (parseItemAmount(values.amount) === null) {
+      context.addIssue({ code: "custom", path: ["amount"], message: ITEM_AMOUNT_MESSAGE });
     }
     if (!isDueDate(values.dueDate)) {
       context.addIssue({ code: "custom", path: ["dueDate"], message: "Choose a due date." });
@@ -39,7 +37,7 @@ export const expenseFormSchema = z
   .transform(
     (values): ExpenseDraft => ({
       name: values.name,
-      amount: parseAmount(values.amount) ?? 0,
+      amount: parseItemAmount(values.amount) ?? 0,
       dueDate: values.dueDate,
       tagId: values.tagId || null,
     }),
