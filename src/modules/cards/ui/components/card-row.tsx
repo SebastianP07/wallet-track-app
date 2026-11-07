@@ -1,11 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import type { CardDraft } from "../../domain/card-forms";
 import type { CreditCard, CreditCardUpdate } from "../../domain/types";
-import { CardForm } from "./card-form";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const CardForm = dynamic(() => import("./card-form").then((module) => module.CardForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -61,28 +64,18 @@ export function CardRow({ card, isUpdating, onUpdate, onDelete }: CardRowProps) 
       ) : null}
 
       {mode === "confirm-delete" ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-sm">
-            Delete <span className="font-medium wrap-anywhere">{card.name}</span> for good? Its active
-            card charge templates become inactive, so months opened from now on won&apos;t get those
-            charges. Charges already in a month stay, under Deleted card.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                onDelete();
-                toView();
-              }}
-            >
-              Delete
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={toView}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="Delete"
+          onConfirm={() => {
+            onDelete();
+            toView();
+          }}
+          onKeep={toView}
+        >
+          Delete <span className="font-medium wrap-anywhere">{card.name}</span> for good? Its active
+          card charge templates become inactive, so months opened from now on won&apos;t get those
+          charges. Charges already in a month stay, under Deleted card.
+        </ConfirmPanel>
       ) : null}
     </li>
   );

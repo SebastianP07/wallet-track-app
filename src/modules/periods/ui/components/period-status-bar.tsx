@@ -6,6 +6,7 @@ import { cn } from "cn";
 import type { Period } from "../../domain/types";
 import { monthName, yearOf } from "../../domain/year-month";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 import { FormAlert } from "@/shared/ui/form-alert";
 
 function StatusLabel({ children, active = false }: { children: string; active?: boolean }) {
@@ -51,7 +52,8 @@ export function PeriodStatusBar({
 
   if (isLoading) {
     return (
-      <p role="status" className="font-mono text-xs text-muted-foreground">
+      // As tall as the bar it turns into, so the page below does not jump when it answers.
+      <p role="status" className="min-h-35 font-mono text-xs text-muted-foreground md:min-h-20">
         Checking this month…
       </p>
     );
@@ -115,26 +117,20 @@ export function PeriodStatusBar({
       {selected?.status === "open" && isConfirmingClose ? (
         <div className="flex flex-col gap-3">
           <StatusLabel active>Open</StatusLabel>
-          <p className="text-sm">
+          <ConfirmPanel
+            confirmLabel="Close month"
+            keepLabel="Keep it open"
+            actionsClassName="md:max-w-md"
+            onConfirm={() => {
+              closeMonth();
+              setIsConfirmingClose(false);
+            }}
+            onKeep={() => setIsConfirmingClose(false)}
+          >
             Close {month}? Every pending fixed, occasional and income item becomes overdue and stays
             in {monthName(period)}. Card charges stay as they are. A closed month can&apos;t be
             reopened.
-          </p>
-          <div className="flex gap-2 md:max-w-md">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                closeMonth();
-                setIsConfirmingClose(false);
-              }}
-            >
-              Close month
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={() => setIsConfirmingClose(false)}>
-              Keep it open
-            </Button>
-          </div>
+          </ConfirmPanel>
         </div>
       ) : null}
     </div>

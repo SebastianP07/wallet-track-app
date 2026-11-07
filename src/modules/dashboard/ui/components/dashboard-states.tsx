@@ -1,8 +1,11 @@
+import { cn } from "cn";
+
 import { Button } from "@/shared/ui/button";
 
-export function DashboardLoading() {
+// className holds the height of what is on its way, so the page below does not jump when it arrives.
+export function DashboardLoading({ className }: { className: string }) {
   return (
-    <p role="status" className="font-mono text-xs text-muted-foreground">
+    <p role="status" className={cn("font-mono text-xs text-muted-foreground", className)}>
       Loading…
     </p>
   );
@@ -11,7 +14,9 @@ export function DashboardLoading() {
 export function DashboardLoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
   return (
     <div className="flex items-center gap-3">
-      <p className="text-sm text-muted-foreground">{what} could not be loaded.</p>
+      <p role="alert" className="text-sm text-muted-foreground">
+        {what} could not be loaded.
+      </p>
       <Button variant="link" className="px-2" onClick={onRetry}>
         Try again
       </Button>

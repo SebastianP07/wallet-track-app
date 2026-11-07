@@ -1,15 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { usePlatformSection } from "../../application/use-platform-section";
 import { httpPlatformsRepository } from "../../infrastructure/http-platforms-repository";
-import { PersonForm } from "../components/person-form";
 import { PersonRow } from "../components/person-row";
-import { PlatformForm } from "../components/platform-form";
 import { PlatformRow } from "../components/platform-row";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const PersonForm = dynamic(() => import("../components/person-form").then((module) => module.PersonForm));
+const PlatformForm = dynamic(() => import("../components/platform-form").then((module) => module.PlatformForm));
 
 const NEW_PERSON = { name: "", billingMonths: "1", isOwner: false };
 const NEW_PLATFORM = { name: "", monthlyCost: "", cardId: "" };

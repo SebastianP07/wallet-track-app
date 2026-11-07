@@ -1,10 +1,12 @@
+import dynamic from "next/dynamic";
 import { formatDueDate } from "../../domain/expense-groups";
 import type { PeriodItem, PeriodItemUpdate } from "../../domain/types";
-import { ExpenseForm } from "./expense-form";
 import { ItemRow } from "./item-row";
 import { UrgencyBadge } from "./urgency-badge";
 import { formatCopInput } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
+
+const ExpenseForm = dynamic(() => import("./expense-form").then((module) => module.ExpenseForm));
 
 interface ExpenseRowProps {
   item: PeriodItem;

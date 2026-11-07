@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.15.0 — 2026-11-05 — PWA, export and accessibility
+
+- PWA: a manifest through Next's metadata with real and maskable icons, and a hand-written `public/sw.js`. It stores only the
+  offline page's files and the body of the last `GET /dashboard`. Cross-origin and non-GET requests, auth, every other read and
+  the app's own pages and assets go to the network, so a deploy cannot be stranded behind it.
+- Offline reload: no page's HTML is stored, because it would carry a spent nonce. A failed navigation gets the static
+  `offline.html`, under its own CSP with no inline code, which draws the saved Dashboard with its age and no control that writes.
+  With nothing saved it is a plain offline page. Back online it reloads the real app.
+- Offline with the page open: a banner with the data's age and a disabled `fieldset` around the Dashboard. Mutations use
+  `networkMode: "always"`, so nothing is ever queued.
+- The saved Dashboard goes on logout, logout-all, ending this session, any 401, and when `/login` finds no session. A response on
+  its way during a clear is not stored, and saved data past 30 days is refused.
+- The worker's URL carries a hash of itself and the offline files, computed at build time, so a change cannot forget to install a
+  new worker. It takes over at once.
+- CSP: `worker-src 'self'` added. The offline page has its own policy. The manifest is covered by `default-src 'self'`.
+- Export: an Export CSV action in the Dashboard, by `fetch` and a blob so that a refusal can be said in the page.
+- Accessibility: `FocusKeeper` returns focus when a focused row or form leaves or its button turns disabled. `ConfirmPanel` puts
+  focus on the safe choice. A skip link, `main` around the month, the donut out of the Tab order, toggles whose name no longer
+  flips along with `aria-pressed`, a visible input border at 3:1, a focus style on the color input, disabled styles on fields and
+  chips, and dim template text replaced by a token that passes contrast. The payment form takes focus when it opens, and
+  cancelling it, or keeping a payment, returns focus to the toggle that opened it. The month title no longer runs into its
+  arrows at 320 px.
+- Lighthouse: the charts and Recharts wait until they near the screen, with their tables rendered at once. Sections render one
+  task at a time, row forms with react-hook-form and zod load when first opened, zod's locales left the bundle, and the status
+  bar, tag filter, Overview and Charts hold their height while loading, which removes the layout shift.
+- Refreshed the vendored contract and its types. No new dependencies. No new automated tests (T7).
+
 ## 0.14.0 — 2026-11-05 — Passkeys and active sessions
 
 - Login: when the owner has a passkey, the second-factor step offers it first, one tap away, with links to the authenticator and

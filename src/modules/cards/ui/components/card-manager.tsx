@@ -1,13 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import type { CardDraft } from "../../domain/card-forms";
 import type { CreditCard, CreditCardUpdate } from "../../domain/types";
-import { CardForm } from "./card-form";
 import { CardRow } from "./card-row";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const CardForm = dynamic(() => import("./card-form").then((module) => module.CardForm));
 
 const NEW_CARD = { name: "", issuer: "", statementDay: "", dueDay: "" };
 

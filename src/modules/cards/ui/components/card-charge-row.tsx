@@ -1,12 +1,14 @@
+import dynamic from "next/dynamic";
 import { cn } from "cn";
 
-import { CardChargeForm } from "./card-charge-form";
 import type { CreditCard } from "../../domain/types";
 import { formatCopInput } from "@/modules/accounts/domain/money";
 import type { PeriodItem, PeriodItemUpdate } from "@/modules/expenses/domain/types";
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
 import { BADGE } from "@/modules/expenses/ui/components/urgency-badge";
 import type { Tag } from "@/modules/tags/domain/types";
+
+const CardChargeForm = dynamic(() => import("./card-charge-form").then((module) => module.CardChargeForm));
 
 interface CardChargeRowProps {
   item: PeriodItem;

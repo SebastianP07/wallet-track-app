@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
@@ -7,11 +8,14 @@ import { toTemplateUpdate } from "../../domain/template-forms";
 import { isPendingTemplate } from "../../domain/optimistic-templates";
 import { needsCardToActivate } from "../../domain/template-groups";
 import type { Template, TemplateUpdate } from "../../domain/types";
-import { TemplateForm, type CardChoices } from "./template-form";
+import { type CardChoices } from "./template-form";
 import { formatCopInput, formatCOP } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const TemplateForm = dynamic(() => import("./template-form").then((module) => module.TemplateForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -52,8 +56,8 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
   return (
     <li className="flex flex-col gap-1 border-t border-rule py-2">
       <div className="flex items-start justify-between gap-3">
-        <div className={cn("flex min-w-0 flex-col", !template.active && "opacity-60")}>
-          <span className="font-medium wrap-anywhere">{template.name}</span>
+        <div className="flex min-w-0 flex-col">
+          <span className={cn("font-medium wrap-anywhere", !template.active && "text-muted-foreground")}>{template.name}</span>
           <span className="text-xs text-muted-foreground">
             {[detail, template.active ? null : "Inactive"].filter(Boolean).join(" · ")}
           </span>
@@ -62,7 +66,7 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
         <span
           className={cn(
             "shrink-0 text-right font-mono text-sm leading-6 whitespace-nowrap",
-            !template.active && "opacity-60",
+            !template.active && "text-muted-foreground",
           )}
         >
           {formatCOP(template.amount)}
@@ -128,27 +132,17 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
       ) : null}
 
       {mode === "confirm-delete" ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-sm">
-            Delete <span className="font-medium wrap-anywhere">{template.name}</span> for good?
-            Months already opened keep their items; months opened from now on won&apos;t get it.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                onDelete();
-                toView();
-              }}
-            >
-              Delete
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={toView}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="Delete"
+          onConfirm={() => {
+            onDelete();
+            toView();
+          }}
+          onKeep={toView}
+        >
+          Delete <span className="font-medium wrap-anywhere">{template.name}</span> for good?
+          Months already opened keep their items; months opened from now on won&apos;t get it.
+        </ConfirmPanel>
       ) : null}
     </li>
   );

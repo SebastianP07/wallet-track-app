@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useIncomeSection } from "../../application/use-income-section";
 import { INCOME_COPY } from "../../domain/income-copy";
-import { IncomeForm } from "../components/income-form";
 import { IncomeRow } from "../components/income-row";
 import { httpExpensesRepository } from "@/modules/expenses/infrastructure/http-expenses-repository";
 import { ItemSection } from "@/modules/expenses/ui/components/item-section";
@@ -10,6 +10,8 @@ import { useSelectedPeriod } from "@/modules/periods/application/use-selected-pe
 import { httpPeriodsRepository } from "@/modules/periods/infrastructure/http-periods-repository";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
+
+const IncomeForm = dynamic(() => import("../components/income-form").then((module) => module.IncomeForm));
 
 const NEW_INCOME = { name: "", amount: "", tagId: "" };
 

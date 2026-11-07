@@ -1,15 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
 import type { AccountGroup } from "../../domain/account-groups";
 import { formatCOP } from "../../domain/money";
 import type { Account, AccountCreate } from "../../domain/types";
-import { AccountAddForm } from "./account-add-form";
 import { AccountRow } from "./account-row";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const AccountAddForm = dynamic(() => import("./account-add-form").then((module) => module.AccountAddForm));
 
 const COPY: Record<AccountGroup, { total: string; add: string; empty: string }> = {
   spendable: {

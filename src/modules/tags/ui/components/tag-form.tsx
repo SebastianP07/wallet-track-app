@@ -41,7 +41,7 @@ export function TagForm({ defaultValues, submitLabel, pending, onSubmit, onCance
         <input
           id={colorId}
           type="color"
-          className="h-12 w-20 cursor-pointer rounded-md border border-input bg-card p-1"
+          className="h-12 w-20 cursor-pointer rounded-md border border-input bg-card p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
           {...register("color")}
         />
         {errors.color ? (

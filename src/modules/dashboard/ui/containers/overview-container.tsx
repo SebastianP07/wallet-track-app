@@ -29,7 +29,7 @@ export function OverviewContainer({ period, onSessionEnded }: OverviewContainerP
   const balances = useAccountTotals(httpAccountsRepository, notOpened);
 
   if (isLoading) {
-    return <DashboardLoading />;
+    return <DashboardLoading className="min-h-142 md:min-h-85 lg:min-h-64" />;
   }
   if (notOpened) {
     return <KpiOverview kpis={balances ?? {}} note={NOT_OPENED_NOTE} isSettling={false} />;

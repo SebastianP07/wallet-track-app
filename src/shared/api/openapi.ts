@@ -890,6 +890,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dashboard/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a month as CSV
+         * @description Columns: `kind,name,amount,due_date,status,tag`. One row per item of the month, of every kind, then one row per account
+         *     with `kind` `account_<kind>` and an empty due date, status and tag. Account balances are today's in any month (D6, D9),
+         *     so they are never to be summed with the items. No totals (D1). UTF-8 with a BOM, CRLF line ends, whole pesos as plain
+         *     integers. Text cells are always quoted, and one that starts with a control character (tab, CR, LF), or with `=`, `+`, `-`
+         *     or `@` or their full-width forms after any leading blanks, gets a leading `'` so that a spreadsheet reads it as text. So
+         *     does such a character after a `;`, a tab or a line break inside a cell, for a spreadsheet that splits there. 404 if the
+         *     month has not been opened.
+         */
+        get: operations["exportDashboardMonth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3468,6 +3494,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    exportDashboardMonth: {
+        parameters: {
+            query: {
+                period: components["parameters"]["PeriodQuery"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The month's items and the accounts. */
+            200: {
+                headers: {
+                    /** @description `attachment; filename="wallet-track-<YYYY-MM>.csv"`. */
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
             400: components["responses"]["BadRequest"];

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
@@ -7,9 +8,11 @@ import { KIND_LABELS } from "../../domain/account-groups";
 import { formatCOP } from "../../domain/money";
 import { isPendingAccount } from "../../domain/optimistic-list";
 import type { Account } from "../../domain/types";
-import { AccountBalanceForm } from "./account-balance-form";
-import { AccountNameForm } from "./account-name-form";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const AccountBalanceForm = dynamic(() => import("./account-balance-form").then((module) => module.AccountBalanceForm));
+const AccountNameForm = dynamic(() => import("./account-name-form").then((module) => module.AccountNameForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -99,27 +102,17 @@ export function AccountRow({ account, onRename, onSetBalance, onDelete }: Accoun
       ) : null}
 
       {mode === "confirm-delete" ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-sm">
-            Delete <span className="font-medium wrap-anywhere">{account.name}</span> for good? This
-            can&apos;t be undone.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                onDelete();
-                toView();
-              }}
-            >
-              Delete
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={toView}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="Delete"
+          onConfirm={() => {
+            onDelete();
+            toView();
+          }}
+          onKeep={toView}
+        >
+          Delete <span className="font-medium wrap-anywhere">{account.name}</span> for good? This
+          can&apos;t be undone.
+        </ConfirmPanel>
       ) : null}
     </li>
   );

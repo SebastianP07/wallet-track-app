@@ -1,11 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCardChargeSection } from "../../application/use-card-charge-section";
 import { useCardSection } from "../../application/use-card-section";
 import { CARD_CHARGE_COPY } from "../../domain/card-charge-copy";
 import { groupByCard } from "../../domain/card-groups";
 import { httpCardsRepository } from "../../infrastructure/http-cards-repository";
-import { CardChargeForm } from "../components/card-charge-form";
 import { CardChargeRow } from "../components/card-charge-row";
 import { CardGroupsList } from "../components/card-groups-list";
 import { CardManager } from "../components/card-manager";
@@ -16,6 +16,8 @@ import { useSelectedPeriod } from "@/modules/periods/application/use-selected-pe
 import { httpPeriodsRepository } from "@/modules/periods/infrastructure/http-periods-repository";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
+
+const CardChargeForm = dynamic(() => import("../components/card-charge-form").then((module) => module.CardChargeForm));
 
 const NEW_CHARGE = { name: "", amount: "", cardId: "", tagId: "" };
 

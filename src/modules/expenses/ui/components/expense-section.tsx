@@ -1,12 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { EXPENSE_COPY } from "../../domain/expense-groups";
 import type { ExpenseDraft } from "../../domain/expense-forms";
 import type { ExpenseKind, PeriodItem, PeriodItemUpdate } from "../../domain/types";
-import { ExpenseForm } from "./expense-form";
 import { ExpenseRow } from "./expense-row";
 import { ItemSection } from "./item-section";
 import type { Tag } from "@/modules/tags/domain/types";
+
+const ExpenseForm = dynamic(() => import("./expense-form").then((module) => module.ExpenseForm));
 
 const NEW_EXPENSE = { name: "", amount: "", dueDate: "", tagId: "" };
 

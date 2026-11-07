@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content="Wallet Track while there is no connection." />
+    <title>Offline · Wallet Track</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="stylesheet" href="/offline.css" />
+    <script src="/offline.js" defer></script>
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>Wallet <span class="signal">Track</span></h1>
+    </header>
+    <main id="content">
+      <div id="no-data" class="notice">
+        <p>You&rsquo;re offline, and this device holds no saved Dashboard.</p>
+        <p class="muted">Wallet Track needs a connection to sign in and to show your numbers.</p>
+        <a class="action" href="/">Try again</a>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,13 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
 
 import type { ActiveSession, Passkey, SecondFactorProof } from "../../domain/types";
-import { PasskeyAddForm } from "./passkey-add-form";
 import { PasskeyRow } from "./passkey-row";
 import { SessionRow } from "./session-row";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const PasskeyAddForm = dynamic(() => import("./passkey-add-form").then((module) => module.PasskeyAddForm));
 
 interface ListState {
   isLoading: boolean;

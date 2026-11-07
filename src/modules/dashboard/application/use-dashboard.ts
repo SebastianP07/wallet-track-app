@@ -38,5 +38,6 @@ export function useDashboard(
     // These numbers lag every write until the refetch after it lands.
     isSettling: inFlight > 0 || query.isFetching,
     reload: () => void query.refetch(),
+    updatedAt: query.dataUpdatedAt,
   };
 }

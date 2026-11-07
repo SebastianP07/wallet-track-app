@@ -1,28 +1,17 @@
 "use client";
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { cn } from "cn";
 
 import { formatCOP } from "@/modules/accounts/domain/money";
-import { formatCompactCOP } from "../../domain/chart-format";
 import type { DashboardKpis } from "../../domain/types";
-import { ChartTooltip } from "./chart-tooltip";
+import { ChartPlaceholder, DeferredChart } from "./deferred-chart";
 
-const CHART_HEIGHT = 220;
-const BAR_WIDTH = 24;
-const AXIS_WIDTH = 64;
-const NEGATIVE_LABEL_ROOM = 20;
-const AXIS_TEXT = { fill: "var(--muted-foreground)", fontSize: 11 };
+const TotalsBarsChart = dynamic(() => import("./totals-bars-chart").then((module) => module.TotalsBarsChart), {
+  ssr: false,
+  loading: ChartPlaceholder,
+});
+
 const NEUTRAL = "var(--chart-2)";
 
 interface TotalsBarsProps {
@@ -52,46 +41,9 @@ export function TotalsBars({ kpis }: TotalsBarsProps) {
           <span className="bg-background px-2">All of these are zero this month.</span>
         </p>
       ) : (
-        <div aria-hidden="true" className="h-55">
-          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-            <BarChart data={rows} margin={{ top: 20, right: 4, bottom: 16, left: 0 }} accessibilityLayer={false}>
-              <CartesianGrid vertical={false} stroke="var(--rule)" />
-              <XAxis
-                dataKey="name"
-                interval={0}
-                axisLine={false}
-                tickLine={false}
-                tick={AXIS_TEXT}
-                tickMargin={6}
-              />
-              <YAxis
-                width={AXIS_WIDTH}
-                axisLine={false}
-                tickLine={false}
-                tick={AXIS_TEXT}
-                tickFormatter={formatCompactCOP}
-                // Room for the label under a negative bar, clear of the names along the bottom.
-                padding={{ bottom: rows.some((row) => row.value < 0) ? NEGATIVE_LABEL_ROOM : 0 }}
-              />
-              <ReferenceLine y={0} stroke="var(--muted-foreground)" />
-              <Tooltip cursor={{ fill: "var(--rule)" }} content={<ChartTooltip />} wrapperClassName="z-10" />
-              <Bar
-                dataKey="value"
-                maxBarSize={BAR_WIDTH}
-                radius={[4, 4, 0, 0]}
-                isAnimationActive={false}
-              >
-                <LabelList
-                  dataKey="value"
-                  position="top"
-                  fill="var(--foreground)"
-                  fontSize={11}
-                  formatter={(value) => formatCompactCOP(Number(value))}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <DeferredChart className="h-55">
+          <TotalsBarsChart rows={rows} />
+        </DeferredChart>
       )}
       <table className="w-full text-sm">
         <caption className="sr-only">The month&apos;s totals: the amounts behind the chart.</caption>

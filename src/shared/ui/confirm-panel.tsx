@@ -1,0 +1,52 @@
+import { useId, type ReactNode } from "react";
+import { cn } from "cn";
+
+import { Button } from "./button";
+
+interface ConfirmPanelProps {
+  children: ReactNode;
+  confirmLabel: string;
+  confirmAriaLabel?: string;
+  keepLabel?: string;
+  confirmDisabled?: boolean;
+  className?: string;
+  actionsClassName?: string;
+  onConfirm: () => void;
+  onKeep: () => void;
+}
+
+// Focus lands on the way out, not on the destructive button: a second press of Enter must not delete anything.
+export function ConfirmPanel({
+  children,
+  confirmLabel,
+  confirmAriaLabel,
+  keepLabel = "Keep it",
+  confirmDisabled = false,
+  className,
+  actionsClassName,
+  onConfirm,
+  onKeep,
+}: ConfirmPanelProps) {
+  const messageId = useId();
+  return (
+    <div role="group" aria-labelledby={messageId} className={cn("flex flex-col gap-2 pt-1", className)}>
+      <p id={messageId} className="text-sm">
+        {children}
+      </p>
+      <div className={cn("flex gap-2", actionsClassName)}>
+        <Button
+          variant="destructive"
+          className="flex-1"
+          disabled={confirmDisabled}
+          aria-label={confirmAriaLabel}
+          onClick={onConfirm}
+        >
+          {confirmLabel}
+        </Button>
+        <Button autoFocus variant="outline" className="flex-1" onClick={onKeep}>
+          {keepLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}

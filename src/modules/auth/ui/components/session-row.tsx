@@ -5,6 +5,7 @@ import { useState } from "react";
 import { describeDevice, formatDateTime } from "../../domain/security-display";
 import type { ActiveSession } from "../../domain/types";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
 interface SessionRowProps {
   session: ActiveSession;
@@ -38,29 +39,20 @@ export function SessionRow({ session, isRevoking, onRevoke }: SessionRowProps) {
       ) : null}
 
       {isConfirming ? (
-        <div className="flex flex-col gap-2 pt-1 md:max-w-md">
-          <p className="text-sm">
-            {session.current
-              ? "End the session on this device? You'll be signed out."
-              : `End the session on ${device}? It stops working at once.`}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              disabled={isRevoking}
-              onClick={() => {
-                onRevoke();
-                setIsConfirming(false);
-              }}
-            >
-              End session
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={() => setIsConfirming(false)}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="End session"
+          confirmDisabled={isRevoking}
+          className="md:max-w-md"
+          onConfirm={() => {
+            onRevoke();
+            setIsConfirming(false);
+          }}
+          onKeep={() => setIsConfirming(false)}
+        >
+          {session.current
+            ? "End the session on this device? You'll be signed out."
+            : `End the session on ${device}? It stops working at once.`}
+        </ConfirmPanel>
       ) : (
         <div className="flex flex-wrap items-center">
           <Button

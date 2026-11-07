@@ -29,5 +29,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!(?:api|healthz)(?:/|$)|_next/static|_next/image|favicon\\.ico).*)"],
+  // The PWA's files have to load with no session: a browser fetches them without the cookie, or while signed out.
+  matcher: [
+    "/((?!(?:api|healthz|icons)(?:/|$)|_next/static|_next/image|favicon\\.ico|(?:sw\\.js|manifest\\.webmanifest|offline\\.(?:html|js|css))$).*)",
+  ],
 };

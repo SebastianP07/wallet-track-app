@@ -1,11 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import type { Tag, TagUpdate } from "../../domain/types";
-import { TagForm } from "./tag-form";
 import { TagLabel } from "./tag-label";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const TagForm = dynamic(() => import("./tag-form").then((module) => module.TagForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -53,27 +56,17 @@ export function TagRow({ tag, isUpdating, onUpdate, onDelete }: TagRowProps) {
       ) : null}
 
       {mode === "confirm-delete" ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-sm">
-            Delete <span className="font-medium wrap-anywhere">{tag.name}</span> for good? Items and
-            templates that have it stay, without a tag.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                onDelete();
-                toView();
-              }}
-            >
-              Delete
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={toView}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="Delete"
+          onConfirm={() => {
+            onDelete();
+            toView();
+          }}
+          onKeep={toView}
+        >
+          Delete <span className="font-medium wrap-anywhere">{tag.name}</span> for good? Items and
+          templates that have it stay, without a tag.
+        </ConfirmPanel>
       ) : null}
     </li>
   );

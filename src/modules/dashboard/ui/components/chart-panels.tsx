@@ -1,25 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { cn } from "cn";
 
 import type { Dashboard } from "../../domain/types";
+import { ToPayDonut } from "./to-pay-donut";
+import { TotalsBars } from "./totals-bars";
 import { UpcomingDueList } from "./upcoming-due-list";
-
-function ChartPlaceholder() {
-  return <div className="ledger-rows h-80" />;
-}
-
-// Recharts writes style attributes. Rendered on the server they would reach the browser as HTML, which the
-// CSP refuses; created by React in the browser they are set through the DOM, which it allows.
-const ToPayDonut = dynamic(() => import("./to-pay-donut").then((module) => module.ToPayDonut), {
-  ssr: false,
-  loading: ChartPlaceholder,
-});
-const TotalsBars = dynamic(() => import("./totals-bars").then((module) => module.TotalsBars), {
-  ssr: false,
-  loading: ChartPlaceholder,
-});
 
 interface ChartPanelsProps {
   dashboard: Dashboard;

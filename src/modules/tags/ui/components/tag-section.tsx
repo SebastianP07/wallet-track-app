@@ -1,13 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { DEFAULT_TAG_COLOR } from "../../domain/tag-forms";
 import type { Tag, TagCreate, TagUpdate } from "../../domain/types";
-import { TagForm } from "./tag-form";
 import { TagRow } from "./tag-row";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const TagForm = dynamic(() => import("./tag-form").then((module) => module.TagForm));
 
 interface TagSectionProps {
   tags: Tag[];

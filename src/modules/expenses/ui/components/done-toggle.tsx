@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { Check } from "lucide-react";
 import { cn } from "cn";
 
@@ -10,16 +11,18 @@ interface DoneToggleProps {
   done: boolean;
   disabled: boolean;
   onToggle: () => void;
+  ref?: Ref<HTMLButtonElement>;
 }
 
-export function DoneToggle({ name, word, done, disabled, onToggle }: DoneToggleProps) {
+export function DoneToggle({ name, word, done, disabled, onToggle, ref }: DoneToggleProps) {
   return (
     <Button
+      ref={ref}
       variant={done ? "primary" : "outline"}
       className={cn("size-12 shrink-0 px-0", !done && "text-muted-foreground")}
       disabled={disabled}
       aria-pressed={done}
-      aria-label={done ? `Undo ${word} on ${name}` : `Mark ${name} as ${word}`}
+      aria-label={`Mark ${name} as ${word}`}
       onClick={onToggle}
     >
       <Check aria-hidden="true" className={cn("size-6", !done && "opacity-40")} />

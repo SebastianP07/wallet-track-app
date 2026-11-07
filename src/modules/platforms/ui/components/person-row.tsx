@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { cn } from "cn";
 
 import {
@@ -11,12 +13,14 @@ import {
   type PersonDraft,
 } from "../../domain/platform-forms";
 import type { Person } from "../../domain/types";
-import { PaymentForm } from "./payment-form";
-import { PersonForm } from "./person-form";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import { DoneToggle } from "@/modules/expenses/ui/components/done-toggle";
 import { BADGE } from "@/modules/expenses/ui/components/urgency-badge";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const PaymentForm = dynamic(() => import("./payment-form").then((module) => module.PaymentForm));
+const PersonForm = dynamic(() => import("./person-form").then((module) => module.PersonForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 const LOOK = cn(BADGE, "border-rule text-muted-foreground");
@@ -46,6 +50,12 @@ export function PersonRow({
 }: PersonRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
   const toView = () => setMode("view");
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  // The toggle opened the payment form or the confirmation, so backing out of either returns there.
+  const backToToggle = () => {
+    flushSync(() => setMode("view"));
+    toggleRef.current?.focus();
+  };
   const covered = person.coveredInPeriod === true;
   const canPay = !person.isOwner && person.monthlyOwed > 0;
   const paymentId = person.periodPaymentId;
@@ -56,6 +66,7 @@ export function PersonRow({
         <DoneToggle
           name={person.name}
           word="paid"
+          ref={toggleRef}
           done={covered}
           disabled={isSavingPayment}
           onToggle={() => setMode(covered ? "confirm-undo" : "confirm-paid")}
@@ -108,36 +119,26 @@ export function PersonRow({
               monthsCovered: String(person.billingMonths),
             }}
             pending={isSavingPayment}
-            onCancel={toView}
+            onCancel={backToToggle}
             onSubmit={(payment) => onRecordPayment(payment, { onSuccess: toView })}
           />
         ) : null}
 
         {mode === "confirm-undo" ? (
-          <div className="flex flex-col gap-2 pt-1">
-            <p className="text-sm">
-              Remove the payment that covers this month? All its coverage goes with it, and the income
-              item it marked received, if any, goes back to expected.
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                className="flex-1"
-                disabled={isSavingPayment || !paymentId}
-                aria-label={`Remove payment from ${person.name}`}
-                onClick={() => {
-                  if (paymentId) {
-                    onUndoPayment(paymentId, { onSuccess: toView });
-                  }
-                }}
-              >
-                Remove payment
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={toView}>
-                Keep it
-              </Button>
-            </div>
-          </div>
+          <ConfirmPanel
+            confirmLabel="Remove payment"
+            confirmAriaLabel={`Remove payment from ${person.name}`}
+            confirmDisabled={isSavingPayment || !paymentId}
+            onConfirm={() => {
+              if (paymentId) {
+                onUndoPayment(paymentId, { onSuccess: toView });
+              }
+            }}
+            onKeep={backToToggle}
+          >
+            Remove the payment that covers this month? All its coverage goes with it, and the income
+            item it marked received, if any, goes back to expected.
+          </ConfirmPanel>
         ) : null}
 
         {mode === "edit" ? (
@@ -155,28 +156,19 @@ export function PersonRow({
         ) : null}
 
         {mode === "confirm-delete" ? (
-          <div className="flex flex-col gap-2 pt-1">
-            <p className="text-sm">
-              Delete <span className="font-medium wrap-anywhere">{person.name}</span> for good? They leave
-              every platform, which raises the others&apos; shares. Income items already in a month stay,
-              as plain income. Someone with payments can&apos;t be deleted.
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => {
-                  onDelete();
-                  toView();
-                }}
-              >
-                Delete
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={toView}>
-                Keep them
-              </Button>
-            </div>
-          </div>
+          <ConfirmPanel
+            confirmLabel="Delete"
+            keepLabel="Keep them"
+            onConfirm={() => {
+              onDelete();
+              toView();
+            }}
+            onKeep={toView}
+          >
+            Delete <span className="font-medium wrap-anywhere">{person.name}</span> for good? They leave
+            every platform, which raises the others&apos; shares. Income items already in a month stay,
+            as plain income. Someone with payments can&apos;t be deleted.
+          </ConfirmPanel>
         ) : null}
       </div>
     </li>

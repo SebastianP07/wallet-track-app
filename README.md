@@ -62,11 +62,27 @@ from the right of the incoming `X-Forwarded-For`, and everything further left is
 - Every page renders on demand, which the root layout forces. A prerendered page would have no nonce.
 - Never use a server-rendered `style` attribute or inline `<style>`; production blocks them. That is why the app
   has its own `not-found.tsx` and `error.tsx`: Next.js's defaults use inline styles.
-- Charts stay client-rendered: Recharts writes `style` attributes, so `chart-panels.tsx` loads it through `next/dynamic` with
-  `ssr: false`. In the browser React sets those through the DOM, which the CSP allows.
+- Charts stay client-rendered: Recharts writes `style` attributes, so `to-pay-donut.tsx` and `totals-bars.tsx` load it through
+  `next/dynamic` with `ssr: false`. In the browser React sets those through the DOM, which the CSP allows.
 - Development relaxes the policy with `'unsafe-eval'`, `'unsafe-inline'` styles and the HMR WebSocket.
 
-`upgrade-insecure-requests` is added only when `APP_ORIGIN` is `https://`.
+`upgrade-insecure-requests` is added only when `APP_ORIGIN` is `https://`. `worker-src 'self'` keeps workers to this origin:
+without it they fall back to `script-src`, where `'strict-dynamic'` trusts whatever a trusted script starts. The manifest needs
+no directive of its own, because `default-src 'self'` covers it.
+
+## PWA and offline
+
+Installable through `src/app/manifest.ts`, with the icons in `public/icons`. `public/sw.js` is written by hand, with no plugin,
+so that all it can do is readable in one file:
+
+| Topic | Behavior |
+|---|---|
+| What it holds | `wallet-track-shell-<version>`: the offline page and its files, the manifest and icons. `wallet-track-offline-data`: the body of the last `GET /api/v1/dashboard`, with the moment it was saved. No header of the API's response is stored. |
+| What it never touches | Cross-origin and non-GET requests, `/api/auth/*`, every other API read, the export, and the app's pages and assets. Those always go to the network, so a new deploy cannot be stranded behind it. |
+| Nonces | No page's HTML is ever stored, since it would carry a spent nonce. When a navigation fails, the worker answers with the static `public/offline.html`, under its own CSP from `next.config.ts`: no inline code, `script-src 'self'`, no `connect-src`. `public/offline.js` draws the saved Dashboard from Cache Storage, with no control that could write. |
+| Clearing | `clearOfflineData()` runs on logout, logout-all and ending this session (`goToLogin`), on any 401 seen by `http-client.ts`, and when `/login` finds no session. The worker clears on a 401 for the Dashboard too. A response still on its way when a clear happens is not stored. Saved data past 30 days, the longest a session lives, is refused. |
+| Going offline with the page open | A banner with the data's age, and a disabled `fieldset` around the whole Dashboard. Mutations use `networkMode: "always"`, so one that slips through fails at once and is never queued. |
+| Updates | `next.config.ts` hashes the worker and the offline files into the registration's URL, so changing any of them installs a new worker, which takes over at once and deletes the old shell. Saved data survives an update. The worker only runs in production builds. |
 
 ## Session handling
 
@@ -139,7 +155,9 @@ Read when the server starts, from the environment or `.env.local`. `.env.example
 | `src/shared/query` | The optimistic mutation hook and row helpers, on TanStack Query |
 | `src/shared/validation` | Where schemas import zod from, set to `jitless` so it never probes `new Function` under the CSP |
 | `src/shared/bff` | The server-side proxy to the API |
-| `src/shared/security` | The CSP |
+| `src/shared/security` | The CSP, and the offline page's |
+| `src/shared/pwa` | Worker registration, online status and clearing the saved Dashboard |
+| `public` | `sw.js`, the offline page and the icons |
 | `contracts` | Vendored `openapi.yaml`; never edit by hand |
 
 The theme is dark only, on near-black `#0a0a0a`, with marigold as the one accent. There is no light palette:
@@ -148,6 +166,14 @@ components active. Fonts are self-hosted from `@fontsource-variable` packages, s
 
 `QueryProvider` invalidates the dashboard query after every mutation, successful or not, so a new write cannot forget to.
 Logging out and the Security section opt out, through `meta.keepsDashboard`.
+
+`FocusKeeper` watches the Dashboard and Login for a focused element that leaves or turns disabled, and returns focus: to the
+control that opened a form or confirmation that closed, otherwise to the next row, the previous one, and in an emptied section
+to its heading. A new list or form gets this without any code of its own.
+
+To keep a phone responsive, `SectionGrid` renders the sections one task at a time, the charts wait until they near the screen
+and the row forms, with react-hook-form and zod, load when first opened. Import zod only from `src/shared/validation`: naming
+what is used there leaves its locales out of the bundle.
 
 MSW is not installed: the real API is available, so Phase 3 was built and checked against it.
 

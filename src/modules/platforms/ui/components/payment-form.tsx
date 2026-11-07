@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -23,11 +24,14 @@ export function PaymentForm({ name, defaultValues, pending, onSubmit, onCancel }
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<PaymentFormValues, unknown, PaymentDraft>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues,
   });
+
+  useEffect(() => setFocus("paidAt"), [setFocus]);
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">

@@ -1,3 +1,5 @@
+import { clearOfflineData } from "@/shared/pwa/offline-data";
+
 const BASE_PATH = "/api/v1";
 const NETWORK_FAILURE_STATUS = 0;
 
@@ -16,8 +18,9 @@ export function statusOf(error: unknown): number {
 }
 
 async function send(path: string, init: RequestInit): Promise<Response> {
+  let response: Response;
   try {
-    return await fetch(`${BASE_PATH}${path}`, {
+    response = await fetch(`${BASE_PATH}${path}`, {
       ...init,
       cache: "no-store",
       credentials: "same-origin",
@@ -26,6 +29,11 @@ async function send(path: string, init: RequestInit): Promise<Response> {
   } catch {
     throw new ApiError(NETWORK_FAILURE_STATUS);
   }
+  // Here rather than in each section, so that no 401 can leave the saved Dashboard behind.
+  if (response.status === 401) {
+    void clearOfflineData();
+  }
+  return response;
 }
 
 function toApiError(response: Response): ApiError {
@@ -62,6 +70,23 @@ async function fetchCsrfToken(): Promise<string> {
 
 export async function apiGet<T>(path: string): Promise<T> {
   return parse<T>(await send(path, { method: "GET" }));
+}
+
+export interface DownloadedFile {
+  blob: Blob;
+  fileName: string | null;
+}
+
+const FILE_NAME_IN_HEADER = /filename="([^"]+)"/;
+
+export async function apiGetFile(path: string, accept: string): Promise<DownloadedFile> {
+  const response = await send(path, { method: "GET", headers: { Accept: accept } });
+  if (!response.ok) {
+    await drain(response);
+    throw toApiError(response);
+  }
+  const fileName = FILE_NAME_IN_HEADER.exec(response.headers.get("Content-Disposition") ?? "")?.[1] ?? null;
+  return { blob: await response.blob(), fileName };
 }
 
 async function sendMutation<T>(method: string, path: string, body?: unknown): Promise<T> {

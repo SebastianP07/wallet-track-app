@@ -1,14 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
 import type { PlatformDraft } from "../../domain/platform-forms";
 import type { Person, Platform } from "../../domain/types";
-import { PlatformForm } from "./platform-form";
 import { formatCOP, formatCopInput } from "@/modules/accounts/domain/money";
 import type { CreditCard } from "@/modules/cards/domain/types";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
+
+const PlatformForm = dynamic(() => import("./platform-form").then((module) => module.PlatformForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -66,11 +69,7 @@ export function PlatformRow({
                 key={person.id}
                 type="button"
                 aria-pressed={member}
-                aria-label={
-                  member
-                    ? `Remove ${person.name} from ${platform.name}`
-                    : `Add ${person.name} to ${platform.name}`
-                }
+                aria-label={`${person.name} shares ${platform.name}`}
                 disabled={isChangingMembers}
                 onClick={() => onSetMember(person.id, !member)}
                 className={cn(
@@ -119,27 +118,17 @@ export function PlatformRow({
       ) : null}
 
       {mode === "confirm-delete" ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-sm">
-            Delete <span className="font-medium wrap-anywhere">{platform.name}</span> for good? Months
-            opened from now on won&apos;t count it. Income items already in a month keep their amount.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={() => {
-                onDelete();
-                toView();
-              }}
-            >
-              Delete
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={toView}>
-              Keep it
-            </Button>
-          </div>
-        </div>
+        <ConfirmPanel
+          confirmLabel="Delete"
+          onConfirm={() => {
+            onDelete();
+            toView();
+          }}
+          onKeep={toView}
+        >
+          Delete <span className="font-medium wrap-anywhere">{platform.name}</span> for good? Months
+          opened from now on won&apos;t count it. Income items already in a month keep their amount.
+        </ConfirmPanel>
       ) : null}
     </li>
   );

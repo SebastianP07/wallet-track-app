@@ -31,7 +31,7 @@ export function MonthSwitcher({ period, onChange }: MonthSwitcherProps) {
       </Button>
       <h2
         aria-live="polite"
-        className="min-w-0 flex-1 text-center font-heading text-[clamp(2.5rem,11vw,6rem)] leading-none font-extrabold tracking-tight md:flex-none md:text-left"
+        className="min-w-0 flex-1 text-center font-heading text-[1.875rem] min-[375px]:text-[clamp(2.5rem,11vw,6rem)] leading-none font-extrabold tracking-tight md:flex-none md:text-left"
       >
         {monthName(period)}{" "}
         <span className="font-mono text-[0.4em] font-normal tracking-normal text-signal">

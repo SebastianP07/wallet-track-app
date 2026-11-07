@@ -1,12 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { formatDateTime } from "../../domain/security-display";
 import type { Passkey, SecondFactorProof } from "../../domain/types";
-import { PasskeyNameForm } from "./passkey-name-form";
-import { PasskeyRemoveForm } from "./passkey-remove-form";
 import { Button } from "@/shared/ui/button";
+
+const PasskeyNameForm = dynamic(() => import("./passkey-name-form").then((module) => module.PasskeyNameForm));
+const PasskeyRemoveForm = dynamic(() => import("./passkey-remove-form").then((module) => module.PasskeyRemoveForm));
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 

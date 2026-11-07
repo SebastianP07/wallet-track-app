@@ -7,7 +7,11 @@ import { DASHBOARD_KEY } from "@/shared/api/query-keys";
 
 function createQueryClient() {
   const client: QueryClient = new QueryClient({
-    defaultOptions: { queries: { refetchOnWindowFocus: true, refetchOnReconnect: true } },
+    defaultOptions: {
+      queries: { refetchOnWindowFocus: true, refetchOnReconnect: true },
+      // The default pauses a write made offline and sends it on reconnect. Writes are never queued: this fails it.
+      mutations: { networkMode: "always" },
+    },
     mutationCache: new MutationCache({
       // On failure too: a refused write may mean the data moved under this tab. Not awaited, so a write
       // never waits for the KPIs, and each later one restarts the refetch, so the last write's numbers win.

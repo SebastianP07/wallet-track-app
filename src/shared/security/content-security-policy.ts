@@ -13,6 +13,8 @@ export function buildContentSecurityPolicy(options: {
     "img-src 'self' data:",
     "font-src 'self'",
     isDevelopment ? "connect-src 'self' ws://localhost:* ws://127.0.0.1:*" : "connect-src 'self'",
+    // Without it workers fall back to script-src, where 'strict-dynamic' lets a trusted script start one from anywhere.
+    "worker-src 'self'",
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
@@ -21,3 +23,16 @@ export function buildContentSecurityPolicy(options: {
   ];
   return directives.join("; ");
 }
+
+// The offline fallback is a static file, stored by the service worker and served with no server around, so it
+// cannot carry a nonce. It has no inline script or style, and reads what it shows from Cache Storage.
+export const OFFLINE_PAGE_CONTENT_SECURITY_POLICY = [
+  "default-src 'none'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self'",
+  "manifest-src 'self'",
+  "base-uri 'none'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join("; ");

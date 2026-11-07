@@ -7,11 +7,18 @@ import "@fontsource-variable/instrument-sans/wght.css";
 import "@fontsource-variable/martian-mono/wght.css";
 import "./globals.css";
 
+import { ServiceWorkerRegistration } from "@/shared/pwa/service-worker-registration";
 import { QueryProvider } from "@/shared/ui/query-provider";
 
 export const metadata: Metadata = {
   title: "Wallet Track",
   description: "Private monthly cash control.",
+  applicationName: "Wallet Track",
+  icons: {
+    icon: [{ url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: { capable: true, title: "Wallet Track", statusBarStyle: "black" },
 };
 
 export const viewport: Viewport = {
@@ -25,7 +32,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="min-h-dvh antialiased">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ServiceWorkerRegistration />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

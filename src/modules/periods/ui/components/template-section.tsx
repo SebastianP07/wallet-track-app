@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import {
@@ -8,11 +9,12 @@ import {
   templatesOf,
 } from "../../domain/template-groups";
 import type { CreditCard, Template, TemplateCreate, TemplateUpdate } from "../../domain/types";
-import { TemplateForm } from "./template-form";
 import { TemplateRow } from "./template-row";
 import type { Tag } from "@/modules/tags/domain/types";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
+
+const TemplateForm = dynamic(() => import("./template-form").then((module) => module.TemplateForm));
 
 const NEW_TEMPLATE = { kind: "fixed", name: "", amount: "", dueDay: "", cardId: "", tagId: "" } as const;
 

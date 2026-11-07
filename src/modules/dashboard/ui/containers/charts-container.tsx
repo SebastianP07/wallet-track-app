@@ -18,7 +18,7 @@ export function ChartsContainer({ period, onSessionEnded }: ChartsContainerProps
   );
 
   if (isLoading) {
-    return <DashboardLoading />;
+    return <DashboardLoading className="min-h-268 md:min-h-180 lg:min-h-98" />;
   }
   if (notOpened) {
     return <p className="text-sm text-muted-foreground">Open this month to see its charts.</p>;

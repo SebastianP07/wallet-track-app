@@ -10,6 +10,7 @@ import type { Tag } from "@/modules/tags/domain/types";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { isPendingRow } from "@/shared/query/optimistic-rows";
 import { Button } from "@/shared/ui/button";
+import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
@@ -92,27 +93,17 @@ export function ItemRow({
         {mode === "edit" ? renderEditForm?.(toView) : null}
 
         {mode === "confirm-delete" ? (
-          <div className="flex flex-col gap-2 pt-1">
-            <p className="text-sm">
-              Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?{" "}
-              {deleteNote}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => {
-                  onDelete?.();
-                  toView();
-                }}
-              >
-                Delete
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={toView}>
-                Keep it
-              </Button>
-            </div>
-          </div>
+          <ConfirmPanel
+            confirmLabel="Delete"
+            onConfirm={() => {
+              onDelete?.();
+              toView();
+            }}
+            onKeep={toView}
+          >
+            Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?{" "}
+            {deleteNote}
+          </ConfirmPanel>
         ) : null}
       </div>
     </li>

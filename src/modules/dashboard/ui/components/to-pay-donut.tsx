@@ -1,15 +1,16 @@
 "use client";
 
-import { Pie, PieChart, ResponsiveContainer, Tooltip, type PieLabelRenderProps } from "recharts";
+import dynamic from "next/dynamic";
 
 import { formatCOP } from "@/modules/accounts/domain/money";
-import { formatCompactCOP, formatShare } from "../../domain/chart-format";
+import { formatShare } from "../../domain/chart-format";
 import type { ToPayBreakdown } from "../../domain/types";
-import { ChartTooltip } from "./chart-tooltip";
+import { ChartPlaceholder, DeferredChart } from "./deferred-chart";
 
-const CHART_HEIGHT = 220;
-const LABEL_GAP = 12;
-const RADIANS_PER_DEGREE = Math.PI / 180;
+const ToPayDonutChart = dynamic(() => import("./to-pay-donut-chart").then((module) => module.ToPayDonutChart), {
+  ssr: false,
+  loading: ChartPlaceholder,
+});
 
 const SLICES = [
   { key: "fixed", name: "Fixed", fill: "var(--chart-fixed)" },
@@ -33,35 +34,9 @@ export function ToPayDonut({ breakdown, toPay }: ToPayDonutProps) {
           <span className="bg-background px-2">Nothing left to pay this month.</span>
         </p>
       ) : (
-        <div aria-hidden="true" className="relative h-55">
-          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-            <PieChart accessibilityLayer={false}>
-              <Pie
-                // A slice of nothing draws nothing, and has no label to collide with its neighbour.
-                data={rows.filter((row) => row.value > 0)}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={54}
-                outerRadius={74}
-                startAngle={90}
-                endAngle={-270}
-                stroke="var(--background)"
-                strokeWidth={2}
-                isAnimationActive={false}
-                labelLine={false}
-                label={(props) => <SliceLabel {...props} whole={toPay} />}
-              />
-              <Tooltip
-                content={<ChartTooltip />}
-                wrapperClassName="z-10"
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-sans text-base font-semibold">{formatCompactCOP(toPay)}</span>
-            <span className="text-xs text-muted-foreground">to pay</span>
-          </div>
-        </div>
+        <DeferredChart className="relative h-55">
+          <ToPayDonutChart rows={rows} toPay={toPay} />
+        </DeferredChart>
       )}
       <table className="w-full text-sm">
         <caption className="sr-only">To pay by kind: the amounts behind the chart.</caption>
@@ -92,33 +67,5 @@ export function ToPayDonut({ breakdown, toPay }: ToPayDonutProps) {
         </tbody>
       </table>
     </figure>
-  );
-}
-
-// The slice's name beside it, so that telling them apart never rests on color.
-function SliceLabel({
-  cx,
-  cy,
-  midAngle,
-  outerRadius,
-  name,
-  value,
-  whole,
-}: PieLabelRenderProps & { whole: number }) {
-  const angle = -(midAngle ?? 0) * RADIANS_PER_DEGREE;
-  const radius = Number(outerRadius) + LABEL_GAP;
-  const x = Number(cx) + radius * Math.cos(angle);
-  const y = Number(cy) + radius * Math.sin(angle);
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="var(--foreground)"
-      fontSize={12}
-      textAnchor={x >= Number(cx) ? "start" : "end"}
-      dominantBaseline="central"
-    >
-      {name} {formatShare(Number(value), whole)}
-    </text>
   );
 }
