@@ -22,10 +22,18 @@ export interface ExpenseDraft {
   amount: number;
   dueDate: string;
   tagId: string | null;
+  // Only a new fixed expense can ask for this; an edit never sends it.
+  repeatsMonthly: boolean;
 }
 
 export const expenseFormSchema = z
-  .object({ name: nameField, amount: z.string(), dueDate: z.string(), tagId: z.string() })
+  .object({
+    name: nameField,
+    amount: z.string(),
+    dueDate: z.string(),
+    tagId: z.string(),
+    repeatsMonthly: z.boolean().optional(),
+  })
   .superRefine((values, context) => {
     if (parseItemAmount(values.amount) === null) {
       context.addIssue({ code: "custom", path: ["amount"], message: ITEM_AMOUNT_MESSAGE });
@@ -40,6 +48,7 @@ export const expenseFormSchema = z
       amount: parseItemAmount(values.amount) ?? 0,
       dueDate: values.dueDate,
       tagId: values.tagId || null,
+      repeatsMonthly: values.repeatsMonthly ?? false,
     }),
   );
 

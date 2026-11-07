@@ -542,7 +542,7 @@ export interface paths {
         put?: never;
         /**
          * Add an item to a month
-         * @description 409 if the month is closed.
+         * @description 409 if the month is closed. With `repeatsMonthly` on a fixed or income item, the same transaction also creates an active recurring template with the item's name, amount, tag and, on a fixed item, the day of its `dueDate` as `dueDay`, and links the item to it (`templateId`). Every month opened from then on gets the item; months already opened do not.
          */
         post: operations["createPeriodItem"];
         delete?: never;
@@ -564,7 +564,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an item
-         * @description A payment linked to a person-linked income item stays, as history, with its coverage.
+         * @description Deletes the item from its own month only. A payment linked to a person-linked income item stays, as history, with its coverage. With `stopRepeating=true` the same transaction also deactivates the item's template, if it has one, so no month opened from then on gets it; the template is kept, inactive, and items of other months, paid or not, stay as they are. An overdue expense deleted from its month of origin leaves the totals of the month that owed it (D1, D7).
          */
         delete: operations["deletePeriodItem"];
         options?: never;
@@ -1220,6 +1220,11 @@ export interface components {
             amount: components["schemas"]["NonNegativeMoney"];
             dueDate: components["schemas"]["Date"];
             tagId?: components["schemas"]["Id"] | null;
+            /**
+             * @description Only on a `fixed` item; `true` on an `occasional` one returns 400. Also creates the recurring template that repeats it every month opened from now on, with the day of `dueDate` as its due day.
+             * @default false
+             */
+            repeatsMonthly: boolean;
         };
         IncomeItemCreate: {
             /**
@@ -1230,6 +1235,11 @@ export interface components {
             name: components["schemas"]["Name"];
             amount: components["schemas"]["NonNegativeMoney"];
             tagId?: components["schemas"]["Id"] | null;
+            /**
+             * @description Also creates the recurring template that repeats it every month opened from now on.
+             * @default false
+             */
+            repeatsMonthly: boolean;
         };
         CardChargeItemCreate: {
             /**
@@ -2546,7 +2556,10 @@ export interface operations {
     };
     deletePeriodItem: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Also stop the item's template. Absent means false. */
+                stopRepeating?: boolean;
+            };
             header: {
                 /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
                 "X-CSRF-Token": components["parameters"]["CsrfToken"];

@@ -7,6 +7,7 @@ import type { PeriodItem } from "../../domain/types";
 import { DoneToggle } from "./done-toggle";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
+import { monthName, yearOf } from "@/modules/periods/domain/year-month";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { isPendingRow } from "@/shared/query/optimistic-rows";
 import { Button } from "@/shared/ui/button";
@@ -22,9 +23,11 @@ interface ItemRowProps {
   doneWord: "paid" | "received" | "charged";
   details: ReactNode;
   deleteNote?: string;
+  // Its template still repeats it, so deleting asks whether later months should stop getting it too.
+  repeats?: boolean;
   // A row without these has only its done toggle.
   renderEditForm?: (close: () => void) => ReactNode;
-  onDelete?: () => void;
+  onDelete?: (stopRepeating: boolean) => void;
   onSetDone: (done: boolean) => void;
 }
 
@@ -33,7 +36,8 @@ export function ItemRow({
   tags,
   doneWord,
   details,
-  deleteNote = "Its template, if it has one, stays.",
+  deleteNote,
+  repeats = false,
   renderEditForm,
   onSetDone,
   onDelete,
@@ -43,6 +47,17 @@ export function ItemRow({
   const done = item.status === "done";
   const tag = tags.find(({ id }) => id === item.tagId);
   const toView = () => setMode("view");
+  const remove = (stopRepeating: boolean) => {
+    onDelete?.(stopRepeating);
+    toView();
+  };
+  // Removal stays in the item's own month; the month that owes an overdue one stops counting it (D1, D7).
+  const owedNote =
+    item.status === "overdue" && item.owedIn
+      ? ` ${monthName(item.owedIn)} ${yearOf(item.owedIn)}, which owes it, stops counting it.`
+      : "";
+  const note = deleteNote ?? (item.templateId ? "Its template stays as it is." : "");
+  const doneNote = done ? ` It is marked ${doneWord} here, and that mark goes with it.` : "";
 
   return (
     <li className="flex gap-3 border-t border-rule py-3">
@@ -92,17 +107,31 @@ export function ItemRow({
 
         {mode === "edit" ? renderEditForm?.(toView) : null}
 
-        {mode === "confirm-delete" ? (
+        {mode === "confirm-delete" && repeats ? (
           <ConfirmPanel
-            confirmLabel="Delete"
-            onConfirm={() => {
-              onDelete?.();
-              toView();
+            confirmLabel="Only this month"
+            confirmAriaLabel={`Delete ${item.name} from this month only`}
+            alternative={{
+              label: "Stop repeating too",
+              ariaLabel: `Delete ${item.name} and stop repeating it`,
+              onSelect: () => remove(true),
             }}
+            onConfirm={() => remove(false)}
             onKeep={toView}
           >
+            <span className="font-medium wrap-anywhere">{item.name}</span> repeats every month. Delete it from
+            this month only, so months opened later still get it, or also stop repeating it. Earlier months keep
+            theirs, paid or not.{doneNote}
+            {owedNote}
+          </ConfirmPanel>
+        ) : null}
+
+        {mode === "confirm-delete" && !repeats ? (
+          <ConfirmPanel confirmLabel="Delete" onConfirm={() => remove(false)} onKeep={toView}>
             Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?{" "}
-            {deleteNote}
+            {note}
+            {doneNote}
+            {owedNote}
           </ConfirmPanel>
         ) : null}
       </div>

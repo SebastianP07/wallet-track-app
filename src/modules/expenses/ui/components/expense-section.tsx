@@ -6,14 +6,25 @@ import type { ExpenseDraft } from "../../domain/expense-forms";
 import type { ExpenseKind, PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ExpenseRow } from "./expense-row";
 import { ItemSection } from "./item-section";
+import { lastDayOf } from "@/modules/periods/domain/year-month";
 import type { Tag } from "@/modules/tags/domain/types";
 
 const ExpenseForm = dynamic(() => import("./expense-form").then((module) => module.ExpenseForm));
 
-const NEW_EXPENSE = { name: "", amount: "", dueDate: "", tagId: "" };
+const REPEAT_HINT = "Every month you open from now on gets it too, due on the same day. Untick it for this month only.";
+
+// A fixed expense repeats unless the owner says otherwise. An occasional one is due by the month's end unless
+// another date is chosen, so only its name and amount are needed.
+function newExpense(kind: ExpenseKind, period: string) {
+  return kind === "fixed"
+    ? { name: "", amount: "", dueDate: "", tagId: "", repeatsMonthly: true }
+    : { name: "", amount: "", dueDate: lastDayOf(period), tagId: "", repeatsMonthly: false };
+}
 
 interface ExpenseSectionProps {
   kind: ExpenseKind;
+  period: string;
+  activeTemplateIds: ReadonlySet<string>;
   isFiltered: boolean;
   isClosed: boolean;
   tags: Tag[];
@@ -29,12 +40,14 @@ interface ExpenseSectionProps {
   reload: () => void;
   createExpense: (draft: ExpenseDraft, callbacks: { onSuccess: () => void }) => void;
   updateExpense: (id: string, changes: PeriodItemUpdate) => void;
-  deleteExpense: (id: string) => void;
+  deleteExpense: (id: string, stopRepeating: boolean) => void;
   setDone: (id: string, done: boolean) => void;
 }
 
 export function ExpenseSection({
   kind,
+  period,
+  activeTemplateIds,
   tags,
   toPay,
   isCreating,
@@ -72,17 +85,19 @@ export function ExpenseSection({
           key={item.id}
           item={item}
           tags={tags}
+          repeats={item.templateId !== null && activeTemplateIds.has(item.templateId)}
           onSetDone={(done) => setDone(item.id, done)}
           onUpdate={(changes) => updateExpense(item.id, changes)}
-          onDelete={() => deleteExpense(item.id)}
+          onDelete={(stopRepeating) => deleteExpense(item.id, stopRepeating)}
         />
       )}
       renderAddForm={(close) => (
         <ExpenseForm
-          defaultValues={NEW_EXPENSE}
+          defaultValues={newExpense(kind, period)}
           tags={tags}
           submitLabel="Save"
           pending={isCreating}
+          repeatHint={kind === "fixed" ? REPEAT_HINT : undefined}
           onCancel={close}
           onSubmit={(draft) => createExpense(draft, { onSuccess: close })}
         />

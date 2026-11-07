@@ -14,15 +14,17 @@ interface IncomeRowProps {
   item: PeriodItem;
   tags: Tag[];
   onSetDone: (done: boolean) => void;
+  repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
-  onDelete: () => void;
+  onDelete: (stopRepeating: boolean) => void;
 }
 
-export function IncomeRow({ item, tags, onSetDone, onUpdate, onDelete }: IncomeRowProps) {
+export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }: IncomeRowProps) {
   return (
     <ItemRow
       item={item}
       tags={tags}
+      repeats={repeats}
       doneWord="received"
       onSetDone={onSetDone}
       onDelete={onDelete}
@@ -45,8 +47,8 @@ export function IncomeRow({ item, tags, onSetDone, onUpdate, onDelete }: IncomeR
           tags={tags}
           submitLabel="Save changes"
           onCancel={close}
-          onSubmit={(draft) => {
-            onUpdate(draft);
+          onSubmit={({ name, amount, tagId }) => {
+            onUpdate({ name, amount, tagId });
             close();
           }}
         />

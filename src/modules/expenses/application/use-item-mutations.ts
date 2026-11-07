@@ -5,7 +5,7 @@ import { monthItemsKey, monthItemsListKey } from "./use-expense-list";
 import { describeExpenseFailure } from "../domain/failures";
 import type { ItemCreate, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
-import { OVERDUE_ITEMS_KEY } from "@/shared/api/query-keys";
+import { OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { pendingRowId, withoutRow, withReplacedRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
@@ -31,7 +31,8 @@ export function useItemMutations({
     queryKey: monthItemsListKey(period, tagId),
     syncKey: monthItemsKey(period),
     // Toggling, editing or deleting an item of a closed month changes the overdue list of the month that owes it.
-    refreshes: [monthItemsKey(period), OVERDUE_ITEMS_KEY],
+    // Adding an item that repeats, or deleting one to stop it, changes the templates.
+    refreshes: [monthItemsKey(period), OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY],
   };
   const onStart = () => setFailure(null);
   const onFailure = (error: unknown) => {
@@ -91,10 +92,10 @@ export function useItemMutations({
     onFailure,
   });
 
-  const remove = useOptimisticMutation<PeriodItemList, string, void>({
+  const remove = useOptimisticMutation<PeriodItemList, { id: string; stopRepeating: boolean }, void>({
     ...keys,
-    mutationFn: (id) => repository.remove(id),
-    change: (list, id) => {
+    mutationFn: ({ id, stopRepeating }) => repository.remove(id, stopRepeating),
+    change: (list, { id }) => {
       const index = list.items.findIndex((item) => item.id === id);
       const previous = list.items[index];
       if (!previous) {
@@ -139,7 +140,7 @@ export function useItemMutations({
     isCreating: create.isPending,
     createItem: create.mutate,
     updateItem: (id: string, changes: PeriodItemUpdate) => update.mutate({ id, changes }),
-    deleteItem: (id: string) => remove.mutate(id),
+    deleteItem: (id: string, stopRepeating = false) => remove.mutate({ id, stopRepeating }),
     setDone: (id: string, done: boolean) => toggleDone.mutate({ id, done }),
   };
 }

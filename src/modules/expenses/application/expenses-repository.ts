@@ -5,7 +5,8 @@ export interface ExpensesRepository {
   list(period: string, tagId: string | null): Promise<PeriodItemList>;
   create(period: string, item: ItemCreate): Promise<PeriodItem>;
   update(id: string, changes: PeriodItemUpdate): Promise<PeriodItem>;
-  remove(id: string): Promise<void>;
+  // stopRepeating also stops the item's template, in the same write.
+  remove(id: string, stopRepeating: boolean): Promise<void>;
   markDone(id: string): Promise<PeriodItem>;
   unmarkDone(id: string): Promise<PeriodItem>;
 }

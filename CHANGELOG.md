@@ -12,6 +12,12 @@
   screens) under the backend's Total actual; the Savings section, the Savings KPI tile and the Savings bar are gone, the add
   form asks only for name and balance, and rows no longer show a kind. Sections after Accounts renumber (Overdue is 07).
   `account-groups.ts` removed; `offline.js` lists every account and drops Savings. Contract and types refreshed.
+- Fixed, Occasional and Income sections: the add form for a fixed expense has "Repeat every month" ticked, Income offers it
+  unticked, and an occasional expense's due date defaults to the month's last day. A row whose template still repeats gets a
+  three-way confirmation (Only this month, Stop repeating too, Keep it), with focus on Keep it; other deletes note an overdue
+  item's owing month and a paid mark that goes with the row. `ConfirmPanel` takes an optional second action, new
+  `CheckboxField` and `useActiveTemplateIds` (shares the templates query), and item writes refresh the templates list.
+  Contract and types refreshed.
 
 ## 0.16.0 — 2026-11-07 — Production-like local stack
 

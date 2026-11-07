@@ -6,14 +6,20 @@ import { INCOME_COPY } from "../../domain/income-copy";
 import { IncomeRow } from "../components/income-row";
 import { httpExpensesRepository } from "@/modules/expenses/infrastructure/http-expenses-repository";
 import { ItemSection } from "@/modules/expenses/ui/components/item-section";
+import { useActiveTemplateIds } from "@/modules/periods/application/use-active-template-ids";
 import { useSelectedPeriod } from "@/modules/periods/application/use-selected-period";
-import { httpPeriodsRepository } from "@/modules/periods/infrastructure/http-periods-repository";
+import {
+  httpPeriodsRepository,
+  httpTemplatesRepository,
+} from "@/modules/periods/infrastructure/http-periods-repository";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
 
 const IncomeForm = dynamic(() => import("../components/income-form").then((module) => module.IncomeForm));
 
-const NEW_INCOME = { name: "", amount: "", tagId: "" };
+const NEW_INCOME = { name: "", amount: "", tagId: "", repeatsMonthly: false };
+
+const REPEAT_HINT = "Every month you open from now on gets it too, like a salary. Leave it unticked for this month only.";
 
 interface IncomeSectionContainerProps {
   period: string;
@@ -25,6 +31,7 @@ export function IncomeSectionContainer({ period, tagId, onSessionEnded }: Income
   const selected = useSelectedPeriod(httpPeriodsRepository, period);
   const { tags } = useTagList(httpTagsRepository);
   const isClosed = selected?.status === "closed";
+  const activeTemplateIds = useActiveTemplateIds(httpTemplatesRepository);
   const section = useIncomeSection({
     repository: httpExpensesRepository,
     period,
@@ -52,9 +59,10 @@ export function IncomeSectionContainer({ period, tagId, onSessionEnded }: Income
           key={item.id}
           item={item}
           tags={tags}
+          repeats={item.templateId !== null && activeTemplateIds.has(item.templateId)}
           onSetDone={(done) => section.setDone(item.id, done)}
           onUpdate={(changes) => section.updateItem(item.id, changes)}
-          onDelete={() => section.deleteItem(item.id)}
+          onDelete={(stopRepeating) => section.deleteItem(item.id, stopRepeating)}
         />
       )}
       renderAddForm={(close) => (
@@ -63,6 +71,7 @@ export function IncomeSectionContainer({ period, tagId, onSessionEnded }: Income
           tags={tags}
           submitLabel="Save"
           pending={section.isCreating}
+          repeatHint={REPEAT_HINT}
           onCancel={close}
           onSubmit={(draft) => section.createIncome(draft, { onSuccess: close })}
         />

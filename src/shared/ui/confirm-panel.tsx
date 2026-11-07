@@ -11,6 +11,8 @@ interface ConfirmPanelProps {
   confirmDisabled?: boolean;
   className?: string;
   actionsClassName?: string;
+  // A second way to go ahead, for a choice between two outcomes; the three buttons then stack.
+  alternative?: { label: string; ariaLabel?: string; onSelect: () => void };
   onConfirm: () => void;
   onKeep: () => void;
 }
@@ -24,6 +26,7 @@ export function ConfirmPanel({
   confirmDisabled = false,
   className,
   actionsClassName,
+  alternative,
   onConfirm,
   onKeep,
 }: ConfirmPanelProps) {
@@ -33,7 +36,7 @@ export function ConfirmPanel({
       <p id={messageId} className="text-sm">
         {children}
       </p>
-      <div className={cn("flex gap-2", actionsClassName)}>
+      <div className={cn("flex gap-2", alternative && "flex-col", actionsClassName)}>
         <Button
           variant="destructive"
           className="flex-1"
@@ -43,6 +46,17 @@ export function ConfirmPanel({
         >
           {confirmLabel}
         </Button>
+        {alternative ? (
+          <Button
+            variant="destructive"
+            className="flex-1"
+            disabled={confirmDisabled}
+            aria-label={alternative.ariaLabel}
+            onClick={alternative.onSelect}
+          >
+            {alternative.label}
+          </Button>
+        ) : null}
         <Button autoFocus variant="outline" className="flex-1" onClick={onKeep}>
           {keepLabel}
         </Button>

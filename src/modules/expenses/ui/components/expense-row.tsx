@@ -13,15 +13,17 @@ interface ExpenseRowProps {
   item: PeriodItem;
   tags: Tag[];
   onSetDone: (done: boolean) => void;
+  repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
-  onDelete: () => void;
+  onDelete: (stopRepeating: boolean) => void;
 }
 
-export function ExpenseRow({ item, tags, onSetDone, onUpdate, onDelete }: ExpenseRowProps) {
+export function ExpenseRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }: ExpenseRowProps) {
   return (
     <ItemRow
       item={item}
       tags={tags}
+      repeats={repeats}
       doneWord="paid"
       onSetDone={onSetDone}
       onDelete={onDelete}
@@ -51,8 +53,8 @@ export function ExpenseRow({ item, tags, onSetDone, onUpdate, onDelete }: Expens
           tags={tags}
           submitLabel="Save changes"
           onCancel={close}
-          onSubmit={(draft) => {
-            onUpdate(draft);
+          onSubmit={({ name, amount, dueDate, tagId }) => {
+            onUpdate({ name, amount, dueDate, tagId });
             close();
           }}
         />

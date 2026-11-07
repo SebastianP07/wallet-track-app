@@ -11,6 +11,7 @@ import {
 } from "../../domain/income-forms";
 import type { Tag } from "@/modules/tags/domain/types";
 import { Button } from "@/shared/ui/button";
+import { CheckboxField } from "@/shared/ui/checkbox-field";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
 
@@ -19,6 +20,8 @@ interface IncomeFormProps {
   tags: Tag[];
   submitLabel: string;
   pending?: boolean;
+  // Only a form that adds an item offers this, with what repeating means there.
+  repeatHint?: string;
   onSubmit: (draft: IncomeDraft) => void;
   onCancel: () => void;
 }
@@ -28,6 +31,7 @@ export function IncomeForm({
   tags,
   submitLabel,
   pending = false,
+  repeatHint,
   onSubmit,
   onCancel,
 }: IncomeFormProps) {
@@ -64,6 +68,9 @@ export function IncomeForm({
         ]}
         {...register("tagId")}
       />
+      {repeatHint ? (
+        <CheckboxField label="Repeat every month" hint={repeatHint} {...register("repeatsMonthly")} />
+      ) : null}
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
           {pending ? "Saving…" : submitLabel}

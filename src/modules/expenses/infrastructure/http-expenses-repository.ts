@@ -15,8 +15,8 @@ export const httpExpensesRepository: ExpensesRepository = {
   update(id, changes) {
     return apiPatch<PeriodItem>(itemPath(id), changes);
   },
-  remove(id) {
-    return apiDelete(itemPath(id));
+  remove(id, stopRepeating) {
+    return apiDelete(`${itemPath(id)}${stopRepeating ? "?stopRepeating=true" : ""}`);
   },
   markDone(id) {
     return apiPut<PeriodItem>(`${itemPath(id)}/done`);

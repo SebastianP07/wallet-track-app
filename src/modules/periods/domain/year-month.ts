@@ -47,6 +47,13 @@ export function monthName(yearMonth: string): string {
   );
 }
 
+// The month's last calendar day, as YYYY-MM-DD.
+export function lastDayOf(yearMonth: string): string {
+  const [year, month] = parts(yearMonth);
+  const day = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return `${format(year, month)}-${String(day).padStart(2, "0")}`;
+}
+
 export function yearOf(yearMonth: string): string {
   return yearMonth.slice(0, 4);
 }
