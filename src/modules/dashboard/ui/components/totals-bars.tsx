@@ -24,7 +24,6 @@ function rowsOf(kpis: DashboardKpis) {
     { name: "To pay", value: kpis.toPay, fill: NEUTRAL },
     // The one bar the chart is about, and red when it is under water, its sign printed beside it too.
     { name: "Left over", value: kpis.surplus, fill: kpis.surplus < 0 ? "var(--destructive)" : "var(--signal)" },
-    { name: "Savings", value: kpis.savings, fill: NEUTRAL },
   ];
 }
 

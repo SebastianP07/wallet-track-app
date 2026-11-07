@@ -7,10 +7,9 @@ export interface DashboardSection {
 // T4: everything the single Dashboard shows, in reading order: the numbers, the money behind them, what
 // the month owes and is owed, then the setup that rarely changes.
 export const DASHBOARD_SECTIONS: DashboardSection[] = [
-  { id: "kpis", title: "Overview", description: "Total actual, to pay, to arrive, left over, savings and the month's balance. Card charges count toward none of them; overdue expenses this month owes count in to pay and going out." },
+  { id: "kpis", title: "Overview", description: "Total actual, to pay, to arrive, left over and the month's balance. Card charges count toward none of them; overdue expenses this month owes count in to pay and going out." },
   { id: "charts", title: "Charts", description: "To pay by kind, how the totals compare, and what is due next." },
-  { id: "accounts", title: "Accounts", description: "Where the money sits right now." },
-  { id: "savings", title: "Savings", description: "Savings accounts, kept apart from spendable money." },
+  { id: "accounts", title: "Accounts", description: "Where the money sits right now. Every account counts toward Total actual." },
   { id: "fixed-expenses", title: "Fixed expenses", description: "Recurring bills with a due date." },
   { id: "occasional-expenses", title: "Occasional expenses", description: "One-off payments this month." },
   { id: "income", title: "Income", description: "What should arrive this month." },

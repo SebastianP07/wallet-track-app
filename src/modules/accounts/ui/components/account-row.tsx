@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
-import { KIND_LABELS } from "../../domain/account-groups";
 import { formatCOP } from "../../domain/money";
 import { isPendingAccount } from "../../domain/optimistic-list";
 import type { Account } from "../../domain/types";
@@ -33,10 +32,7 @@ export function AccountRow({ account, onRename, onSetBalance, onDelete }: Accoun
   return (
     <li className="flex flex-col gap-1 border-t border-rule py-2">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
-          <span className="font-medium wrap-anywhere">{account.name}</span>
-          <span className="text-xs text-muted-foreground">{KIND_LABELS[account.kind]}</span>
-        </div>
+        <span className="min-w-0 font-medium wrap-anywhere">{account.name}</span>
         <span
           className={cn(
             "shrink-0 text-right font-mono text-sm leading-6 whitespace-nowrap",

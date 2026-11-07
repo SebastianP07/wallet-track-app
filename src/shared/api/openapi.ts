@@ -900,7 +900,7 @@ export interface paths {
         /**
          * Download a month as CSV
          * @description Columns: `kind,name,amount,due_date,status,tag`. One row per item of the month, of every kind, then one row per account
-         *     with `kind` `account_<kind>` and an empty due date, status and tag. Account balances are today's in any month (D6, D9),
+         *     with `kind` `account` and an empty due date, status and tag. Account balances are today's in any month (D6),
          *     so they are never to be summed with the items. No totals (D1). UTF-8 with a BOM, CRLF line ends, whole pesos as plain
          *     integers. Text cells are always quoted, and one that starts with a control character (tab, CR, LF), or with `=`, `+`, `-`
          *     or `@` or their full-width forms after any leading blanks, gets a leading `'` so that a spreadsheet reads it as text. So
@@ -1142,35 +1142,25 @@ export interface components {
         SessionList: {
             items: components["schemas"]["Session"][];
         };
-        /**
-         * @description `savings` accounts count toward Savings instead of Current total (D9).
-         * @enum {string}
-         */
-        AccountKind: "bank" | "wallet" | "cash" | "food_card" | "savings";
         Account: {
             id: components["schemas"]["Id"];
             name: components["schemas"]["Name"];
-            kind: components["schemas"]["AccountKind"];
             balance: components["schemas"]["Money"];
             createdAt: components["schemas"]["Timestamp"];
             updatedAt: components["schemas"]["Timestamp"];
         };
         AccountCreate: {
             name: components["schemas"]["Name"];
-            kind: components["schemas"]["AccountKind"];
             balance?: components["schemas"]["Money"];
         };
         AccountUpdate: {
             name?: components["schemas"]["Name"];
-            kind?: components["schemas"]["AccountKind"];
             balance?: components["schemas"]["Money"];
         };
         AccountList: {
             items: components["schemas"]["Account"][];
-            /** @description Total actual: sum of non-savings balances (D6, D9). */
+            /** @description Total actual: sum of every account's balance (D6, D9). */
             currentTotal: components["schemas"]["Money"];
-            /** @description Ahorro: sum of savings balances (D9). */
-            savingsTotal: components["schemas"]["Money"];
         };
         /** @enum {string} */
         PeriodStatus: "open" | "closed";
@@ -1488,7 +1478,7 @@ export interface components {
             items: components["schemas"]["Platform"][];
         };
         DashboardKpis: {
-            /** @description Total actual: sum of non-savings balances now (D6, D9). */
+            /** @description Total actual: sum of every account's balance now (D6, D9). */
             currentTotal: components["schemas"]["Money"];
             /** @description Por pagar: pending fixed + occasional items of the month plus the unpaid overdue expenses it owes (D1, D7). Excludes card charges (D3) and the month's own items once closing made them overdue, which a later month owes. */
             toPay: components["schemas"]["NonNegativeMoney"];
@@ -1496,8 +1486,6 @@ export interface components {
             toReceive: components["schemas"]["NonNegativeMoney"];
             /** @description Sobrante: currentTotal - toPay + toReceive, stopping at the money bound in either direction. Writes bound balances and items apart, not this sum. */
             surplus: components["schemas"]["Money"];
-            /** @description Ahorro: sum of savings balances now (D9). */
-            savings: components["schemas"]["Money"];
             /** @description Llega: all income items of the month, whatever their status (D2). */
             incoming: components["schemas"]["NonNegativeMoney"];
             /** @description Se va: all fixed + occasional items of the month plus every overdue expense it owes, whatever their status (D2, D3, D7). */

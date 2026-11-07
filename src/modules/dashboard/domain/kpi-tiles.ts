@@ -12,7 +12,7 @@ export interface KpiGroup {
   tiles: KpiTile[];
 }
 
-// What a month with no period can still say: balances are current values (D6, D9).
+// What a month with no period can still say: balances are current values (D6).
 export type KnownKpis = Partial<DashboardKpis>;
 
 const TODAY = "Today's balances, in any month";
@@ -32,7 +32,6 @@ export function kpiGroups(kpis: KnownKpis): [standing: KpiGroup, month: KpiGroup
         tile("To pay", "Pending fixed and occasional, plus overdue", kpis.toPay),
         tile("To arrive", "Pending income", kpis.toReceive),
         tile("Left over", "Total actual − to pay + to arrive", kpis.surplus),
-        tile("Savings", TODAY, kpis.savings),
       ],
     },
     {

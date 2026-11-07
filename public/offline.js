@@ -99,10 +99,8 @@
       .map((item) => ({ name: item.name, pesos: item.amount, detail: itemDetail(item) }));
   }
 
-  function accountEntries(accounts, savings) {
-    return accounts
-      .filter((account) => (account.kind === "savings") === savings)
-      .map((account) => ({ name: account.name, pesos: account.balance }));
+  function accountEntries(accounts) {
+    return accounts.map((account) => ({ name: account.name, pesos: account.balance }));
   }
 
   function render({ savedAt, dashboard }) {
@@ -124,7 +122,6 @@
         ["To pay", k.toPay],
         ["To arrive", k.toReceive],
         ["Left over", k.surplus],
-        ["Savings", k.savings],
         ["Coming in", k.incoming],
         ["Going out", k.outgoing],
         ["Balance", k.balance],
@@ -132,8 +129,7 @@
       el(
         "div",
         { className: "grid" },
-        section("Accounts", accountEntries(accounts.items, false), "No accounts."),
-        section("Savings", accountEntries(accounts.items, true), "No savings accounts."),
+        section("Accounts", accountEntries(accounts.items), "No accounts."),
         section("Fixed expenses", itemEntries(items.items, "fixed"), "No fixed expenses."),
         section("Occasional expenses", itemEntries(items.items, "occasional"), "No occasional expenses."),
         section("Income", itemEntries(items.items, "income"), "No income."),

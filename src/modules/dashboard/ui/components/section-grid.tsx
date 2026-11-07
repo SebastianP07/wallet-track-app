@@ -10,8 +10,7 @@ import { SectionFrame } from "./section-frame";
 const SPANS: Record<string, string> = {
   kpis: "md:col-span-6 lg:col-span-12",
   charts: "md:col-span-6 lg:col-span-12",
-  accounts: "md:col-span-3 lg:col-span-7",
-  savings: "md:col-span-3 lg:col-span-5",
+  accounts: "md:col-span-6 lg:col-span-12",
   "fixed-expenses": "md:col-span-3 lg:col-span-7",
   "occasional-expenses": "md:col-span-3 lg:col-span-5",
   income: "md:col-span-3 lg:col-span-7",

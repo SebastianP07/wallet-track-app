@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { cn } from "cn";
 
-import type { AccountGroup } from "../../domain/account-groups";
 import { formatCOP } from "../../domain/money";
 import type { Account, AccountCreate } from "../../domain/types";
 import { AccountRow } from "./account-row";
@@ -13,21 +12,7 @@ import { FormAlert } from "@/shared/ui/form-alert";
 
 const AccountAddForm = dynamic(() => import("./account-add-form").then((module) => module.AccountAddForm));
 
-const COPY: Record<AccountGroup, { total: string; add: string; empty: string }> = {
-  spendable: {
-    total: "Total actual",
-    add: "Add account",
-    empty: "No accounts yet. Add the first one to see your total.",
-  },
-  savings: {
-    total: "Total savings",
-    add: "Add savings account",
-    empty: "No savings accounts yet.",
-  },
-};
-
 interface AccountSectionProps {
-  group: AccountGroup;
   accounts: Account[];
   total: number | null;
   isLoading: boolean;
@@ -44,7 +29,6 @@ interface AccountSectionProps {
 }
 
 export function AccountSection({
-  group,
   accounts,
   total,
   isLoading,
@@ -60,7 +44,6 @@ export function AccountSection({
   deleteAccount,
 }: AccountSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const copy = COPY[group];
 
   if (isLoading) {
     return (
@@ -84,7 +67,7 @@ export function AccountSection({
   return (
     <div className="flex flex-1 flex-col gap-3">
       <div className="flex flex-col gap-1" aria-busy={totalIsSettling}>
-        <p className="text-sm text-muted-foreground">{copy.total}</p>
+        <p className="text-sm text-muted-foreground">Total actual</p>
         <p
           className={cn(
             "font-mono text-[clamp(1.25rem,6vw,1.75rem)] leading-tight font-medium wrap-anywhere text-signal transition-opacity",
@@ -104,9 +87,12 @@ export function AccountSection({
       ) : null}
 
       {accounts.length === 0 ? (
-        <p className="border-t border-rule py-3 text-sm text-muted-foreground">{copy.empty}</p>
+        <p className="border-t border-rule py-3 text-sm text-muted-foreground">
+          No accounts yet. Add the first one to see your total.
+        </p>
       ) : (
-        <ul className="flex flex-col">
+        // Two or three columns on wider screens, so a name and its balance never sit a page apart.
+        <ul className="flex flex-col md:grid md:grid-cols-2 md:gap-x-6 lg:grid-cols-3">
           {accounts.map((account) => (
             <AccountRow
               key={account.id}
@@ -121,14 +107,13 @@ export function AccountSection({
 
       {isAdding ? (
         <AccountAddForm
-          group={group}
           pending={isCreating}
           onCancel={() => setIsAdding(false)}
           onSubmit={(account) => createAccount(account, { onSuccess: () => setIsAdding(false) })}
         />
       ) : (
-        <Button variant="outline" className="mt-auto" onClick={() => setIsAdding(true)}>
-          {copy.add}
+        <Button variant="outline" className="mt-auto md:self-start" onClick={() => setIsAdding(true)}>
+          Add account
         </Button>
       )}
     </div>

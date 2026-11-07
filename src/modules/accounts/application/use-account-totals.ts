@@ -12,7 +12,5 @@ export function useAccountTotals(repository: AccountsRepository, enabled: boolea
     retry: (count, error) => statusOf(error) !== 401 && count < 2,
     enabled,
   });
-  return query.data
-    ? { currentTotal: query.data.currentTotal, savings: query.data.savingsTotal }
-    : null;
+  return query.data ? { currentTotal: query.data.currentTotal } : null;
 }

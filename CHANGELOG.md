@@ -8,6 +8,10 @@
 - To pay donut gains an Overdue slice; KPI, section and close-month copy explain that overdue expenses count in To pay and
   Going out of the month that owes them, and an overdue row in 05/06 says which month owes it. Contract and types
   refreshed. No new dependencies, no new automated tests (T7).
+- Savings merged into Accounts for now (D9): one Accounts section lists every account (in two or three columns on wider
+  screens) under the backend's Total actual; the Savings section, the Savings KPI tile and the Savings bar are gone, the add
+  form asks only for name and balance, and rows no longer show a kind. Sections after Accounts renumber (Overdue is 07).
+  `account-groups.ts` removed; `offline.js` lists every account and drops Savings. Contract and types refreshed.
 
 ## 0.16.0 — 2026-11-07 — Production-like local stack
 

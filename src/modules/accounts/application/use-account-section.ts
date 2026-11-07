@@ -3,7 +3,6 @@ import { useIsMutating, useQuery } from "@tanstack/react-query";
 
 import type { AccountsRepository } from "./accounts-repository";
 import { describeAccountFailure } from "../domain/account-failure";
-import { accountsOf, totalOf, type AccountGroup } from "../domain/account-groups";
 import {
   pendingAccountId,
   withAccount,
@@ -15,12 +14,9 @@ import { statusOf } from "@/shared/api/http-client";
 import { ACCOUNTS_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
-// Both sections read the one accounts query. Balances are current values, so the month is not part of it.
-export function useAccountSection(
-  repository: AccountsRepository,
-  group: AccountGroup,
-  onSessionEnded: () => void,
-) {
+// Balances are current values, so the month is not part of the query. Every account counts toward Total
+// actual (D9), and the total is the backend's (D1).
+export function useAccountSection(repository: AccountsRepository, onSessionEnded: () => void) {
   const [failure, setFailure] = useState<string | null>(null);
 
   const query = useQuery({
@@ -106,8 +102,8 @@ export function useAccountSection(
 
   const list = query.data;
   return {
-    accounts: list ? accountsOf(list, group) : [],
-    total: list ? totalOf(list, group) : null,
+    accounts: list?.items ?? [],
+    total: list?.currentTotal ?? null,
     isLoading: query.isPending,
     loadFailed: query.isError && !list,
     refreshFailed: query.isError && Boolean(list),

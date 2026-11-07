@@ -5,23 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { newAccountSchema } from "../../domain/account-forms";
-import { KIND_LABELS, kindsOf, type AccountGroup } from "../../domain/account-groups";
 import { flipCopInputSign } from "../../domain/money";
 import type { AccountCreate } from "../../domain/types";
 import { MoneyField } from "./money-field";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
-import { SelectField } from "@/shared/ui/select-field";
 
 interface AccountAddFormProps {
-  group: AccountGroup;
   pending: boolean;
   onSubmit: (account: AccountCreate) => void;
   onCancel: () => void;
 }
 
-export function AccountAddForm({ group, pending, onSubmit, onCancel }: AccountAddFormProps) {
-  const kinds = kindsOf(group);
+export function AccountAddForm({ pending, onSubmit, onCancel }: AccountAddFormProps) {
   const {
     register,
     handleSubmit,
@@ -31,7 +27,7 @@ export function AccountAddForm({ group, pending, onSubmit, onCancel }: AccountAd
     formState: { errors },
   } = useForm({
     resolver: zodResolver(newAccountSchema),
-    defaultValues: { name: "", kind: kinds[0], balance: "" },
+    defaultValues: { name: "", balance: "" },
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
@@ -40,16 +36,9 @@ export function AccountAddForm({ group, pending, onSubmit, onCancel }: AccountAd
     <form
       noValidate
       onSubmit={handleSubmit(onSubmit)}
-      className="mt-auto flex flex-col gap-3 border-t border-rule pt-3"
+      className="mt-auto flex flex-col gap-3 border-t border-rule pt-3 md:max-w-md"
     >
       <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
-      {kinds.length > 1 ? (
-        <SelectField
-          label="Kind"
-          options={kinds.map((kind) => ({ value: kind, label: KIND_LABELS[kind] }))}
-          {...register("kind")}
-        />
-      ) : null}
       <MoneyField
         label="Balance in pesos"
         placeholder="0"

@@ -31,6 +31,5 @@ export const accountBalanceSchema = z.object({ balance: pesos(false) });
 
 export const newAccountSchema = z.object({
   name: nameField,
-  kind: z.enum(["bank", "wallet", "cash", "food_card", "savings"]),
   balance: pesos(true),
 });
