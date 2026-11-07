@@ -1,0 +1,19 @@
+# Build contexts get only what the build needs. Secrets and local state never leave the machine.
+.env
+.env.*
+**/.env
+**/.env.*
+.git
+.github
+.codegraph
+.idea
+.vscode
+node_modules
+**/node_modules
+.next
+out
+coverage
+next-env.d.ts
+*.tsbuildinfo
+Dockerfile
+.dockerignore

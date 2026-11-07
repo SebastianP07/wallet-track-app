@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.0 — 2026-11-07 — Production-like local stack
+
+- `Dockerfile`: the web image for the production-like stack and Railway, on `node:26.13.0-trixie-slim` pinned by digest. pnpm
+  12.16.1 comes from npm in the build stages, since Node 25 and later ship without Corepack. The runtime stage holds the
+  normal `.next` output, production `node_modules`, `public/`, `server.mjs` and `next.config.ts` with the offline CSP it
+  imports, and runs `node server.mjs` as `node`. Never `next start` or `standalone`, which would break the BFF.
+- First real run on Node 26: the build, the BFF, the CSP nonces, the service worker and the offline page all work on it.
+- `.dockerignore` keeps `.env*`, `.next`, `node_modules` and VCS data out of the build context. README: the image and where
+  the stack that runs it lives. No code changes, no new dependencies, no new automated tests (T7).
+
 ## 0.15.0 — 2026-11-05 — PWA, export and accessibility
 
 - PWA: a manifest through Next's metadata with real and maskable icons, and a hand-written `public/sw.js`. It stores only the

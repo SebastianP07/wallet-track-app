@@ -105,6 +105,24 @@ renames and removes passkeys, and lists and ends sessions. Adding or removing a 
 JSON by hand, so there is no WebAuthn dependency, and the CSP needs no change. A rejected code and an ended session both answer
 401, so the section asks the API again before sending anyone to `/login`.
 
+## Production-like local stack
+
+The `Dockerfile` here builds the web image Railway will use in Phase 13. The stack that runs it, behind Caddy on HTTPS
+with the API and Postgres, lives in `wallet-track-core-app`: follow its README's "Production-like local stack" section,
+which also covers trusting Caddy's local CA and reaching it from a phone. Compose builds this image from this checkout,
+so the two repositories must sit side by side.
+
+| Topic | Behavior |
+|---|---|
+| Entry point | `node server.mjs`, never `next start`, so the BFF keeps working (see "Why a custom server"). For the same reason the image carries the normal `.next` output with production `node_modules`, not `standalone` |
+| Runtime | Node 26.13.0 from `.nvmrc`, pinned by digest. pnpm 12.16.1 is installed with npm in the build stages only, because Node 25 and later ship without Corepack |
+| Files at runtime | `server.mjs` loads `next.config.ts` when it starts, which hashes `public/` and the offline page's CSP into the service worker's version, so both ship in the image |
+| User | `node` (uid 1000). Everything is owned by root; Next.js may write only to `.next/cache`, which the stack mounts as a tmpfs on a read-only root |
+| Behind Caddy | `TRUSTED_PROXY_HOPS=1`. Caddy replaces any client `X-Forwarded-For` with the peer's address, so the last entry is the client, and `APP_ORIGIN` is the `https://` origin, which adds `upgrade-insecure-requests` to the CSP |
+
+Build it alone with `podman build -t wallet-track-web .`. `.dockerignore` keeps `.env*`, `.next`, `node_modules` and VCS data
+out of the build context.
+
 ## Commands
 
 | Command | What it does |
@@ -146,6 +164,7 @@ Read when the server starts, from the environment or `.env.local`. `.env.example
 | Path | Contents |
 |---|---|
 | `server.mjs` | Custom server: establishes the client address, then hands over to Next.js |
+| `Dockerfile` | The production image: builds with pnpm, runs `server.mjs` on Node 26 as `node` |
 | `src/proxy.ts` | CSP nonce and the redirect of requests with no session cookie |
 | `src/app` | Next routes only: thin pages, the `/api` BFF route, `/healthz`, global theme |
 | `src/modules/<module>` | `domain`, `application`, `infrastructure`, `ui/containers`, `ui/components`. Today: `accounts`, `auth`, `cards`, `dashboard`, `expenses`, `income`, `overdue`, `periods`, `platforms`, `tags` |
