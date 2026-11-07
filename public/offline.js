@@ -139,7 +139,7 @@
         section("Income", itemEntries(items.items, "income"), "No income."),
         section(
           "Overdue",
-          overdue.items.map((item) => ({ name: item.name, pesos: item.amount, detail: `${item.period} · ${itemDetail(item)}` })),
+          overdue.items.map((item) => ({ name: item.name, pesos: item.amount, detail: `From ${item.period} · ${itemDetail(item)}` })),
           "Nothing overdue.",
         ),
         section("Card charges", itemEntries(items.items, "card_charge"), "No card charges."),

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.17.0 — 2026-11-07 — Owner feedback
+
+- Section 08 is per month now: it reads `GET /periods/{period}/overdue-items`, shows the expenses the selected month owes
+  with "From <month>" for their month of origin, keeps the paid action and the focus return when a paid row leaves, and
+  says so when the month is not opened. Overdue income is still listed in every month.
+- To pay donut gains an Overdue slice; KPI, section and close-month copy explain that overdue expenses count in To pay and
+  Going out of the month that owes them, and an overdue row in 05/06 says which month owes it. Contract and types
+  refreshed. No new dependencies, no new automated tests (T7).
+
 ## 0.16.0 — 2026-11-07 — Production-like local stack
 
 - `Dockerfile`: the web image for the production-like stack and Railway, on `node:26.13.0-trixie-slim` pinned by digest. pnpm

@@ -29,7 +29,7 @@ export function kpiGroups(kpis: KnownKpis): [standing: KpiGroup, month: KpiGroup
       title: "Where you stand",
       tiles: [
         tile("Total actual", TODAY, kpis.currentTotal),
-        tile("To pay", "Pending fixed and occasional", kpis.toPay),
+        tile("To pay", "Pending fixed and occasional, plus overdue", kpis.toPay),
         tile("To arrive", "Pending income", kpis.toReceive),
         tile("Left over", "Total actual − to pay + to arrive", kpis.surplus),
         tile("Savings", TODAY, kpis.savings),
@@ -39,7 +39,7 @@ export function kpiGroups(kpis: KnownKpis): [standing: KpiGroup, month: KpiGroup
       title: "The month's balance",
       tiles: [
         tile("Coming in", "All income, paid or not", kpis.incoming),
-        tile("Going out", "All fixed and occasional, paid or not", kpis.outgoing),
+        tile("Going out", "All fixed, occasional and overdue, paid or not", kpis.outgoing),
         tile("Balance", "Coming in − going out", kpis.balance),
       ],
     },

@@ -4,8 +4,8 @@ import { httpExpensesRepository } from "@/modules/expenses/infrastructure/http-e
 import { apiGet } from "@/shared/api/http-client";
 
 export const httpOverdueRepository: OverdueRepository = {
-  list() {
-    return apiGet<OverdueItemList>("/overdue-items");
+  list(period) {
+    return apiGet<OverdueItemList>(`/periods/${period}/overdue-items`);
   },
   markDone: httpExpensesRepository.markDone,
 };

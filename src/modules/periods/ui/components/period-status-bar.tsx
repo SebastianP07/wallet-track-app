@@ -92,7 +92,8 @@ export function PeriodStatusBar({
         <div className="flex flex-col gap-2">
           <StatusLabel>Closed</StatusLabel>
           <p className="text-sm text-muted-foreground">
-            {month} is closed. What was still pending when it closed is overdue.
+            {month} is closed. Its unpaid expenses moved to the Overdue section of the next month that is
+            not closed; income still to receive stays here as overdue.
           </p>
         </div>
       ) : null}
@@ -127,9 +128,10 @@ export function PeriodStatusBar({
             }}
             onKeep={() => setIsConfirmingClose(false)}
           >
-            Close {month}? Every pending fixed, occasional and income item becomes overdue and stays
-            in {monthName(period)}. Card charges stay as they are. A closed month can&apos;t be
-            reopened.
+            Close {month}? Every unpaid fixed and occasional item, and everything still in its Overdue
+            section, moves to the Overdue section of the next month that is not closed, where it counts
+            toward to pay. Pending income becomes overdue and stays in {monthName(period)}. Card charges
+            stay as they are. A closed month can&apos;t be reopened.
           </ConfirmPanel>
         </div>
       ) : null}

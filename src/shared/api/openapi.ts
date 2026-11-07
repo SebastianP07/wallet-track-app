@@ -478,7 +478,7 @@ export interface paths {
         put?: never;
         /**
          * Close a month
-         * @description Every pending expense and income item becomes `overdue` (D7). Card charges are informational (D3) and stay as they are. Idempotent.
+         * @description Every pending fixed and occasional item becomes `overdue` and is owed in the first later month that is not closed, opened or not, together with every overdue expense this month owed (D7); each keeps its own `period` as its month of origin and appears once, in the Overdue section of the month in its `owedIn`. Pending income becomes `overdue` and stays in this month. Card charges are informational (D3) and stay as they are. Idempotent.
          */
         post: operations["closePeriod"];
         delete?: never;
@@ -499,6 +499,26 @@ export interface paths {
          * @description Informational; never part of To pay, Outgoing or Balance (D3). Counts every card charge of the month, whatever its status. Every card has a row, with total 0 if it has no charges. Charges whose card was deleted are gathered in one last row with `cardId` and `cardName` null, which exists only when there are such charges, and they count toward `total`.
          */
         get: operations["getCardChargeTotals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{period}/overdue-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a month's overdue items
+         * @description The month's Overdue section (D7): the fixed and occasional items earlier months left unpaid that this month owes (`owedIn` is this month), oldest month of origin first, then the income every closed month left unreceived. Those expenses count toward this month's `toPay` and `outgoing`; overdue income counts toward no month's totals. A paid expense leaves the list but stays in this month's `outgoing`.
+         */
+        get: operations["listOverdueItems"];
         put?: never;
         post?: never;
         delete?: never;
@@ -566,7 +586,7 @@ export interface paths {
         get?: never;
         /**
          * Mark an item paid or received
-         * @description Idempotent. Never changes an account balance (D6). An overdue item stays in its original month (D7). On a person-linked income item this records that person's payment in the same transaction (D4, D8), dated within the item's month and covering their `billingMonths`.
+         * @description Idempotent. Never changes an account balance (D6). An overdue item keeps its `period` and its `owedIn`, so a paid overdue expense leaves `toPay` but stays in `outgoing` of the month that owes it (D2, D7). On a person-linked income item this records that person's payment in the same transaction (D4, D8), dated within the item's month and covering their `billingMonths`.
          */
         put: operations["markPeriodItemDone"];
         post?: never;
@@ -575,26 +595,6 @@ export interface paths {
          * @description Idempotent. On a person-linked income item this removes the payment linked to it, and no other, in the same transaction (D4, D8).
          */
         delete: operations["unmarkPeriodItemDone"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/overdue-items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List overdue items
-         * @description These never count toward any open month's totals (D7).
-         */
-        get: operations["listOverdueItems"];
-        put?: never;
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1190,7 +1190,7 @@ export interface components {
         /** @enum {string} */
         ItemKind: "fixed" | "occasional" | "income" | "card_charge";
         /**
-         * @description `overdue` means the month closed while an expense or income item was still pending (D7). Card charges never become overdue (D3).
+         * @description `overdue` means the month closed while an expense or income item was still pending (D7). An overdue fixed or occasional item is owed in the month in its `owedIn`. Card charges never become overdue (D3).
          * @enum {string}
          */
         ItemStatus: "pending" | "done" | "overdue";
@@ -1214,6 +1214,8 @@ export interface components {
             tagId: components["schemas"]["Id"] | null;
             status: components["schemas"]["ItemStatus"];
             doneAt: components["schemas"]["Timestamp"] | null;
+            /** @description Set on a fixed or occasional item a closed month left unpaid: the month whose Overdue section lists it and whose `toPay` and `outgoing` count it (D7). `period` stays its month of origin. A paid one keeps the month that owed it when it was paid. Null on every other item. */
+            owedIn: components["schemas"]["YearMonth"] | null;
             urgency: components["schemas"]["Urgency"];
             createdAt: components["schemas"]["Timestamp"];
             updatedAt: components["schemas"]["Timestamp"];
@@ -1266,7 +1268,7 @@ export interface components {
             pending: components["schemas"]["NonNegativeMoney"];
         };
         PeriodItemTotals: {
-            /** @description Por pagar: pending fixed + occasional items of the month (D1). Excludes card charges (D3) and overdue items (D7). */
+            /** @description Por pagar: pending fixed + occasional items of the month plus the unpaid overdue expenses it owes, `overdue.pending` (D1, D7). Excludes card charges (D3) and the month's own items once closing made them overdue, which a later month owes. */
             toPay: components["schemas"]["NonNegativeMoney"];
             /** @description Por llegar: pending income items of the month (D1). Excludes received and overdue items (D7). */
             toReceive: components["schemas"]["NonNegativeMoney"];
@@ -1274,6 +1276,8 @@ export interface components {
             occasional: components["schemas"]["ItemKindTotal"];
             income: components["schemas"]["ItemKindTotal"];
             cardCharge: components["schemas"]["ItemKindTotal"];
+            /** @description Overdue fixed and occasional items earlier months left unpaid that this month owes (D7): `total` is every one owed here, paid since or not, and `pending` the unpaid ones. Not in `items`, which hold the month's own items; the overdue list shows them. Each part stops at the money bound if they add up past it. */
+            overdue: components["schemas"]["ItemKindTotal"];
         };
         PeriodItemList: {
             items: components["schemas"]["PeriodItem"][];
@@ -1281,9 +1285,9 @@ export interface components {
         };
         OverdueItemList: {
             items: components["schemas"]["PeriodItem"][];
-            /** @description Sum of overdue expenses across every closed month, stopping at the money bound if they add up past it. */
+            /** @description Sum of the unpaid overdue expenses this month owes, the same as the month's `overdue.pending`, stopping at the money bound if they add up past it. */
             expenseTotal: components["schemas"]["NonNegativeMoney"];
-            /** @description Sum of overdue income across every closed month, stopping at the money bound if they add up past it. */
+            /** @description Sum of overdue income across every closed month, stopping at the money bound if they add up past it. Counts toward no month's totals. */
             incomeTotal: components["schemas"]["NonNegativeMoney"];
         };
         /** @enum {string} */
@@ -1486,7 +1490,7 @@ export interface components {
         DashboardKpis: {
             /** @description Total actual: sum of non-savings balances now (D6, D9). */
             currentTotal: components["schemas"]["Money"];
-            /** @description Por pagar: pending fixed + occasional items of the month (D1). Excludes card charges (D3) and overdue items (D7). */
+            /** @description Por pagar: pending fixed + occasional items of the month plus the unpaid overdue expenses it owes (D1, D7). Excludes card charges (D3) and the month's own items once closing made them overdue, which a later month owes. */
             toPay: components["schemas"]["NonNegativeMoney"];
             /** @description Por llegar: pending income items of the month (D1). Excludes overdue items (D7). */
             toReceive: components["schemas"]["NonNegativeMoney"];
@@ -1496,7 +1500,7 @@ export interface components {
             savings: components["schemas"]["Money"];
             /** @description Llega: all income items of the month, whatever their status (D2). */
             incoming: components["schemas"]["NonNegativeMoney"];
-            /** @description Se va: all fixed + occasional items of the month, whatever their status (D2, D3). */
+            /** @description Se va: all fixed + occasional items of the month plus every overdue expense it owes, whatever their status (D2, D3, D7). */
             outgoing: components["schemas"]["NonNegativeMoney"];
             /** @description Balance: incoming - outgoing (D2). */
             balance: components["schemas"]["Money"];
@@ -1505,6 +1509,8 @@ export interface components {
         ToPayBreakdown: {
             fixed: components["schemas"]["NonNegativeMoney"];
             occasional: components["schemas"]["NonNegativeMoney"];
+            /** @description Unpaid overdue expenses this month owes (D7). */
+            overdue: components["schemas"]["NonNegativeMoney"];
         };
         /** @description Every number is computed by the backend (D1). */
         Dashboard: {
@@ -2437,6 +2443,31 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    listOverdueItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: components["parameters"]["Period"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The month's overdue items. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverdueItemList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     listPeriodItems: {
         parameters: {
             query?: {
@@ -2628,7 +2659,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Item is pending again, or overdue if it is an expense or income item of a closed month. A card charge is always pending again (D3). */
+            /** @description Item is pending again, or overdue if it is an expense or income item of a closed month. An expense that becomes overdue again is owed in the month that owed it when it was paid, or else the month after its own, moving on to the first later month that is not closed (D7). A card charge is always pending again (D3). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2641,27 +2672,6 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
-        };
-    };
-    listOverdueItems: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Unsettled expense and income items from closed months, oldest first. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OverdueItemList"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
         };
     };
     listRecurringTemplates: {

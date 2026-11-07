@@ -10,13 +10,18 @@ import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
 
 interface OverdueSectionContainerProps {
+  period: string;
   tagId: string | null;
   onSessionEnded: () => void;
 }
 
-export function OverdueSectionContainer({ tagId, onSessionEnded }: OverdueSectionContainerProps) {
+export function OverdueSectionContainer({ period, tagId, onSessionEnded }: OverdueSectionContainerProps) {
   const { tags } = useTagList(httpTagsRepository);
-  const section = useOverdueSection(httpOverdueRepository, tagId, onSessionEnded);
+  const section = useOverdueSection(httpOverdueRepository, period, tagId, onSessionEnded);
+
+  if (section.notOpened && !section.isLoading) {
+    return <p className="border-t border-rule py-3 text-sm text-muted-foreground">{OVERDUE_COPY.notOpened}</p>;
+  }
 
   return (
     <ItemList

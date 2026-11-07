@@ -11,21 +11,28 @@ import { OVERDUE_ITEMS_KEY, PERIOD_ITEMS_KEY } from "@/shared/api/query-keys";
 import { withoutRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
-// Not scoped to a month: the list is the same whichever one is selected. The tag only narrows the rows;
-// the totals cover the whole list, as a month's cover the whole month (D5).
+const NOT_FOUND = 404;
+
+export const overdueItemsKey = (period: string) => [...OVERDUE_ITEMS_KEY, period];
+
+// What the selected month owes from earlier months (D7), plus overdue income, which every month lists. A 404
+// is how a month with no period answers. The tag only narrows the rows; the totals cover the whole list, as
+// a month's cover the whole month (D5).
 export function useOverdueSection(
   repository: OverdueRepository,
+  period: string,
   tagId: string | null,
   onSessionEnded: () => void,
 ) {
   const [failure, setFailure] = useState<string | null>(null);
+  const queryKey = overdueItemsKey(period);
 
   const query = useQuery({
-    queryKey: OVERDUE_ITEMS_KEY,
-    queryFn: () => repository.list(),
-    retry: (count, error) => statusOf(error) !== 401 && count < 2,
+    queryKey,
+    queryFn: () => repository.list(period),
+    retry: (count, error) => ![401, NOT_FOUND].includes(statusOf(error)) && count < 2,
   });
-  const inFlight = useIsMutating({ mutationKey: OVERDUE_ITEMS_KEY });
+  const inFlight = useIsMutating({ mutationKey: queryKey });
 
   const { error } = query;
   useEffect(() => {
@@ -35,10 +42,11 @@ export function useOverdueSection(
   }, [error, onSessionEnded]);
 
   const settle = useOptimisticMutation<OverdueItemList, string, PeriodItem>({
-    queryKey: OVERDUE_ITEMS_KEY,
+    queryKey,
     // The same queue as the months' toggles, so a settle and an undo land in the order they were made.
     scope: "period-item-done",
-    // The item's own month, and with a person-linked item the people of every month its payment covers.
+    // This month's totals, the item's own month, and with a person-linked item the people of every month its
+    // payment covers.
     refreshes: [PERIOD_ITEMS_KEY],
     mutationFn: (id) => repository.markDone(id),
     change: (list, id) => {
@@ -63,13 +71,15 @@ export function useOverdueSection(
   });
 
   const list = query.data;
+  const notOpened = !list && statusOf(error) === NOT_FOUND;
   const allItems = list?.items ?? [];
   const items = tagId ? allItems.filter((item) => item.tagId === tagId) : allItems;
   return {
     items,
     groups: groupOverdue(list, items),
+    notOpened,
     isLoading: query.isPending,
-    loadFailed: query.isError && !list,
+    loadFailed: query.isError && !list && !notOpened,
     refreshFailed: query.isError && Boolean(list),
     // The rows are ahead of the totals until the refetch after a change brings them back in step.
     totalsAreSettling: inFlight > 0 || query.isFetching,

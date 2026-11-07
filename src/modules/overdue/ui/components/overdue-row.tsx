@@ -13,7 +13,7 @@ interface OverdueRowProps {
   onSettle: () => void;
 }
 
-// Editing and deleting stay in the item's own month.
+// Editing and deleting stay in the item's own month, which the row names as where it comes from (D7).
 export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
   return (
     <ItemRow
@@ -24,7 +24,7 @@ export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
       details={
         <>
           <span className="text-xs font-medium whitespace-nowrap">
-            {monthName(item.period)} {yearOf(item.period)}
+            From {monthName(item.period)} {yearOf(item.period)}
           </span>
           <span className={DETAIL}>{kindLabel(item)}</span>
           {item.dueDate ? <span className={DETAIL}>Due {formatDueDate(item.dueDate, item.period)}</span> : null}

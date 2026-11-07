@@ -94,7 +94,7 @@ export function DashboardContainer({
         <CardChargeSectionContainer key={period} period={period} tagId={tagId} onSessionEnded={goToLogin} />
       ),
       platforms: <PlatformSectionContainer key={period} period={period} onSessionEnded={goToLogin} />,
-      overdue: <OverdueSectionContainer tagId={tagId} onSessionEnded={goToLogin} />,
+      overdue: <OverdueSectionContainer key={period} period={period} tagId={tagId} onSessionEnded={goToLogin} />,
       accounts: <AccountSectionContainer group="spendable" onSessionEnded={goToLogin} />,
       savings: <AccountSectionContainer group="savings" onSessionEnded={goToLogin} />,
       templates: <TemplateSectionContainer onSessionEnded={goToLogin} />,

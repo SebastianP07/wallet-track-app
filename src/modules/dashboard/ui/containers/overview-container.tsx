@@ -13,7 +13,7 @@ import { KpiOverview } from "../components/kpi-overview";
 
 const NOT_OPENED_NOTE = "Open this month to see the rest. Its balances are the same as in any month.";
 const CLOSED_NOTE =
-  "This month is closed, so what was pending is overdue: it stays in Coming in and Going out, and is out of To pay and To arrive. Left over is therefore today's Total actual.";
+  "This month is closed, so what was pending is overdue: it stays in Coming in and Going out, and is out of To pay and To arrive. Unpaid expenses moved to the Overdue section of the next month that is not closed. Left over is therefore today's Total actual.";
 
 interface OverviewContainerProps {
   period: string;

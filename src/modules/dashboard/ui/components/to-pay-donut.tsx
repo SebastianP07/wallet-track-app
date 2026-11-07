@@ -15,6 +15,7 @@ const ToPayDonutChart = dynamic(() => import("./to-pay-donut-chart").then((modul
 const SLICES = [
   { key: "fixed", name: "Fixed", fill: "var(--chart-fixed)" },
   { key: "occasional", name: "Occasional", fill: "var(--chart-occasional)" },
+  { key: "overdue", name: "Overdue", fill: "var(--chart-overdue)" },
 ] as const;
 
 interface ToPayDonutProps {

@@ -4,6 +4,7 @@ import type { PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ItemRow } from "./item-row";
 import { UrgencyBadge } from "./urgency-badge";
 import { formatCopInput } from "@/modules/accounts/domain/money";
+import { monthName, yearOf } from "@/modules/periods/domain/year-month";
 import type { Tag } from "@/modules/tags/domain/types";
 
 const ExpenseForm = dynamic(() => import("./expense-form").then((module) => module.ExpenseForm));
@@ -32,6 +33,11 @@ export function ExpenseRow({ item, tags, onSetDone, onUpdate, onDelete }: Expens
             </span>
           ) : null}
           <UrgencyBadge item={item} />
+          {item.status === "overdue" && item.owedIn ? (
+            <span className="text-xs whitespace-nowrap text-muted-foreground">
+              Owed in {monthName(item.owedIn)} {yearOf(item.owedIn)}
+            </span>
+          ) : null}
         </>
       }
       renderEditForm={(close) => (

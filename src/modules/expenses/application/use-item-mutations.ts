@@ -30,7 +30,7 @@ export function useItemMutations({
   const keys = {
     queryKey: monthItemsListKey(period, tagId),
     syncKey: monthItemsKey(period),
-    // Toggling, editing or deleting an item of a closed month changes the overdue list.
+    // Toggling, editing or deleting an item of a closed month changes the overdue list of the month that owes it.
     refreshes: [monthItemsKey(period), OVERDUE_ITEMS_KEY],
   };
   const onStart = () => setFailure(null);
@@ -58,6 +58,7 @@ export function useItemMutations({
         cardId: item.kind === "card_charge" ? item.cardId : null,
         status: "pending",
         doneAt: null,
+        owedIn: null,
         urgency: "none",
         createdAt: now,
         updatedAt: now,
