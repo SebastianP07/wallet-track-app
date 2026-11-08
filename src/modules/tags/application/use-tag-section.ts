@@ -6,13 +6,15 @@ import { useTagList } from "./use-tag-list";
 import { describeTagFailure } from "../domain/failures";
 import type { TagCreate, TagUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { PERIOD_ITEMS_KEY, RECURRING_TEMPLATES_KEY, TAGS_KEY } from "@/shared/api/query-keys";
 
 // These wait for the server: a taken name has to keep the form open with its message, and deleting
 // a tag changes rows in other sections.
 export function useTagSection(repository: TagsRepository, onSessionEnded: () => void) {
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
   const { queryError, ...list } = useTagList(repository);
 
   useEffect(() => {
@@ -28,7 +30,8 @@ export function useTagSection(repository: TagsRepository, onSessionEnded: () => 
         onSessionEnded();
         return;
       }
-      setFailure(describeTagFailure(statusOf(error)));
+      const status = statusOf(error);
+      setFailure(() => (current: typeof messages) => describeTagFailure(status, current));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: TAGS_KEY }),
   };
@@ -53,7 +56,7 @@ export function useTagSection(repository: TagsRepository, onSessionEnded: () => 
 
   return {
     ...list,
-    failure,
+    failure: failure?.(messages) ?? null,
     isCreating: create.isPending,
     isUpdating: update.isPending,
     createTag: create.mutate,

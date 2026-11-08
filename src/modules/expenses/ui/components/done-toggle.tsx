@@ -2,6 +2,7 @@ import type { Ref } from "react";
 import { Check } from "lucide-react";
 import { cn } from "cn";
 
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 interface DoneToggleProps {
@@ -15,6 +16,7 @@ interface DoneToggleProps {
 }
 
 export function DoneToggle({ name, word, done, disabled, onToggle, ref }: DoneToggleProps) {
+  const t = useMessages().expenses;
   return (
     <Button
       ref={ref}
@@ -22,7 +24,7 @@ export function DoneToggle({ name, word, done, disabled, onToggle, ref }: DoneTo
       className={cn("size-12 shrink-0 px-0", !done && "text-muted-foreground")}
       disabled={disabled}
       aria-pressed={done}
-      aria-label={`Mark ${name} as ${word}`}
+      aria-label={t.markAs(name, word)}
       onClick={onToggle}
     >
       <Check aria-hidden="true" className={cn("size-6", !done && "opacity-40")} />

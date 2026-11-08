@@ -4,6 +4,7 @@ import { Pie, PieChart, ResponsiveContainer, Tooltip, type PieLabelRenderProps }
 
 import { formatCompactCOP, formatShare } from "../../domain/chart-format";
 import { ChartTooltip } from "./chart-tooltip";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const CHART_HEIGHT = 220;
 const LABEL_GAP = 12;
@@ -15,6 +16,7 @@ interface ToPayDonutChartProps {
 }
 
 export function ToPayDonutChart({ rows, toPay }: ToPayDonutChartProps) {
+  const t = useMessages().dashboard.charts;
   return (
     <>
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
@@ -44,7 +46,7 @@ export function ToPayDonutChart({ rows, toPay }: ToPayDonutChartProps) {
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-sans text-base font-semibold">{formatCompactCOP(toPay)}</span>
-        <span className="text-xs text-muted-foreground">to pay</span>
+        <span className="text-xs text-muted-foreground">{t.toPayCenter}</span>
       </div>
     </>
   );

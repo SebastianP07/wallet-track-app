@@ -7,7 +7,8 @@ import type { PeriodItem } from "../../domain/types";
 import { DoneToggle } from "./done-toggle";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
-import { monthName, yearOf } from "@/modules/periods/domain/year-month";
+import { monthLabel } from "@/modules/periods/domain/year-month";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { isPendingRow } from "@/shared/query/optimistic-rows";
 import { Button } from "@/shared/ui/button";
@@ -43,6 +44,8 @@ export function ItemRow({
   onDelete,
 }: ItemRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { locale, messages } = useI18n();
+  const t = messages.expenses;
   const pending = isPendingRow(item);
   const done = item.status === "done";
   const tag = tags.find(({ id }) => id === item.tagId);
@@ -54,10 +57,10 @@ export function ItemRow({
   // Removal stays in the item's own month; the month that owes an overdue one stops counting it (D1, D7).
   const owedNote =
     item.status === "overdue" && item.owedIn
-      ? ` ${monthName(item.owedIn)} ${yearOf(item.owedIn)}, which owes it, stops counting it.`
+      ? t.owedMonthStops(monthLabel(item.owedIn, locale))
       : "";
-  const note = deleteNote ?? (item.templateId ? "Its template stays as it is." : "");
-  const doneNote = done ? ` It is marked ${doneWord} here, and that mark goes with it.` : "";
+  const note = deleteNote ?? (item.templateId ? t.templateStays : "");
+  const doneNote = done ? t.doneMarkGoes(doneWord) : "";
 
   return (
     <li className="flex gap-3 border-t border-rule py-3">
@@ -88,19 +91,19 @@ export function ItemRow({
               variant="link"
               className={ACTION}
               disabled={pending}
-              aria-label={`Edit ${item.name}`}
+              aria-label={t.editItem(item.name)}
               onClick={() => setMode("edit")}
             >
-              Edit
+              {messages.common.edit}
             </Button>
             <Button
               variant="link"
               className={ACTION}
               disabled={pending}
-              aria-label={`Delete ${item.name}`}
+              aria-label={t.deleteItem(item.name)}
               onClick={() => setMode("confirm-delete")}
             >
-              Delete
+              {messages.common.delete}
             </Button>
           </div>
         ) : null}
@@ -109,26 +112,28 @@ export function ItemRow({
 
         {mode === "confirm-delete" && repeats ? (
           <ConfirmPanel
-            confirmLabel="Only this month"
-            confirmAriaLabel={`Delete ${item.name} from this month only`}
+            confirmLabel={t.onlyThisMonth}
+            confirmAriaLabel={t.onlyThisMonthAria(item.name)}
             alternative={{
-              label: "Stop repeating too",
-              ariaLabel: `Delete ${item.name} and stop repeating it`,
+              label: t.stopRepeating,
+              ariaLabel: t.stopRepeatingAria(item.name),
               onSelect: () => remove(true),
             }}
             onConfirm={() => remove(false)}
             onKeep={toView}
           >
-            <span className="font-medium wrap-anywhere">{item.name}</span> repeats every month. Delete it from
-            this month only, so months opened later still get it, or also stop repeating it. Earlier months keep
-            theirs, paid or not.{doneNote}
+            <span className="font-medium wrap-anywhere">{item.name}</span>
+            {t.repeatsConfirm}
+            {doneNote}
             {owedNote}
           </ConfirmPanel>
         ) : null}
 
         {mode === "confirm-delete" && !repeats ? (
-          <ConfirmPanel confirmLabel="Delete" onConfirm={() => remove(false)} onKeep={toView}>
-            Delete <span className="font-medium wrap-anywhere">{item.name}</span> from this month?{" "}
+          <ConfirmPanel confirmLabel={messages.common.delete} onConfirm={() => remove(false)} onKeep={toView}>
+            {t.deleteFromMonthBefore}
+            <span className="font-medium wrap-anywhere">{item.name}</span>
+            {t.deleteFromMonthAfter}{" "}
             {note}
             {doneNote}
             {owedNote}

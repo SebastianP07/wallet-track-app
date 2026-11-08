@@ -8,9 +8,10 @@ import {
   templateFormSchema,
   type TemplateFormValues,
 } from "../../domain/template-forms";
-import { TEMPLATE_KIND_LABELS, TEMPLATE_KINDS } from "../../domain/template-groups";
+import { TEMPLATE_KINDS } from "../../domain/template-groups";
 import type { CreditCard, TemplateCreate } from "../../domain/types";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
@@ -60,22 +61,24 @@ export function TemplateForm({
   const cardIsUnavailable = kind === "card_charge" && cards.length === 0;
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, periods } = useMessages();
+  const t = periods.templates;
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
       {canChooseKind ? (
         <SelectField
-          label="Kind"
+          label={t.kind}
           options={TEMPLATE_KINDS.map((value) => ({
             value,
-            label: TEMPLATE_KIND_LABELS[value],
+            label: t.kinds[value],
           }))}
           {...register("kind")}
         />
       ) : null}
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <Field
-        label="Amount in pesos"
+        label={common.amountInPesos}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -86,8 +89,8 @@ export function TemplateForm({
       />
       {kind === "fixed" ? (
         <Field
-          label="Due day"
-          hint="1 to 31. In a shorter month it falls on the last day."
+          label={t.dueDay}
+          hint={t.dueDayHint}
           type="text"
           inputMode="numeric"
           autoComplete="off"
@@ -99,48 +102,48 @@ export function TemplateForm({
       {kind === "card_charge" ? (
         <div className="flex flex-col gap-2">
           <SelectField
-            label="Card"
+            label={t.card}
             disabled={cards.length === 0}
             error={errors.cardId?.message}
             options={[
-              { value: "", label: isLoading ? "Loading cards…" : "Choose a card" },
+              { value: "", label: isLoading ? t.loadingCards : t.chooseCard },
               ...cards.map((card) => ({ value: card.id, label: card.name })),
             ]}
             {...register("cardId")}
           />
           {hasNoCards ? (
             <p className="text-sm text-muted-foreground">
-              A card charge needs a card, and there are none yet. Add one in{" "}
+              {t.noCardsBefore}
               <a href="#card-charges" className="text-foreground underline underline-offset-4">
-                Card charges
+                {t.noCardsLink}
               </a>
-              , and it will show up here without losing what you typed.
+              {t.noCardsAfter}
             </p>
           ) : null}
           {loadFailed ? (
             <div className="flex items-center gap-3">
-              <p className="text-sm text-muted-foreground">The cards could not be loaded.</p>
+              <p className="text-sm text-muted-foreground">{t.cardsLoadFailed}</p>
               <Button variant="link" className="px-2" onClick={reload}>
-                Try again
+                {common.tryAgain}
               </Button>
             </div>
           ) : null}
         </div>
       ) : null}
       <SelectField
-        label="Tag"
+        label={common.tag}
         options={[
-          { value: "", label: "No tag" },
+          { value: "", label: common.noTag },
           ...tags.map((tag) => ({ value: tag.id, label: tag.name })),
         ]}
         {...register("tagId")}
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending || cardIsUnavailable}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

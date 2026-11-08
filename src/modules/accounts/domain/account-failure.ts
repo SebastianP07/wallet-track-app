@@ -1,12 +1,14 @@
-export function describeAccountFailure(status: number): string {
+import type { Messages } from "@/shared/i18n/messages";
+
+export function describeAccountFailure(status: number, messages: Messages): string {
   switch (status) {
     case 400:
-      return "That change was not accepted. Check the name and the amount; amounts and totals have a limit.";
+      return messages.accounts.failures.rejected;
     case 403:
-      return "This request could not be verified. Reload the page and try again.";
+      return messages.common.unverified;
     case 404:
-      return "That account no longer exists.";
+      return messages.accounts.failures.notFound;
     default:
-      return "Wallet Track can't reach its server right now, so nothing was changed. Try again in a moment.";
+      return messages.common.unreachable;
   }
 }

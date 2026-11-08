@@ -1,13 +1,13 @@
-import { formatWait } from "./auth-failure";
+import { describeTooMany } from "./auth-failure";
+import { languageTag, type Locale } from "@/shared/i18n/locale";
+import type { Messages } from "@/shared/i18n/messages";
 
-const dateTime = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/Bogota",
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-export function formatDateTime(timestamp: string): string {
-  return dateTime.format(new Date(timestamp));
+export function formatDateTime(timestamp: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(languageTag(locale), {
+    timeZone: "America/Bogota",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(timestamp));
 }
 
 const BROWSERS: readonly [RegExp, string][] = [
@@ -30,76 +30,72 @@ const SYSTEMS: readonly [RegExp, string][] = [
 const firstMatch = (table: readonly [RegExp, string][], userAgent: string) =>
   table.find(([pattern]) => pattern.test(userAgent))?.[1];
 
-export function describeDevice(userAgent: string | null): string {
+export function describeDevice(userAgent: string | null, messages: Messages): string {
+  const t = messages.security;
   if (!userAgent) {
-    return "Unknown device";
+    return t.unknownDevice;
   }
   const browser = firstMatch(BROWSERS, userAgent);
   const system = firstMatch(SYSTEMS, userAgent);
   if (browser && system) {
-    return `${browser} on ${system}`;
+    return t.browserOn(browser, system);
   }
-  return browser ?? system ?? "Unknown device";
-}
-
-const UNREACHABLE = "Wallet Track can't reach its server right now, so nothing was changed. Try again in a moment.";
-const UNVERIFIED = "This request could not be verified. Reload the page and try again.";
-
-function tooMany(retryAfterSeconds: number | null): string {
-  return retryAfterSeconds === null
-    ? "Too many attempts. Try again later."
-    : `Too many attempts. Try again in ${formatWait(retryAfterSeconds)}.`;
+  return browser ?? system ?? t.unknownDevice;
 }
 
 // A 401 here means the session is still good: the hook checks that before calling this.
-export function describeProofFailure(status: number, retryAfterSeconds: number | null): string {
+export function describeProofFailure(status: number, retryAfterSeconds: number | null, messages: Messages): string {
   switch (status) {
     case 400:
-      return "Check what you entered and try again.";
+      return messages.common.checkInput;
     case 401:
-      return "That code was not accepted. A code works once, so wait for the next one or use another.";
+      return messages.security.failures.codeRejected;
     case 403:
-      return UNVERIFIED;
+      return messages.common.unverified;
     case 404:
-      return "That passkey no longer exists.";
+      return messages.security.failures.passkeyGone;
     case 429:
-      return tooMany(retryAfterSeconds);
+      return describeTooMany(retryAfterSeconds, messages);
     default:
-      return UNREACHABLE;
+      return messages.common.unreachable;
   }
 }
 
-export function describeRegistrationFailure(status: number, retryAfterSeconds: number | null): string {
+export function describeRegistrationFailure(
+  status: number,
+  retryAfterSeconds: number | null,
+  messages: Messages,
+): string {
   switch (status) {
     case 401:
-      return "The passkey was not accepted, or this took too long. Nothing was added. Enter a new code to try again.";
+      return messages.security.failures.registrationRejected;
     case 409:
-      return "That passkey is already registered.";
+      return messages.security.failures.alreadyRegistered;
     default:
-      return describeProofFailure(status, retryAfterSeconds);
+      return describeProofFailure(status, retryAfterSeconds, messages);
   }
 }
 
-export function describeRenameFailure(status: number): string {
+export function describeRenameFailure(status: number, messages: Messages): string {
   switch (status) {
     case 400:
-      return "That name was not accepted.";
+      return messages.security.failures.nameRejected;
     case 403:
-      return UNVERIFIED;
+      return messages.common.unverified;
     case 404:
-      return "That passkey no longer exists.";
+      return messages.security.failures.passkeyGone;
     default:
-      return UNREACHABLE;
+      return messages.common.unreachable;
   }
 }
 
-export function describeRevokeFailure(status: number): string {
+export function describeRevokeFailure(status: number, messages: Messages): string {
   switch (status) {
     case 403:
-      return UNVERIFIED;
+      return messages.common.unverified;
     case 404:
-      return "That session has already ended.";
+      return messages.security.failures.sessionGone;
     default:
-      return UNREACHABLE;
+      return messages.common.unreachable;
   }
 }

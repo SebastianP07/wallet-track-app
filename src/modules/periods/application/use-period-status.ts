@@ -6,6 +6,7 @@ import { describePeriodFailure } from "../domain/failures";
 import { findPeriod, withPeriod } from "../domain/period-list";
 import type { Period, PeriodList } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { PERIOD_ITEMS_KEY, PERIODS_KEY } from "@/shared/api/query-keys";
 
 
@@ -18,7 +19,8 @@ export function usePeriodStatus(
   onSessionEnded: () => void,
 ) {
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
 
   const query = useQuery({
     queryKey: PERIODS_KEY,
@@ -42,7 +44,8 @@ export function usePeriodStatus(
         onSessionEnded();
         return;
       }
-      setFailure(describePeriodFailure(statusOf(error)));
+      const status = statusOf(error);
+      setFailure(() => (current: typeof messages) => describePeriodFailure(status, current));
     },
     onSettled: () =>
       Promise.all([
@@ -58,7 +61,7 @@ export function usePeriodStatus(
     selected: findPeriod(query.data, period),
     isLoading: query.isPending,
     loadFailed: query.isError && !query.data,
-    failure,
+    failure: failure?.(messages) ?? null,
     reload: () => void query.refetch(),
     openMonth: () => open.mutate(),
     isOpening: open.isPending,

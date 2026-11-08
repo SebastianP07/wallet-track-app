@@ -5,6 +5,7 @@ import type { AuthRepository } from "./auth-repository";
 import type { User } from "../domain/types";
 import { describeAuthFailure } from "../domain/auth-failure";
 import { ApiError } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 const isUnauthorized = (error: unknown) => error instanceof ApiError && error.status === 401;
 
@@ -14,7 +15,8 @@ export function useSession(
   initialUser: User,
   onSessionEnded: () => void,
 ) {
-  const [logoutFailure, setLogoutFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [logoutFailure, setLogoutFailure] = useState<Translatable | null>(null);
 
   const { data: user = initialUser, error } = useQuery({
     queryKey: ["auth", "me"],
@@ -44,9 +46,9 @@ export function useSession(
       }
       const status = mutationError instanceof ApiError ? mutationError.status : 0;
       const retryAfter = mutationError instanceof ApiError ? mutationError.retryAfterSeconds : null;
-      setLogoutFailure(describeAuthFailure("logout", status, retryAfter));
+      setLogoutFailure(() => (t: typeof messages) => describeAuthFailure("logout", status, retryAfter, t));
     },
   });
 
-  return { user, logOut, isLoggingOut: isPending, logoutFailure };
+  return { user, logOut, isLoggingOut: isPending, logoutFailure: logoutFailure?.(messages) ?? null };
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/modules/auth/infrastructure/server-session";
 import { currentYearMonth, parseYearMonth } from "@/modules/periods/domain/year-month";
 import { DashboardContainer } from "@/modules/dashboard/ui/containers/dashboard-container";
+import { getMessages } from "@/shared/i18n/server-locale";
 import { MessageScreen } from "@/shared/ui/message-screen";
 
 interface HomePageProps {
@@ -15,12 +16,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     redirect("/login");
   }
   if (session.status === "unavailable") {
+    const { common } = await getMessages();
     return (
-      <MessageScreen
-        title="Wallet Track"
-        message="The server can't be reached right now, so your session could not be checked."
-        linkLabel="Try again"
-      />
+      <MessageScreen title={common.appName} message={common.sessionCheckUnavailable} linkLabel={common.tryAgain} />
     );
   }
   const { period } = await searchParams;

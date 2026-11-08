@@ -8,6 +8,7 @@ import type { PlatformDraft } from "../../domain/platform-forms";
 import type { Person, Platform } from "../../domain/types";
 import { formatCOP, formatCopInput } from "@/modules/accounts/domain/money";
 import type { CreditCard } from "@/modules/cards/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
@@ -39,6 +40,7 @@ export function PlatformRow({
   onSetMember,
 }: PlatformRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { common, expenses, platforms: t } = useMessages();
   const toView = () => setMode("view");
   const card = cards.find(({ id }) => id === platform.cardId);
   const isMember = (personId: string) => platform.members.some((member) => member.personId === personId);
@@ -53,15 +55,13 @@ export function PlatformRow({
       </div>
       <p className="text-xs text-muted-foreground wrap-anywhere">
         {platform.members.length === 0
-          ? "No members yet"
-          : `${formatCOP(platform.sharePerMember)} per member · ${platform.members.length} ${
-              platform.members.length === 1 ? "member" : "members"
-            }`}
+          ? t.noMembers
+          : t.perMember(formatCOP(platform.sharePerMember), platform.members.length)}
         {card ? ` · ${card.name}` : null}
       </p>
 
       {people.length > 0 ? (
-        <div role="group" aria-label={`Members of ${platform.name}`} className="flex flex-wrap gap-2">
+        <div role="group" aria-label={t.membersOf(platform.name)} className="flex flex-wrap gap-2">
           {people.map((person) => {
             const member = isMember(person.id);
             return (
@@ -69,7 +69,7 @@ export function PlatformRow({
                 key={person.id}
                 type="button"
                 aria-pressed={member}
-                aria-label={`${person.name} shares ${platform.name}`}
+                aria-label={t.sharesPlatform(person.name, platform.name)}
                 disabled={isChangingMembers}
                 onClick={() => onSetMember(person.id, !member)}
                 className={cn(
@@ -88,16 +88,16 @@ export function PlatformRow({
 
       {mode === "view" ? (
         <div className="flex flex-wrap items-center">
-          <Button variant="link" className={ACTION} aria-label={`Edit ${platform.name}`} onClick={() => setMode("edit")}>
-            Edit
+          <Button variant="link" className={ACTION} aria-label={expenses.editItem(platform.name)} onClick={() => setMode("edit")}>
+            {common.edit}
           </Button>
           <Button
             variant="link"
             className={ACTION}
-            aria-label={`Delete ${platform.name}`}
+            aria-label={expenses.deleteItem(platform.name)}
             onClick={() => setMode("confirm-delete")}
           >
-            Delete
+            {common.delete}
           </Button>
         </div>
       ) : null}
@@ -110,7 +110,7 @@ export function PlatformRow({
             cardId: platform.cardId ?? "",
           }}
           cards={cards}
-          submitLabel="Save changes"
+          submitLabel={expenses.saveChanges}
           pending={isSaving}
           onCancel={toView}
           onSubmit={(changes) => onUpdate(changes, { onSuccess: toView })}
@@ -119,15 +119,16 @@ export function PlatformRow({
 
       {mode === "confirm-delete" ? (
         <ConfirmPanel
-          confirmLabel="Delete"
+          confirmLabel={common.delete}
           onConfirm={() => {
             onDelete();
             toView();
           }}
           onKeep={toView}
         >
-          Delete <span className="font-medium wrap-anywhere">{platform.name}</span> for good? Months
-          opened from now on won&apos;t count it. Income items already in a month keep their amount.
+          {t.deletePlatformBefore}
+          <span className="font-medium wrap-anywhere">{platform.name}</span>
+          {t.deletePlatformAfter}
         </ConfirmPanel>
       ) : null}
     </li>

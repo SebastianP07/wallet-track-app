@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import type { LoginFailure } from "../../application/use-login-flow";
 import type { PasswordLoginRequest } from "../../domain/types";
 import { passwordLoginSchema } from "../../domain/credentials";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { FormAlert } from "@/shared/ui/form-alert";
@@ -31,6 +32,7 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
   });
 
   useEffect(() => setFocus("email"), [setFocus]);
+  const t = useMessages().auth;
 
   useEffect(() => {
     if (failure) {
@@ -43,7 +45,7 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="flex flex-col gap-5">
       <FormAlert message={failure?.message} />
       <Field
-        label="Email"
+        label={t.email}
         type="email"
         autoComplete="username"
         autoCapitalize="none"
@@ -52,14 +54,14 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
         {...register("email")}
       />
       <Field
-        label="Password"
+        label={t.password}
         type="password"
         autoComplete="current-password"
         error={errors.password?.message}
         {...register("password")}
       />
       <Button type="submit" disabled={pending} className="mt-1">
-        {pending ? "Checking…" : "Continue"}
+        {pending ? t.checking : t.continue}
       </Button>
     </form>
   );

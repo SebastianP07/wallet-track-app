@@ -1,3 +1,4 @@
+import { issue } from "@/shared/i18n/validation-key";
 import { z } from "@/shared/validation/zod";
 
 import type { CreditCardCreate } from "./types";
@@ -5,7 +6,7 @@ import { nameField } from "@/modules/accounts/domain/account-forms";
 import { ITEM_AMOUNT_MESSAGE, parseItemAmount } from "@/modules/expenses/domain/expense-forms";
 
 const DAY = /^(0?[1-9]|[12][0-9]|3[01])$/;
-const DAY_MESSAGE = "Enter a day between 1 and 31.";
+const DAY_MESSAGE = issue("day");
 
 const dayField = z
   .string()
@@ -39,7 +40,7 @@ export function cardChargeFormSchema(cardIsRequired: boolean) {
         context.addIssue({ code: "custom", path: ["amount"], message: ITEM_AMOUNT_MESSAGE });
       }
       if (cardIsRequired && !values.cardId) {
-        context.addIssue({ code: "custom", path: ["cardId"], message: "Choose a card." });
+        context.addIssue({ code: "custom", path: ["cardId"], message: issue("card") });
       }
     })
     .transform(

@@ -8,6 +8,7 @@ import { newAccountSchema } from "../../domain/account-forms";
 import { flipCopInputSign } from "../../domain/money";
 import type { AccountCreate } from "../../domain/types";
 import { MoneyField } from "./money-field";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 
@@ -31,6 +32,7 @@ export function AccountAddForm({ pending, onSubmit, onCancel }: AccountAddFormPr
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, accounts } = useMessages();
 
   return (
     <form
@@ -38,9 +40,9 @@ export function AccountAddForm({ pending, onSubmit, onCancel }: AccountAddFormPr
       onSubmit={handleSubmit(onSubmit)}
       className="mt-auto flex flex-col gap-3 border-t border-rule pt-3 md:max-w-md"
     >
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <MoneyField
-        label="Balance in pesos"
+        label={accounts.balanceInPesos}
         placeholder="0"
         error={errors.balance?.message}
         onFlipSign={() => setValue("balance", flipCopInputSign(getValues("balance")))}
@@ -48,10 +50,10 @@ export function AccountAddForm({ pending, onSubmit, onCancel }: AccountAddFormPr
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Saving…" : "Save"}
+          {pending ? common.saving : common.save}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

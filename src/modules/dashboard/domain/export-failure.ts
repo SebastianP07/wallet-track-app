@@ -1,16 +1,19 @@
+import type { Messages } from "@/shared/i18n/messages";
+
 const NOT_FOUND = 404;
 const TOO_MANY_REQUESTS = 429;
 const NETWORK_FAILURE = 0;
 
-export function describeExportFailure(status: number): string {
+export function describeExportFailure(status: number, messages: Messages): string {
+  const t = messages.dashboard.export;
   switch (status) {
     case NOT_FOUND:
-      return "This month has not been opened, so there is nothing to export.";
+      return t.notOpened;
     case TOO_MANY_REQUESTS:
-      return "Too many requests. Wait a moment and try again.";
+      return t.tooMany;
     case NETWORK_FAILURE:
-      return "The export needs a connection. Nothing was downloaded.";
+      return t.offline;
     default:
-      return "The export failed. Nothing was downloaded.";
+      return t.failed;
   }
 }

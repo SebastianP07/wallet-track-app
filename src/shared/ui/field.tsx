@@ -1,6 +1,9 @@
 import { useId, type ComponentProps, type ReactNode } from "react";
 import { cn } from "cn";
 
+import { useMessages } from "@/shared/i18n/use-i18n";
+import { fieldError } from "@/shared/i18n/validation-key";
+
 interface FieldProps extends ComponentProps<"input"> {
   label: string;
   hint?: ReactNode;
@@ -8,8 +11,9 @@ interface FieldProps extends ComponentProps<"input"> {
   trailing?: ReactNode;
 }
 
-export function Field({ label, hint, error, trailing, className, ...inputProps }: FieldProps) {
+export function Field({ label, hint, error: errorKey, trailing, className, ...inputProps }: FieldProps) {
   const id = useId();
+  const error = fieldError(useMessages(), errorKey);
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");

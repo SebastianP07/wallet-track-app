@@ -5,7 +5,8 @@ import { useMonthExport } from "../../application/use-month-export";
 import { saveFile } from "../../infrastructure/browser-file-saver";
 import { httpDashboardRepository } from "../../infrastructure/http-dashboard-repository";
 import { ExportAction } from "../components/export-action";
-import { monthName, yearOf } from "@/modules/periods/domain/year-month";
+import { monthLabel } from "@/modules/periods/domain/year-month";
+import { useI18n } from "@/shared/i18n/use-i18n";
 
 interface ExportContainerProps {
   period: string;
@@ -13,6 +14,7 @@ interface ExportContainerProps {
 }
 
 export function ExportContainer({ period, onSessionEnded }: ExportContainerProps) {
+  const { locale } = useI18n();
   const { notOpened } = useDashboard(httpDashboardRepository, period, onSessionEnded);
   const { exportMonth, isExporting, failure, savedFileName } = useMonthExport(
     httpDashboardRepository,
@@ -26,7 +28,7 @@ export function ExportContainer({ period, onSessionEnded }: ExportContainerProps
   }
   return (
     <ExportAction
-      monthLabel={`${monthName(period)} ${yearOf(period)}`}
+      monthLabel={monthLabel(period, locale)}
       isExporting={isExporting}
       failure={failure}
       savedFileName={savedFileName}

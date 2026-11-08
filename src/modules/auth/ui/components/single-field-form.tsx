@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 import type { LoginFailure } from "../../application/use-login-flow";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { FormAlert } from "@/shared/ui/form-alert";
@@ -51,6 +52,7 @@ export function SingleFieldForm({
   });
 
   useEffect(() => setFocus("value"), [setFocus]);
+  const t = useMessages().auth;
 
   useEffect(() => {
     if (failure) {
@@ -74,7 +76,7 @@ export function SingleFieldForm({
         {...register("value")}
       />
       <Button type="submit" disabled={pending}>
-        {pending ? "Checking…" : submitLabel}
+        {pending ? t.checking : submitLabel}
       </Button>
       {children ? <div className="flex flex-wrap items-center gap-x-5">{children}</div> : null}
     </form>

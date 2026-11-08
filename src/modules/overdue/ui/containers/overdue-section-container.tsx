@@ -1,13 +1,13 @@
 "use client";
 
 import { useOverdueSection } from "../../application/use-overdue-section";
-import { OVERDUE_COPY } from "../../domain/overdue-groups";
 import { httpOverdueRepository } from "../../infrastructure/http-overdue-repository";
 import { OverdueGroupsList } from "../components/overdue-groups-list";
 import { OverdueRow } from "../components/overdue-row";
 import { ItemList } from "@/modules/expenses/ui/components/item-list";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 interface OverdueSectionContainerProps {
   period: string;
@@ -16,16 +16,17 @@ interface OverdueSectionContainerProps {
 }
 
 export function OverdueSectionContainer({ period, tagId, onSessionEnded }: OverdueSectionContainerProps) {
+  const t = useMessages().overdue;
   const { tags } = useTagList(httpTagsRepository);
   const section = useOverdueSection(httpOverdueRepository, period, tagId, onSessionEnded);
 
   if (section.notOpened && !section.isLoading) {
-    return <p className="border-t border-rule py-3 text-sm text-muted-foreground">{OVERDUE_COPY.notOpened}</p>;
+    return <p className="border-t border-rule py-3 text-sm text-muted-foreground">{t.copy.notOpened}</p>;
   }
 
   return (
     <ItemList
-      copy={OVERDUE_COPY}
+      copy={t.copy}
       isFiltered={tagId !== null}
       items={section.items}
       isLoading={section.isLoading}

@@ -7,6 +7,7 @@ import { usePlatformSection } from "../../application/use-platform-section";
 import { httpPlatformsRepository } from "../../infrastructure/http-platforms-repository";
 import { PersonRow } from "../components/person-row";
 import { PlatformRow } from "../components/platform-row";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -26,21 +27,22 @@ interface PlatformSectionContainerProps {
 export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSectionContainerProps) {
   const section = usePlatformSection(httpPlatformsRepository, period, onSessionEnded);
   const [addingPerson, setAddingPerson] = useState(false);
+  const { common, platforms: t } = useMessages();
   const [addingPlatform, setAddingPlatform] = useState(false);
 
   if (section.isLoading) {
     return (
       <p role="status" className="font-mono text-xs text-muted-foreground">
-        Loading…
+        {common.loading}
       </p>
     );
   }
   if (section.loadFailed) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <FormAlert message="The platforms could not be loaded." />
+        <FormAlert message={t.loadFailed} />
         <Button variant="outline" onClick={section.reload}>
-          Try again
+          {common.tryAgain}
         </Button>
       </div>
     );
@@ -51,15 +53,15 @@ export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSec
       <FormAlert message={section.failure} />
       {section.refreshFailed ? (
         <p className="text-sm text-muted-foreground">
-          Showing the platforms last loaded; they could not be refreshed.
+          {t.refreshFailed}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-3">
-        <h4 className={SUBHEADING}>Who owes what, per month</h4>
+        <h4 className={SUBHEADING}>{t.whoOwes}</h4>
         {section.people.length === 0 ? (
           <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-            No people yet. Add yourself as the owner, then whoever shares a platform with you.
+            {t.noPeople}
           </p>
         ) : (
           <ul className="flex flex-col">
@@ -84,7 +86,7 @@ export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSec
           <div className="border-t border-rule pt-3">
             <PersonForm
               defaultValues={NEW_PERSON}
-              submitLabel="Save"
+              submitLabel={common.save}
               pending={section.isSavingPerson}
               onCancel={() => setAddingPerson(false)}
               onSubmit={(person) =>
@@ -94,16 +96,16 @@ export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSec
           </div>
         ) : (
           <Button variant="outline" className="lg:self-start" onClick={() => setAddingPerson(true)}>
-            Add person
+            {t.addPerson}
           </Button>
         )}
       </div>
 
       <div className="flex flex-col gap-3 border-t border-rule pt-4">
-        <h4 className={SUBHEADING}>Platforms</h4>
+        <h4 className={SUBHEADING}>{t.platforms}</h4>
         {section.platforms.length === 0 ? (
           <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-            No platforms yet. Add one, then tap who shares it.
+            {t.noPlatforms}
           </p>
         ) : (
           <ul className="flex flex-col">
@@ -127,7 +129,7 @@ export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSec
             <PlatformForm
               defaultValues={NEW_PLATFORM}
               cards={section.cards}
-              submitLabel="Save"
+              submitLabel={common.save}
               pending={section.isSavingPlatform}
               onCancel={() => setAddingPlatform(false)}
               onSubmit={(platform) =>
@@ -137,7 +139,7 @@ export function PlatformSectionContainer({ period, onSessionEnded }: PlatformSec
           </div>
         ) : (
           <Button variant="outline" className="lg:self-start" onClick={() => setAddingPlatform(true)}>
-            Add platform
+            {t.addPlatform}
           </Button>
         )}
       </div>

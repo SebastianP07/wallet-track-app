@@ -6,6 +6,7 @@ import { formatCOP } from "@/modules/accounts/domain/money";
 import { formatShare } from "../../domain/chart-format";
 import type { ToPayBreakdown } from "../../domain/types";
 import { ChartPlaceholder, DeferredChart } from "./deferred-chart";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const ToPayDonutChart = dynamic(() => import("./to-pay-donut-chart").then((module) => module.ToPayDonutChart), {
   ssr: false,
@@ -13,9 +14,9 @@ const ToPayDonutChart = dynamic(() => import("./to-pay-donut-chart").then((modul
 });
 
 const SLICES = [
-  { key: "fixed", name: "Fixed", fill: "var(--chart-fixed)" },
-  { key: "occasional", name: "Occasional", fill: "var(--chart-occasional)" },
-  { key: "overdue", name: "Overdue", fill: "var(--chart-overdue)" },
+  { key: "fixed", fill: "var(--chart-fixed)" },
+  { key: "occasional", fill: "var(--chart-occasional)" },
+  { key: "overdue", fill: "var(--chart-overdue)" },
 ] as const;
 
 interface ToPayDonutProps {
@@ -24,15 +25,16 @@ interface ToPayDonutProps {
 }
 
 export function ToPayDonut({ breakdown, toPay }: ToPayDonutProps) {
-  const rows = SLICES.map((slice) => ({ ...slice, value: breakdown[slice.key] }));
+  const t = useMessages().dashboard.charts;
+  const rows = SLICES.map((slice) => ({ ...slice, name: t[slice.key], value: breakdown[slice.key] }));
   return (
     <figure className="flex min-w-0 flex-col gap-3">
       <figcaption className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-        To pay by kind
+        {t.toPayByKind}
       </figcaption>
       {toPay === 0 ? (
         <p className="ledger-rows flex h-55 items-center justify-center text-sm text-muted-foreground">
-          <span className="bg-background px-2">Nothing left to pay this month.</span>
+          <span className="bg-background px-2">{t.nothingToPay}</span>
         </p>
       ) : (
         <DeferredChart className="relative h-55">
@@ -40,12 +42,12 @@ export function ToPayDonut({ breakdown, toPay }: ToPayDonutProps) {
         </DeferredChart>
       )}
       <table className="w-full text-sm">
-        <caption className="sr-only">To pay by kind: the amounts behind the chart.</caption>
+        <caption className="sr-only">{t.toPayCaption}</caption>
         <thead className="sr-only">
           <tr>
-            <th scope="col">Kind</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Share</th>
+            <th scope="col">{t.kind}</th>
+            <th scope="col">{t.amount}</th>
+            <th scope="col">{t.share}</th>
           </tr>
         </thead>
         <tbody>

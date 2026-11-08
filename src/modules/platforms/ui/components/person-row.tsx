@@ -16,6 +16,7 @@ import type { Person } from "../../domain/types";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import { DoneToggle } from "@/modules/expenses/ui/components/done-toggle";
 import { BADGE } from "@/modules/expenses/ui/components/urgency-badge";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
@@ -49,6 +50,8 @@ export function PersonRow({
   onUndoPayment,
 }: PersonRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { locale, messages } = useI18n();
+  const { common, expenses, platforms: t } = messages;
   const toView = () => setMode("view");
   const toggleRef = useRef<HTMLButtonElement>(null);
   // The toggle opened the payment form or the confirmation, so backing out of either returns there.
@@ -82,31 +85,31 @@ export function PersonRow({
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {person.isOwner ? <span className={LOOK}>Owner</span> : null}
-          {!person.isOwner ? <span className={LOOK}>{billingFrequency(person.billingMonths)}</span> : null}
-          {canPay || covered ? <span className={LOOK}>{covered ? "Covered" : "Owes"}</span> : null}
+          {person.isOwner ? <span className={LOOK}>{t.owner}</span> : null}
+          {!person.isOwner ? <span className={LOOK}>{billingFrequency(person.billingMonths, messages)}</span> : null}
+          {canPay || covered ? <span className={LOOK}>{covered ? t.covered : t.owes}</span> : null}
         </div>
         {person.lastPaymentDate ? (
           <p className="text-xs text-muted-foreground">
-            Last paid {formatDate(person.lastPaymentDate)}
-            {person.coveredUntil ? ` · Covered until ${formatDate(person.coveredUntil)}` : null}
+            {t.lastPaid(formatDate(person.lastPaymentDate, locale))}
+            {person.coveredUntil ? t.coveredUntil(formatDate(person.coveredUntil, locale)) : null}
           </p>
         ) : !person.isOwner ? (
-          <p className="text-xs text-muted-foreground">No payments yet</p>
+          <p className="text-xs text-muted-foreground">{t.noPayments}</p>
         ) : null}
 
         {mode === "view" ? (
           <div className="flex flex-wrap items-center">
-            <Button variant="link" className={ACTION} aria-label={`Edit ${person.name}`} onClick={() => setMode("edit")}>
-              Edit
+            <Button variant="link" className={ACTION} aria-label={expenses.editItem(person.name)} onClick={() => setMode("edit")}>
+              {common.edit}
             </Button>
             <Button
               variant="link"
               className={ACTION}
-              aria-label={`Delete ${person.name}`}
+              aria-label={expenses.deleteItem(person.name)}
               onClick={() => setMode("confirm-delete")}
             >
-              Delete
+              {common.delete}
             </Button>
           </div>
         ) : null}
@@ -126,8 +129,8 @@ export function PersonRow({
 
         {mode === "confirm-undo" ? (
           <ConfirmPanel
-            confirmLabel="Remove payment"
-            confirmAriaLabel={`Remove payment from ${person.name}`}
+            confirmLabel={t.removePayment}
+            confirmAriaLabel={t.removePaymentFrom(person.name)}
             confirmDisabled={isSavingPayment || !paymentId}
             onConfirm={() => {
               if (paymentId) {
@@ -136,8 +139,7 @@ export function PersonRow({
             }}
             onKeep={backToToggle}
           >
-            Remove the payment that covers this month? All its coverage goes with it, and the income
-            item it marked received, if any, goes back to expected.
+            {t.removePaymentConfirm}
           </ConfirmPanel>
         ) : null}
 
@@ -148,7 +150,7 @@ export function PersonRow({
               billingMonths: String(person.billingMonths),
               isOwner: person.isOwner,
             }}
-            submitLabel="Save changes"
+            submitLabel={expenses.saveChanges}
             pending={isSavingPerson}
             onCancel={toView}
             onSubmit={(changes) => onUpdate(changes, { onSuccess: toView })}
@@ -157,17 +159,17 @@ export function PersonRow({
 
         {mode === "confirm-delete" ? (
           <ConfirmPanel
-            confirmLabel="Delete"
-            keepLabel="Keep them"
+            confirmLabel={common.delete}
+            keepLabel={t.keepThem}
             onConfirm={() => {
               onDelete();
               toView();
             }}
             onKeep={toView}
           >
-            Delete <span className="font-medium wrap-anywhere">{person.name}</span> for good? They leave
-            every platform, which raises the others&apos; shares. Income items already in a month stay,
-            as plain income. Someone with payments can&apos;t be deleted.
+            {t.deletePersonBefore}
+            <span className="font-medium wrap-anywhere">{person.name}</span>
+            {t.deletePersonAfter}
           </ConfirmPanel>
         ) : null}
       </div>

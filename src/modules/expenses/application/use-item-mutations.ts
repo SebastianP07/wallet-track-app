@@ -8,6 +8,7 @@ import { statusOf } from "@/shared/api/http-client";
 import { OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { pendingRowId, withoutRow, withReplacedRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 interface ItemMutationOptions {
   repository: ExpensesRepository;
@@ -25,7 +26,8 @@ export function useItemMutations({
   isClosed,
   onSessionEnded,
 }: ItemMutationOptions) {
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
 
   const keys = {
     queryKey: monthItemsListKey(period, tagId),
@@ -40,7 +42,8 @@ export function useItemMutations({
       onSessionEnded();
       return;
     }
-    setFailure(describeExpenseFailure(statusOf(error)));
+    const status = statusOf(error);
+    setFailure(() => (current: typeof messages) => describeExpenseFailure(status, current));
   };
 
   const create = useOptimisticMutation<PeriodItemList, ItemCreate, PeriodItem>({
@@ -136,7 +139,7 @@ export function useItemMutations({
   });
 
   return {
-    failure,
+    failure: failure?.(messages) ?? null,
     isCreating: create.isPending,
     createItem: create.mutate,
     updateItem: (id: string, changes: PeriodItemUpdate) => update.mutate({ id, changes }),

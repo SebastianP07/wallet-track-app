@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DEFAULT_TAG_COLOR } from "../../domain/tag-forms";
 import type { Tag, TagCreate, TagUpdate } from "../../domain/types";
 import { TagRow } from "./tag-row";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -39,11 +40,12 @@ export function TagSection({
   deleteTag,
 }: TagSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const { common, tags: t } = useMessages();
 
   if (isLoading) {
     return (
       <div role="status" className="ledger-rows flex h-18 items-end">
-        <p className="pb-2 font-mono text-xs text-muted-foreground">Loading…</p>
+        <p className="pb-2 font-mono text-xs text-muted-foreground">{common.loading}</p>
       </div>
     );
   }
@@ -51,9 +53,9 @@ export function TagSection({
   if (loadFailed) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <FormAlert message="The tags could not be loaded." />
+        <FormAlert message={t.loadFailed} />
         <Button variant="outline" onClick={reload}>
-          Try again
+          {common.tryAgain}
         </Button>
       </div>
     );
@@ -64,13 +66,13 @@ export function TagSection({
       <FormAlert message={failure} />
       {refreshFailed ? (
         <p className="text-sm text-muted-foreground">
-          Showing the last tags received; they could not be refreshed.
+          {t.refreshFailed}
         </p>
       ) : null}
 
       {tags.length === 0 ? (
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-          No tags yet. Add one to group expenses and income your way.
+          {t.empty}
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3">
@@ -90,7 +92,7 @@ export function TagSection({
         <div className="border-t border-rule pt-3">
           <TagForm
             defaultValues={{ name: "", color: DEFAULT_TAG_COLOR }}
-            submitLabel="Save"
+            submitLabel={common.save}
             pending={isCreating}
             onCancel={() => setIsAdding(false)}
             onSubmit={(tag) => createTag(tag, { onSuccess: () => setIsAdding(false) })}
@@ -98,7 +100,7 @@ export function TagSection({
         </div>
       ) : (
         <Button variant="outline" className="mt-auto lg:self-start" onClick={() => setIsAdding(true)}>
-          Add tag
+          {t.add}
         </Button>
       )}
     </div>

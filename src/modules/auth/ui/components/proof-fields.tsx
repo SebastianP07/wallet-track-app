@@ -4,6 +4,7 @@ import type { UseFormRegisterReturn } from "react-hook-form";
 
 import { PROOF_METHODS } from "../../domain/security-forms";
 import type { SecondFactorProof } from "../../domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
 
@@ -16,12 +17,17 @@ interface ProofFieldsProps {
 
 export function ProofFields({ method, codeError, methodField, codeField }: ProofFieldsProps) {
   const isTotp = method === "totp";
+  const t = useMessages().security;
   return (
     <>
-      <SelectField label="Confirm with" options={PROOF_METHODS} {...methodField} />
+      <SelectField
+        label={t.confirmWith}
+        options={PROOF_METHODS.map((value) => ({ value, label: t.proofMethods[value] }))}
+        {...methodField}
+      />
       <Field
-        label={isTotp ? "Authenticator code" : "Recovery code"}
-        hint={isTotp ? undefined : "Each recovery code works once, and this uses it up."}
+        label={t.proofMethods[method]}
+        hint={isTotp ? undefined : t.recoveryCodeHint}
         type="text"
         inputMode={isTotp ? "numeric" : "text"}
         autoComplete={isTotp ? "one-time-code" : "off"}

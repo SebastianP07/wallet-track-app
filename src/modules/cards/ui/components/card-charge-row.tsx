@@ -7,6 +7,7 @@ import type { PeriodItem, PeriodItemUpdate } from "@/modules/expenses/domain/typ
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
 import { BADGE } from "@/modules/expenses/ui/components/urgency-badge";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const CardChargeForm = dynamic(() => import("./card-charge-form").then((module) => module.CardChargeForm));
 
@@ -20,6 +21,7 @@ interface CardChargeRowProps {
 }
 
 export function CardChargeRow({ item, cards, tags, onSetDone, onUpdate, onDelete }: CardChargeRowProps) {
+  const { cards: t, expenses } = useMessages();
   return (
     <ItemRow
       item={item}
@@ -29,7 +31,7 @@ export function CardChargeRow({ item, cards, tags, onSetDone, onUpdate, onDelete
       onDelete={onDelete}
       details={
         <span className={cn(BADGE, "border-rule text-muted-foreground")}>
-          {item.status === "done" ? "Charged" : "Expected"}
+          {item.status === "done" ? t.charged : t.expected}
         </span>
       }
       renderEditForm={(close) => (
@@ -43,7 +45,7 @@ export function CardChargeRow({ item, cards, tags, onSetDone, onUpdate, onDelete
           cards={cards}
           cardIsRequired={item.cardId !== null}
           tags={tags}
-          submitLabel="Save changes"
+          submitLabel={expenses.saveChanges}
           onCancel={close}
           onSubmit={({ cardId, ...rest }) => {
             onUpdate(cardId ? { ...rest, cardId } : rest);

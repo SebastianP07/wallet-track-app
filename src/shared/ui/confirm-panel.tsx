@@ -2,6 +2,7 @@ import { useId, type ReactNode } from "react";
 import { cn } from "cn";
 
 import { Button } from "./button";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 interface ConfirmPanelProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ export function ConfirmPanel({
   children,
   confirmLabel,
   confirmAriaLabel,
-  keepLabel = "Keep it",
+  keepLabel,
   confirmDisabled = false,
   className,
   actionsClassName,
@@ -31,6 +32,7 @@ export function ConfirmPanel({
   onKeep,
 }: ConfirmPanelProps) {
   const messageId = useId();
+  const t = useMessages().common;
   return (
     <div role="group" aria-labelledby={messageId} className={cn("flex flex-col gap-2 pt-1", className)}>
       <p id={messageId} className="text-sm">
@@ -58,7 +60,7 @@ export function ConfirmPanel({
           </Button>
         ) : null}
         <Button autoFocus variant="outline" className="flex-1" onClick={onKeep}>
-          {keepLabel}
+          {keepLabel ?? t.keepIt}
         </Button>
       </div>
     </div>

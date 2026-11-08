@@ -1,14 +1,17 @@
-export function describeTagFailure(status: number): string {
+import type { Messages } from "@/shared/i18n/messages";
+
+export function describeTagFailure(status: number, messages: Messages): string {
+  const t = messages.tags.failures;
   switch (status) {
     case 400:
-      return "That tag was not accepted. Check its name and color.";
+      return t.rejected;
     case 403:
-      return "This request could not be verified. Reload the page and try again.";
+      return messages.common.unverified;
     case 404:
-      return "That tag no longer exists.";
+      return t.notFound;
     case 409:
-      return "Another tag already has that name.";
+      return t.nameTaken;
     default:
-      return "Wallet Track can't reach its server right now, so nothing was changed. Try again in a moment.";
+      return messages.common.unreachable;
   }
 }

@@ -7,6 +7,7 @@ import { cn } from "cn";
 import { formatCOP } from "../../domain/money";
 import { isPendingAccount } from "../../domain/optimistic-list";
 import type { Account } from "../../domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
@@ -26,6 +27,7 @@ interface AccountRowProps {
 
 export function AccountRow({ account, onRename, onSetBalance, onDelete }: AccountRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { common, accounts: t } = useMessages();
   const pending = isPendingAccount(account);
   const toView = () => setMode("view");
 
@@ -49,28 +51,28 @@ export function AccountRow({ account, onRename, onSetBalance, onDelete }: Accoun
             variant="link"
             className={ACTION}
             disabled={pending}
-            aria-label={`Update balance of ${account.name}`}
+            aria-label={t.updateBalanceOf(account.name)}
             onClick={() => setMode("balance")}
           >
-            Update balance
+            {t.updateBalance}
           </Button>
           <Button
             variant="link"
             className={ACTION}
             disabled={pending}
-            aria-label={`Rename ${account.name}`}
+            aria-label={t.renameItem(account.name)}
             onClick={() => setMode("rename")}
           >
-            Rename
+            {common.rename}
           </Button>
           <Button
             variant="link"
             className={ACTION}
             disabled={pending}
-            aria-label={`Delete ${account.name}`}
+            aria-label={t.deleteItem(account.name)}
             onClick={() => setMode("confirm-delete")}
           >
-            Delete
+            {common.delete}
           </Button>
         </div>
       ) : null}
@@ -99,15 +101,16 @@ export function AccountRow({ account, onRename, onSetBalance, onDelete }: Accoun
 
       {mode === "confirm-delete" ? (
         <ConfirmPanel
-          confirmLabel="Delete"
+          confirmLabel={common.delete}
           onConfirm={() => {
             onDelete();
             toView();
           }}
           onKeep={toView}
         >
-          Delete <span className="font-medium wrap-anywhere">{account.name}</span> for good? This
-          can&apos;t be undone.
+          {t.deleteBefore}
+          <span className="font-medium wrap-anywhere">{account.name}</span>
+          {t.deleteAfter}
         </ConfirmPanel>
       ) : null}
     </li>

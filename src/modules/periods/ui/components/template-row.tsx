@@ -12,6 +12,8 @@ import { type CardChoices } from "./template-form";
 import { formatCopInput, formatCOP } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
+import type { Messages } from "@/shared/i18n/messages";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
@@ -21,18 +23,18 @@ const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
 
 type RowMode = "view" | "edit" | "confirm-delete";
 
-function detailOf(template: Template, cardChoices: CardChoices): string | null {
+function detailOf(template: Template, cardChoices: CardChoices, t: Messages["periods"]["templates"]): string | null {
   switch (template.kind) {
     case "fixed":
-      return `Due on day ${template.dueDay}`;
+      return t.dueOnDay(template.dueDay);
     case "income":
       return null;
     case "card_charge": {
       if (!template.cardId) {
-        return "No card";
+        return t.noCard;
       }
       const card = cardChoices.cards.find(({ id }) => id === template.cardId);
-      return card ? `On ${card.name}` : null;
+      return card ? t.onCard(card.name) : null;
     }
   }
 }
@@ -47,10 +49,12 @@ interface TemplateRowProps {
 
 export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }: TemplateRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { common, expenses, periods } = useMessages();
+  const t = periods.templates;
   const pending = isPendingTemplate(template);
   const blockedFromActivating = !template.active && needsCardToActivate(template);
   const toView = () => setMode("view");
-  const detail = detailOf(template, cardChoices);
+  const detail = detailOf(template, cardChoices, t);
   const tag = tags.find(({ id }) => id === template.tagId);
 
   return (
@@ -59,7 +63,7 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
         <div className="flex min-w-0 flex-col">
           <span className={cn("font-medium wrap-anywhere", !template.active && "text-muted-foreground")}>{template.name}</span>
           <span className="text-xs text-muted-foreground">
-            {[detail, template.active ? null : "Inactive"].filter(Boolean).join(" · ")}
+            {[detail, template.active ? null : t.inactive].filter(Boolean).join(" · ")}
           </span>
           {tag ? <TagLabel name={tag.name} color={tag.color} /> : null}
         </div>
@@ -79,34 +83,34 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
             variant="link"
             className={ACTION}
             disabled={pending}
-            aria-label={`Edit ${template.name}`}
+            aria-label={expenses.editItem(template.name)}
             onClick={() => setMode("edit")}
           >
-            Edit
+            {common.edit}
           </Button>
           <Button
             variant="link"
             className={ACTION}
             disabled={pending || blockedFromActivating}
-            aria-label={`${template.active ? "Deactivate" : "Activate"} ${template.name}`}
+            aria-label={template.active ? t.deactivateItem(template.name) : t.activateItem(template.name)}
             onClick={() => onUpdate({ active: !template.active })}
           >
-            {template.active ? "Deactivate" : "Activate"}
+            {template.active ? t.deactivate : t.activate}
           </Button>
           <Button
             variant="link"
             className={ACTION}
             disabled={pending}
-            aria-label={`Delete ${template.name}`}
+            aria-label={expenses.deleteItem(template.name)}
             onClick={() => setMode("confirm-delete")}
           >
-            Delete
+            {common.delete}
           </Button>
         </div>
       ) : null}
 
       {mode === "view" && blockedFromActivating ? (
-        <p className="text-xs text-muted-foreground">Edit it and choose a card to activate it.</p>
+        <p className="text-xs text-muted-foreground">{t.chooseCardToActivate}</p>
       ) : null}
 
       {mode === "edit" ? (
@@ -122,7 +126,7 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
           canChooseKind={false}
           cardChoices={cardChoices}
           tags={tags}
-          submitLabel="Save changes"
+          submitLabel={expenses.saveChanges}
           onCancel={toView}
           onSubmit={(draft) => {
             onUpdate(toTemplateUpdate(draft));
@@ -133,15 +137,16 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
 
       {mode === "confirm-delete" ? (
         <ConfirmPanel
-          confirmLabel="Delete"
+          confirmLabel={common.delete}
           onConfirm={() => {
             onDelete();
             toView();
           }}
           onKeep={toView}
         >
-          Delete <span className="font-medium wrap-anywhere">{template.name}</span> for good?
-          Months already opened keep their items; months opened from now on won&apos;t get it.
+          {t.deleteBefore}
+          <span className="font-medium wrap-anywhere">{template.name}</span>
+          {t.deleteAfter}
         </ConfirmPanel>
       ) : null}
     </li>

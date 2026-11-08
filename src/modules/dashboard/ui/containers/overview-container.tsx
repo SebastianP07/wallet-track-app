@@ -10,10 +10,7 @@ import {
   DashboardRefreshFailed,
 } from "../components/dashboard-states";
 import { KpiOverview } from "../components/kpi-overview";
-
-const NOT_OPENED_NOTE = "Open this month to see the rest. Its balances are the same as in any month.";
-const CLOSED_NOTE =
-  "This month is closed, so what was pending is overdue: it stays in Coming in and Going out, and is out of To pay and To arrive. Unpaid expenses moved to the Overdue section of the next month that is not closed. Left over is therefore today's Total actual.";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 interface OverviewContainerProps {
   period: string;
@@ -27,22 +24,23 @@ export function OverviewContainer({ period, onSessionEnded }: OverviewContainerP
     onSessionEnded,
   );
   const balances = useAccountTotals(httpAccountsRepository, notOpened);
+  const t = useMessages().dashboard;
 
   if (isLoading) {
     return <DashboardLoading className="min-h-142 md:min-h-85 lg:min-h-64" />;
   }
   if (notOpened) {
-    return <KpiOverview kpis={balances ?? {}} note={NOT_OPENED_NOTE} isSettling={false} />;
+    return <KpiOverview kpis={balances ?? {}} note={t.kpis.notOpenedNote} isSettling={false} />;
   }
   if (loadFailed || !dashboard) {
-    return <DashboardLoadFailed what="The overview" onRetry={reload} />;
+    return <DashboardLoadFailed message={t.overviewLoadFailed} onRetry={reload} />;
   }
   return (
     <>
       {refreshFailed ? <DashboardRefreshFailed /> : null}
       <KpiOverview
         kpis={dashboard.kpis}
-        note={dashboard.period.status === "closed" ? CLOSED_NOTE : null}
+        note={dashboard.period.status === "closed" ? t.kpis.closedNote : null}
         isSettling={isSettling}
       />
     </>

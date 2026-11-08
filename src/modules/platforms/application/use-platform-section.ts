@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { PlatformsRepository } from "./platforms-repository";
-import {
-  describePlatformFailure,
-  OWNER_CONFLICT,
-  PERSON_HAS_PAYMENTS,
-} from "../domain/failures";
+import { describePlatformFailure, type PlatformConflict } from "../domain/failures";
 import type { PaymentDraft, PersonDraft, PlatformDraft } from "../domain/platform-forms";
 import { monthItemsKey } from "@/modules/expenses/application/use-expense-list";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { CREDIT_CARDS_KEY, PERIOD_ITEMS_KEY, PLATFORMS_KEY } from "@/shared/api/query-keys";
 
 interface Callbacks {
@@ -25,7 +22,8 @@ export function usePlatformSection(
   onSessionEnded: () => void,
 ) {
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
   const retry = (count: number, error: unknown) => statusOf(error) !== 401 && count < 2;
 
   const people = useQuery({
@@ -52,14 +50,15 @@ export function usePlatformSection(
     }
   }, [peopleError, platformsError, onSessionEnded]);
 
-  const options = (conflict?: string) => ({
+  const options = (conflict?: PlatformConflict) => ({
     onMutate: () => setFailure(null),
     onError: (error: unknown) => {
       if (statusOf(error) === 401) {
         onSessionEnded();
         return;
       }
-      setFailure(describePlatformFailure(statusOf(error), conflict));
+      const status = statusOf(error);
+      setFailure(() => (current: typeof messages) => describePlatformFailure(status, current, conflict));
     },
     onSettled: () =>
       Promise.all([
@@ -70,16 +69,16 @@ export function usePlatformSection(
 
   const createPerson = useMutation({
     mutationFn: (person: PersonDraft) => repository.createPerson(person),
-    ...options(OWNER_CONFLICT),
+    ...options("ownerConflict"),
   });
   const updatePerson = useMutation({
     mutationFn: ({ id, changes }: { id: string; changes: PersonDraft }) =>
       repository.updatePerson(id, changes),
-    ...options(OWNER_CONFLICT),
+    ...options("ownerConflict"),
   });
   const removePerson = useMutation({
     mutationFn: (id: string) => repository.removePerson(id),
-    ...options(PERSON_HAS_PAYMENTS),
+    ...options("personHasPayments"),
   });
   const recordPayment = useMutation({
     mutationFn: ({ personId, payment }: { personId: string; payment: PaymentDraft }) =>
@@ -130,7 +129,7 @@ export function usePlatformSection(
       void people.refetch();
       void platforms.refetch();
     },
-    failure,
+    failure: failure?.(messages) ?? null,
     isSavingPerson: createPerson.isPending || updatePerson.isPending,
     isSavingPayment: recordPayment.isPending || removePayment.isPending,
     isSavingPlatform: createPlatform.isPending || updatePlatform.isPending,

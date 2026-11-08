@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { CardDraft } from "../../domain/card-forms";
 import type { CreditCard, CreditCardUpdate } from "../../domain/types";
 import { CardRow } from "./card-row";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -42,19 +43,20 @@ export function CardManager({
   deleteCard,
 }: CardManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const { common, cards: t } = useMessages();
 
   return (
     <div className="flex flex-col gap-3 border-t border-rule pt-4">
-      <h4 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">Cards</h4>
+      <h4 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">{t.cards}</h4>
       {isLoading ? (
         <p role="status" className="font-mono text-xs text-muted-foreground">
-          Loading…
+          {common.loading}
         </p>
       ) : loadFailed ? (
         <div className="flex flex-col items-start gap-3">
-          <FormAlert message="The cards could not be loaded." />
+          <FormAlert message={t.cardsLoadFailed} />
           <Button variant="outline" onClick={reload}>
-            Try again
+            {common.tryAgain}
           </Button>
         </div>
       ) : (
@@ -62,13 +64,13 @@ export function CardManager({
           <FormAlert message={failure} />
           {refreshFailed ? (
             <p className="text-sm text-muted-foreground">
-              Showing the last cards received; they could not be refreshed.
+              {t.cardsRefreshFailed}
             </p>
           ) : null}
 
           {cards.length === 0 ? (
             <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-              No cards yet. Add one to start tracking its charges.
+              {t.noCards}
             </p>
           ) : (
             <ul className="flex flex-col">
@@ -88,7 +90,7 @@ export function CardManager({
             <div className="border-t border-rule pt-3">
               <CardForm
                 defaultValues={NEW_CARD}
-                submitLabel="Save"
+                submitLabel={common.save}
                 pending={isCreating}
                 onCancel={() => setIsAdding(false)}
                 onSubmit={(card) => createCard(card, { onSuccess: () => setIsAdding(false) })}
@@ -96,7 +98,7 @@ export function CardManager({
             </div>
           ) : (
             <Button variant="outline" className="lg:self-start" onClick={() => setIsAdding(true)}>
-              Add card
+              {t.addCard}
             </Button>
           )}
         </>

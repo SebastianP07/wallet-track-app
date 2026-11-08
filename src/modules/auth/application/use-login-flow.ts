@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
 import type { AuthRepository } from "./auth-repository";
@@ -6,13 +6,9 @@ import type { PasskeyAuthenticator } from "./passkey-authenticator";
 import type { PasswordLoginRequest } from "../domain/types";
 import { describeAuthFailure, type AuthOperation } from "../domain/auth-failure";
 import { stageAfterPassword, type LoginStage } from "../domain/login-flow";
-import {
-  describeCeremonyFailure,
-  NO_PASSKEY_LEFT,
-  PasskeyCeremonyError,
-  PASSKEYS_UNSUPPORTED,
-} from "../domain/passkey-failure";
+import { PasskeyCeremonyError } from "../domain/passkey-failure";
 import { ApiError } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 type Command =
   | { operation: "password"; credentials: PasswordLoginRequest }
@@ -63,12 +59,15 @@ export function useLoginFlow(
   onAuthenticated: () => void,
 ) {
   const [stage, setStage] = useState<LoginStage>({ name: "password" });
-  const [failure, setFailure] = useState<LoginFailure | null>(null);
+  const messages = useMessages();
+  // Kept as what to say rather than the words, so a language switch rewords a failure on screen.
+  const [failureText, setFailureText] = useState<{ describe: Translatable } | null>(null);
+  const setFailure = (describe: Translatable | null) => setFailureText(describe ? { describe } : null);
   const [passkeyAvailable, setPasskeyAvailable] = useState(false);
 
-  const fallBackToCode = (message: string) => {
+  const fallBackToCode = (describe: Translatable) => {
     setPasskeyAvailable(false);
-    setFailure({ message });
+    setFailure(describe);
     setStage({ name: "totp" });
   };
 
@@ -79,7 +78,7 @@ export function useLoginFlow(
       if (outcome.name === "authenticated") {
         onAuthenticated();
       } else if (outcome.name === "passkey" && !authenticator.isSupported()) {
-        fallBackToCode(PASSKEYS_UNSUPPORTED);
+        fallBackToCode((t) => t.auth.failures.passkeysUnsupported);
       } else {
         setPasskeyAvailable(outcome.name === "passkey");
         setStage(outcome);
@@ -87,20 +86,21 @@ export function useLoginFlow(
     },
     onError: (error, command) => {
       if (error instanceof PasskeyCeremonyError) {
-        if (error.kind === "unsupported") {
-          fallBackToCode(PASSKEYS_UNSUPPORTED);
+        const { kind } = error;
+        if (kind === "unsupported") {
+          fallBackToCode((t) => t.auth.failures.passkeysUnsupported);
         } else {
-          setFailure({ message: describeCeremonyFailure(error.kind) });
+          setFailure((t) => t.auth.failures.ceremony[kind]);
         }
         return;
       }
       const status = error instanceof ApiError ? error.status : 0;
       if (command.operation === "passkey" && status === 409) {
-        fallBackToCode(NO_PASSKEY_LEFT);
+        fallBackToCode((t) => t.auth.failures.noPasskeyLeft);
         return;
       }
       const retryAfter = error instanceof ApiError ? error.retryAfterSeconds : null;
-      setFailure({ message: describeAuthFailure(command.operation, status, retryAfter) });
+      setFailure((t) => describeAuthFailure(command.operation, status, retryAfter, t));
       if (status === 409) {
         setStage({ name: "password" });
       }
@@ -108,11 +108,15 @@ export function useLoginFlow(
   });
 
   const goTo = useCallback((next: LoginStage) => {
-    setFailure(null);
+    setFailureText(null);
     setStage(next);
   }, []);
 
-  const clearFailure = useCallback(() => setFailure(null), []);
+  const clearFailure = useCallback(() => setFailureText(null), []);
+  const failure = useMemo<LoginFailure | null>(
+    () => (failureText ? { message: failureText.describe(messages) } : null),
+    [failureText, messages],
+  );
 
   return { stage, failure, isPending, passkeyAvailable, submit: mutate, goTo, clearFailure };
 }

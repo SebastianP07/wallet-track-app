@@ -1,13 +1,12 @@
+import { issue } from "@/shared/i18n/validation-key";
 import { z } from "@/shared/validation/zod";
 
 import { nameField } from "@/modules/accounts/domain/account-forms";
 
 import type { SecondFactorProof } from "./types";
 
-export const PROOF_METHODS: readonly { value: SecondFactorProof["method"]; label: string }[] = [
-  { value: "totp", label: "Authenticator code" },
-  { value: "recovery_code", label: "Recovery code" },
-];
+// Labels live in the messages, under security.proofMethods.
+export const PROOF_METHODS: readonly SecondFactorProof["method"][] = ["totp", "recovery_code"];
 
 const proofFields = {
   method: z.enum(["totp", "recovery_code"]),
@@ -19,10 +18,10 @@ function checkCode(
   context: z.RefinementCtx,
 ) {
   if (method === "totp" && !/^[0-9]{6}$/.test(code)) {
-    context.addIssue({ code: "custom", path: ["code"], message: "Enter the 6-digit code from your authenticator." });
+    context.addIssue({ code: "custom", path: ["code"], message: issue("totpCode") });
   }
   if (method === "recovery_code" && (code.length < 1 || code.length > 64)) {
-    context.addIssue({ code: "custom", path: ["code"], message: "Enter a recovery code." });
+    context.addIssue({ code: "custom", path: ["code"], message: issue("recoveryCode") });
   }
 }
 

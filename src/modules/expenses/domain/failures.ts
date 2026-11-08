@@ -1,14 +1,17 @@
-export function describeExpenseFailure(status: number): string {
+import type { Messages } from "@/shared/i18n/messages";
+
+export function describeExpenseFailure(status: number, messages: Messages): string {
+  const t = messages.expenses.failures;
   switch (status) {
     case 400:
-      return "That change was not accepted. Check the values; amounts and the month's totals have a limit.";
+      return t.rejected;
     case 403:
-      return "This request could not be verified. Reload the page and try again.";
+      return messages.common.unverified;
     case 404:
-      return "That item no longer exists. Reload the page to see the month as it is now.";
+      return t.notFound;
     case 409:
-      return "This month is closed, so it takes no new items.";
+      return t.closed;
     default:
-      return "Wallet Track can't reach its server right now, so nothing was changed. Try again in a moment.";
+      return messages.common.unreachable;
   }
 }

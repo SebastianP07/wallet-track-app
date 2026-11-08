@@ -1,0 +1,152 @@
+const en = {
+  pageTitle: "Sign in",
+  stages: {
+    password: { eyebrow: "Sign in", title: "Welcome back", description: "" },
+    passkey: {
+      eyebrow: "Second factor",
+      title: "Use your passkey",
+      description: "Confirm with your device's screen lock or your security key.",
+    },
+    totp: {
+      eyebrow: "Second factor",
+      title: "Enter your code",
+      description: "Open your authenticator app for the current 6-digit code.",
+    },
+    "recovery-code": {
+      eyebrow: "Second factor",
+      title: "Use a recovery code",
+      description: "Each recovery code works once.",
+    },
+    "enrollment-secret": {
+      eyebrow: "First sign-in · 1 of 3",
+      title: "Set up two-factor",
+      description: "Enter the one-time enrollment secret that create-owner printed.",
+    },
+    "enrollment-confirm": { eyebrow: "First sign-in · 2 of 3", title: "Add your authenticator", description: "" },
+    "recovery-codes": { eyebrow: "First sign-in · 3 of 3", title: "You're set up", description: "" },
+  },
+  startOver: "Start over",
+  usePasskey: "Use your passkey",
+  useAuthenticator: "Use your authenticator",
+  useRecoveryCode: "Use a recovery code",
+  authenticationCode: "Authentication code",
+  verify: "Verify",
+  recoveryCode: "Recovery code",
+  enrollmentSecret: "Enrollment secret",
+  continue: "Continue",
+  codeFromApp: "Code from your app",
+  confirm: "Confirm",
+  email: "Email",
+  password: "Password",
+  checking: "Checking…",
+  waitingForPasskey: "Waiting for your passkey…",
+  continueWithPasskey: "Continue with passkey",
+  qrTitle: "QR code to add Wallet Track to your authenticator app",
+  qrHelp: "Scan it with your authenticator app, or type this secret in by hand.",
+  saveCodes: "Save your recovery codes",
+  saveCodesHelp:
+    "Each one works once if you lose your authenticator. They will never be shown again, and nothing here keeps a copy. Tap the list to select it all.",
+  savedCodes: "I saved these codes somewhere safe.",
+  continueToDashboard: "Continue to the dashboard",
+  failures: {
+    rejected: {
+      password: "That email and password were not accepted.",
+      passkey: "That passkey was not accepted. Try again, use a code instead, or start over if this has taken a while.",
+      totp: "That code was not accepted. Try the next one, or start over if this has taken a while.",
+      "recovery-code": "That recovery code was not accepted. Try another, or start over.",
+      "enrollment-secret": "That enrollment secret was not accepted, or it has expired.",
+      "enrollment-confirm": "That code was not accepted. Try the next one, or start over.",
+      logout: "Your session has already ended.",
+    },
+    alreadyEnrolled: "Two-factor authentication is already set up. Sign in again.",
+    passkeysUnsupported: "This browser can't use passkeys, so enter a code instead.",
+    noPasskeyLeft: "This account has no passkey anymore, so enter a code instead.",
+    ceremony: {
+      cancelled: "The passkey prompt was cancelled or timed out. Try again, or use a code instead.",
+      "already-registered": "This device already holds a passkey for Wallet Track.",
+      unsupported: "This browser can't use passkeys, so enter a code instead.",
+      failed: "The passkey could not be used on this device. Try again, or use a code instead.",
+    },
+  },
+};
+
+export type AuthMessages = typeof en;
+
+const es: AuthMessages = {
+  pageTitle: "Iniciar sesión",
+  stages: {
+    password: { eyebrow: "Iniciar sesión", title: "Hola de nuevo", description: "" },
+    passkey: {
+      eyebrow: "Segundo factor",
+      title: "Usa tu llave de acceso",
+      description: "Confirma con el bloqueo de pantalla de tu dispositivo o con tu llave de seguridad.",
+    },
+    totp: {
+      eyebrow: "Segundo factor",
+      title: "Escribe tu código",
+      description: "Abre tu app de autenticación para ver el código actual de 6 dígitos.",
+    },
+    "recovery-code": {
+      eyebrow: "Segundo factor",
+      title: "Usa un código de recuperación",
+      description: "Cada código de recuperación sirve una sola vez.",
+    },
+    "enrollment-secret": {
+      eyebrow: "Primer inicio de sesión · 1 de 3",
+      title: "Configura el doble factor",
+      description: "Escribe el secreto de registro de un solo uso que imprimió create-owner.",
+    },
+    "enrollment-confirm": {
+      eyebrow: "Primer inicio de sesión · 2 de 3",
+      title: "Agrega tu app de autenticación",
+      description: "",
+    },
+    "recovery-codes": { eyebrow: "Primer inicio de sesión · 3 de 3", title: "Todo listo", description: "" },
+  },
+  startOver: "Empezar de nuevo",
+  usePasskey: "Usar tu llave de acceso",
+  useAuthenticator: "Usar tu app de autenticación",
+  useRecoveryCode: "Usar un código de recuperación",
+  authenticationCode: "Código de autenticación",
+  verify: "Verificar",
+  recoveryCode: "Código de recuperación",
+  enrollmentSecret: "Secreto de registro",
+  continue: "Continuar",
+  codeFromApp: "Código de tu app",
+  confirm: "Confirmar",
+  email: "Correo electrónico",
+  password: "Contraseña",
+  checking: "Verificando…",
+  waitingForPasskey: "Esperando tu llave de acceso…",
+  continueWithPasskey: "Continuar con llave de acceso",
+  qrTitle: "Código QR para agregar Wallet Track a tu app de autenticación",
+  qrHelp: "Escanéalo con tu app de autenticación o escribe este secreto a mano.",
+  saveCodes: "Guarda tus códigos de recuperación",
+  saveCodesHelp:
+    "Cada uno sirve una vez si pierdes tu app de autenticación. No se volverán a mostrar y aquí no queda ninguna copia. Toca la lista para seleccionarla toda.",
+  savedCodes: "Guardé estos códigos en un lugar seguro.",
+  continueToDashboard: "Continuar al tablero",
+  failures: {
+    rejected: {
+      password: "No se aceptaron ese correo y esa contraseña.",
+      passkey:
+        "No se aceptó esa llave de acceso. Inténtalo de nuevo, usa un código o empieza de nuevo si esto ha tardado un rato.",
+      totp: "No se aceptó ese código. Prueba con el siguiente o empieza de nuevo si esto ha tardado un rato.",
+      "recovery-code": "No se aceptó ese código de recuperación. Prueba con otro o empieza de nuevo.",
+      "enrollment-secret": "No se aceptó ese secreto de registro, o ya venció.",
+      "enrollment-confirm": "No se aceptó ese código. Prueba con el siguiente o empieza de nuevo.",
+      logout: "Tu sesión ya terminó.",
+    },
+    alreadyEnrolled: "La autenticación de doble factor ya está configurada. Inicia sesión de nuevo.",
+    passkeysUnsupported: "Este navegador no puede usar llaves de acceso, así que escribe un código.",
+    noPasskeyLeft: "Esta cuenta ya no tiene llave de acceso, así que escribe un código.",
+    ceremony: {
+      cancelled: "La solicitud de la llave de acceso se canceló o se agotó el tiempo. Inténtalo de nuevo o usa un código.",
+      "already-registered": "Este dispositivo ya tiene una llave de acceso para Wallet Track.",
+      unsupported: "Este navegador no puede usar llaves de acceso, así que escribe un código.",
+      failed: "No se pudo usar la llave de acceso en este dispositivo. Inténtalo de nuevo o usa un código.",
+    },
+  },
+};
+
+export const auth = { en, es };

@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { DashboardRepository } from "./dashboard-repository";
 import { describeExportFailure } from "../domain/export-failure";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 export function useMonthExport(
   repository: DashboardRepository,
@@ -10,6 +11,7 @@ export function useMonthExport(
   saveFile: (blob: Blob, fileName: string) => void,
   onSessionEnded: () => void,
 ) {
+  const messages = useMessages();
   const { mutate, isPending, error, data } = useMutation({
     // Reading a month moves no KPI.
     meta: { keepsDashboard: true },
@@ -25,7 +27,7 @@ export function useMonthExport(
   return {
     exportMonth: () => mutate(),
     isExporting: isPending,
-    failure: error && statusOf(error) !== 401 ? describeExportFailure(statusOf(error)) : null,
+    failure: error && statusOf(error) !== 401 ? describeExportFailure(statusOf(error), messages) : null,
     savedFileName: isPending ? null : (data?.fileName ?? null),
   };
 }

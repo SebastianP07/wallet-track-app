@@ -1,3 +1,5 @@
+import { languageTag, type Locale } from "@/shared/i18n/locale";
+
 const YEAR_MONTH = /^[2-9][0-9]{3}-(0[1-9]|1[0-2])$/;
 const FIRST_MONTH = "2000-01";
 const LAST_MONTH = "9999-12";
@@ -40,10 +42,20 @@ export function hasNextMonth(yearMonth: string): boolean {
   return yearMonth < LAST_MONTH;
 }
 
-export function monthName(yearMonth: string): string {
+function firstDayOf(yearMonth: string): Date {
   const [year, month] = parts(yearMonth);
-  return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "long" }).format(
-    new Date(Date.UTC(year, month - 1, 1)),
+  return new Date(Date.UTC(year, month - 1, 1));
+}
+
+// "November", "noviembre": lower case in Spanish, as it reads inside a sentence.
+export function monthName(yearMonth: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(languageTag(locale), { timeZone: "UTC", month: "long" }).format(firstDayOf(yearMonth));
+}
+
+// "November 2026", "noviembre de 2026".
+export function monthLabel(yearMonth: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(languageTag(locale), { timeZone: "UTC", month: "long", year: "numeric" }).format(
+    firstDayOf(yearMonth),
   );
 }
 

@@ -11,6 +11,7 @@ import {
 } from "../../domain/card-forms";
 import type { CreditCard } from "../../domain/types";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
@@ -49,12 +50,13 @@ export function CardChargeForm({
   const hasNoCards = cards.length === 0;
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, cards: t } = useMessages();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <Field
-        label="Amount in pesos"
+        label={common.amountInPesos}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -65,35 +67,35 @@ export function CardChargeForm({
       />
       <div className="flex flex-col gap-2">
         <SelectField
-          label="Card"
+          label={t.card}
           disabled={hasNoCards}
           error={errors.cardId?.message}
           options={[
-            { value: "", label: cardIsRequired ? "Choose a card" : "Keep without a card" },
+            { value: "", label: cardIsRequired ? t.chooseCard : t.keepWithoutCard },
             ...cards.map((card) => ({ value: card.id, label: card.name })),
           ]}
           {...register("cardId")}
         />
         {hasNoCards && cardIsRequired ? (
           <p className="text-sm text-muted-foreground">
-            A card charge needs a card. Add your first one under Cards, below.
+            {t.needsCard}
           </p>
         ) : null}
       </div>
       <SelectField
-        label="Tag"
+        label={common.tag}
         options={[
-          { value: "", label: "No tag" },
+          { value: "", label: common.noTag },
           ...tags.map((tag) => ({ value: tag.id, label: tag.name })),
         ]}
         {...register("tagId")}
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending || (hasNoCards && cardIsRequired)}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

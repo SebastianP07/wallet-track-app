@@ -19,6 +19,17 @@
   `CheckboxField` and `useActiveTemplateIds` (shares the templates query), and item writes refresh the templates list.
   Contract and types refreshed.
 
+- Language switch (ES/EN): typed dictionaries in `src/shared/i18n/messages/`, one file per area holding both languages,
+  the Spanish object typed by the English one so a missing key fails `pnpm typecheck`. `I18nProvider` in the root
+  layout takes the locale the server read from the `locale` cookie (default `es`, never guessed from Accept-Language),
+  sets `<html lang>` (`es-CO` or `en-US`) and the metadata titles; `LanguageSwitch` (two `aria-pressed` buttons in a
+  named group) writes the cookie, rewords the page at once and refreshes the server render. Zod schemas carry message
+  keys that `Field` and `SelectField` word, and every section's failure is kept as a function of the messages, so an
+  error on screen follows a switch. Month names and dates use `Intl` in the chosen language; money is unchanged.
+  `public/offline.js` now loads from `<head>`, reads the cookie and sets `<html lang>` before the body is drawn, and
+  `offline.html` carries both notices, with CSS showing one. The manifest stays in Spanish, since browsers fetch it
+  without cookies. No new dependencies, no new automated tests (T7).
+
 ## 0.16.0 — 2026-11-07 — Production-like local stack
 
 - `Dockerfile`: the web image for the production-like stack and Railway, on `node:26.13.0-trixie-slim` pinned by digest. pnpm

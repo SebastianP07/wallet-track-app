@@ -2,12 +2,13 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-import { DASHBOARD_SECTIONS } from "../../domain/sections";
+import { DASHBOARD_SECTIONS, type DashboardSectionId } from "../../domain/sections";
 import { SectionFrame } from "./section-frame";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 // Stacked on mobile. Wider screens pair sections of like height, so no row is held open by one tall
 // neighbour, and the two longest of a pair take the wider slot.
-const SPANS: Record<string, string> = {
+const SPANS: Record<DashboardSectionId, string> = {
   kpis: "md:col-span-6 lg:col-span-12",
   charts: "md:col-span-6 lg:col-span-12",
   accounts: "md:col-span-6 lg:col-span-12",
@@ -39,21 +40,17 @@ function useSectionsToRender(total: number): number {
 }
 
 interface SectionGridProps {
-  sections: Record<string, ReactNode>;
+  sections: Record<DashboardSectionId, ReactNode>;
 }
 
 export function SectionGrid({ sections }: SectionGridProps) {
   const sectionsToRender = useSectionsToRender(DASHBOARD_SECTIONS.length);
+  const titles = useMessages().dashboard.sections;
   return (
     <div className="rise-in-children grid grid-cols-1 gap-px border border-rule bg-rule md:grid-cols-6 lg:grid-cols-12">
-      {DASHBOARD_SECTIONS.map((section, index) => (
-        <SectionFrame
-          key={section.id}
-          section={section}
-          position={index + 1}
-          className={SPANS[section.id]}
-        >
-          {index < sectionsToRender ? sections[section.id] : null}
+      {DASHBOARD_SECTIONS.map((id, index) => (
+        <SectionFrame key={id} section={{ id, ...titles[id] }} position={index + 1} className={SPANS[id]}>
+          {index < sectionsToRender ? sections[id] : null}
         </SectionFrame>
       ))}
     </div>

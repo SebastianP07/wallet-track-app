@@ -2,6 +2,7 @@ import { cn } from "cn";
 
 import { formatCOP } from "@/modules/accounts/domain/money";
 import { kpiGroups, type KnownKpis, type KpiGroup, type KpiTile } from "../../domain/kpi-tiles";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 // Each row of tiles fills its width at every size, so no count leaves a hole in the grid: two across a
 // phone, with the first of three alone on its row, and all of a group on one row from a tablet up.
@@ -49,7 +50,7 @@ interface KpiOverviewProps {
 }
 
 export function KpiOverview({ kpis, note, isSettling }: KpiOverviewProps) {
-  const [standing, month] = kpiGroups(kpis);
+  const [standing, month] = kpiGroups(kpis, useMessages());
   return (
     <div className={cn("flex flex-col gap-4 transition-opacity", isSettling && "opacity-60")}>
       <Group group={standing} />

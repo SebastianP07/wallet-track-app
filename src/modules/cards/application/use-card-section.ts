@@ -5,6 +5,7 @@ import type { CardsRepository } from "./cards-repository";
 import { describeCardFailure } from "../domain/failures";
 import type { CreditCardCreate, CreditCardUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import {
   CREDIT_CARDS_KEY,
   PERIOD_ITEMS_KEY,
@@ -16,7 +17,8 @@ import {
 // in the per-card totals, while deleting one changes rows in other sections and in other months.
 export function useCardSection(repository: CardsRepository, onSessionEnded: () => void) {
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
 
   const query = useQuery({
     queryKey: CREDIT_CARDS_KEY,
@@ -38,7 +40,8 @@ export function useCardSection(repository: CardsRepository, onSessionEnded: () =
         onSessionEnded();
         return;
       }
-      setFailure(describeCardFailure(statusOf(error)));
+      const status = statusOf(error);
+      setFailure(() => (current: typeof messages) => describeCardFailure(status, current));
     },
     onSettled: () =>
       Promise.all([
@@ -72,7 +75,7 @@ export function useCardSection(repository: CardsRepository, onSessionEnded: () =
     loadFailed: query.isError && !query.data,
     refreshFailed: query.isError && Boolean(query.data),
     reload: () => void query.refetch(),
-    failure,
+    failure: failure?.(messages) ?? null,
     isCreating: create.isPending,
     isUpdating: update.isPending,
     createCard: create.mutate,

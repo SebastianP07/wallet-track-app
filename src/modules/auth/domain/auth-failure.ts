@@ -1,3 +1,5 @@
+import type { Messages } from "@/shared/i18n/messages";
+
 export type AuthOperation =
   | "password"
   | "passkey"
@@ -7,47 +9,41 @@ export type AuthOperation =
   | "enrollment-confirm"
   | "logout";
 
-const REJECTED: Record<AuthOperation, string> = {
-  password: "That email and password were not accepted.",
-  passkey: "That passkey was not accepted. Try again, use a code instead, or start over if this has taken a while.",
-  totp: "That code was not accepted. Try the next one, or start over if this has taken a while.",
-  "recovery-code": "That recovery code was not accepted. Try another, or start over.",
-  "enrollment-secret": "That enrollment secret was not accepted, or it has expired.",
-  "enrollment-confirm": "That code was not accepted. Try the next one, or start over.",
-  logout: "Your session has already ended.",
-};
-
-export function formatWait(seconds: number): string {
+export function formatWait(seconds: number, messages: Messages): string {
+  const t = messages.common;
   if (seconds < 60) {
-    return `${seconds} ${seconds === 1 ? "second" : "seconds"}`;
+    return t.seconds(seconds);
   }
   if (seconds < 3600) {
-    const minutes = Math.ceil(seconds / 60);
-    return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+    return t.minutes(Math.ceil(seconds / 60));
   }
-  const hours = Math.ceil(seconds / 3600);
-  return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+  return t.hours(Math.ceil(seconds / 3600));
+}
+
+export function describeTooMany(retryAfterSeconds: number | null, messages: Messages): string {
+  return retryAfterSeconds === null
+    ? messages.common.tooManyAttempts
+    : messages.common.tooManyAttemptsWait(formatWait(retryAfterSeconds, messages));
 }
 
 export function describeAuthFailure(
   operation: AuthOperation,
   status: number,
   retryAfterSeconds: number | null,
+  messages: Messages,
 ): string {
   switch (status) {
     case 400:
-      return "Check what you entered and try again.";
+      return messages.common.checkInput;
     case 401:
-      return REJECTED[operation];
+      return messages.auth.failures.rejected[operation];
     case 403:
-      return "This request could not be verified. Reload the page and try again.";
+      return messages.common.unverified;
     case 409:
-      return "Two-factor authentication is already set up. Sign in again.";
+      return messages.auth.failures.alreadyEnrolled;
     case 429:
-      return retryAfterSeconds === null
-        ? "Too many attempts. Try again later."
-        : `Too many attempts. Try again in ${formatWait(retryAfterSeconds)}.`;
+      return describeTooMany(retryAfterSeconds, messages);
     default:
-      return "Wallet Track can't reach its server right now. Try again in a moment.";
+      return messages.common.unreachableShort;
   }
 }

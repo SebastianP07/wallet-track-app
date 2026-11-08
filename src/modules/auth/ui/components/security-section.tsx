@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import type { ActiveSession, Passkey, SecondFactorProof } from "../../domain/types";
 import { PasskeyRow } from "./passkey-row";
 import { SessionRow } from "./session-row";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -46,27 +47,30 @@ interface SessionsProps extends ListState {
 
 function ListFrame({
   title,
-  noun,
+  loadFailedText,
+  refreshFailedText,
   state,
   children,
 }: {
   title: string;
-  noun: string;
+  loadFailedText: string;
+  refreshFailedText: string;
   state: ListState;
   children: ReactNode;
 }) {
+  const t = useMessages().common;
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <h4 className="font-mono text-xs tracking-wide text-muted-foreground">{title}</h4>
       {state.isLoading ? (
         <div role="status" className="ledger-rows flex h-18 items-end">
-          <p className="pb-2 font-mono text-xs text-muted-foreground">Loading…</p>
+          <p className="pb-2 font-mono text-xs text-muted-foreground">{t.loading}</p>
         </div>
       ) : state.loadFailed ? (
         <div className="flex flex-col items-start gap-3">
-          <FormAlert message={`The ${noun} could not be loaded.`} />
+          <FormAlert message={loadFailedText} />
           <Button variant="outline" onClick={state.reload}>
-            Try again
+            {t.tryAgain}
           </Button>
         </div>
       ) : (
@@ -74,7 +78,7 @@ function ListFrame({
           <FormAlert message={state.failure} />
           {state.refreshFailed ? (
             <p className="text-sm text-muted-foreground">
-              Showing the last {noun} received; they could not be refreshed.
+              {refreshFailedText}
             </p>
           ) : null}
           {children}
@@ -87,12 +91,18 @@ function ListFrame({
 function PasskeysBlock(props: PasskeysProps) {
   const { passkeys, isSupported, isAdding, isRenaming, isRemoving } = props;
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const t = useMessages().security;
 
   return (
-    <ListFrame title="PASSKEYS" noun="passkeys" state={props}>
+    <ListFrame
+      title={t.passkeys}
+      loadFailedText={t.passkeysLoadFailed}
+      refreshFailedText={t.passkeysRefreshFailed}
+      state={props}
+    >
       {passkeys.length === 0 ? (
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-          No passkeys yet. Add one to sign in with your device&apos;s screen lock instead of typing a code.
+          {t.noPasskeys}
         </p>
       ) : (
         <ul className="flex flex-col">
@@ -112,7 +122,7 @@ function PasskeysBlock(props: PasskeysProps) {
 
       {!isSupported ? (
         <p className="text-sm text-muted-foreground">
-          This browser can&apos;t create passkeys. You can still rename or remove the ones listed here.
+          {t.cannotCreate}
         </p>
       ) : isFormOpen ? (
         <div className="border-t border-rule pt-3">
@@ -126,7 +136,7 @@ function PasskeysBlock(props: PasskeysProps) {
         </div>
       ) : (
         <Button variant="outline" className="lg:self-start" onClick={() => setIsFormOpen(true)}>
-          Add passkey
+          {t.addPasskey}
         </Button>
       )}
     </ListFrame>
@@ -134,8 +144,14 @@ function PasskeysBlock(props: PasskeysProps) {
 }
 
 function SessionsBlock(props: SessionsProps) {
+  const t = useMessages().security;
   return (
-    <ListFrame title="ACTIVE SESSIONS" noun="sessions" state={props}>
+    <ListFrame
+      title={t.activeSessions}
+      loadFailedText={t.sessionsLoadFailed}
+      refreshFailedText={t.sessionsRefreshFailed}
+      state={props}
+    >
       <ul className="flex flex-col">
         {props.sessions.map((session) => (
           <SessionRow

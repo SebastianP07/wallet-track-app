@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { accountBalanceSchema } from "../../domain/account-forms";
 import { flipCopInputSign, formatCopInput } from "../../domain/money";
 import { MoneyField } from "./money-field";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 interface AccountBalanceFormProps {
@@ -29,6 +30,7 @@ export function AccountBalanceForm({ balance, onSubmit, onCancel }: AccountBalan
   });
 
   useEffect(() => setFocus("balance", { shouldSelect: true }), [setFocus]);
+  const { common, accounts } = useMessages();
 
   return (
     <form
@@ -37,17 +39,17 @@ export function AccountBalanceForm({ balance, onSubmit, onCancel }: AccountBalan
       className="flex flex-col gap-2 pt-1"
     >
       <MoneyField
-        label="New balance in pesos"
+        label={accounts.newBalanceInPesos}
         error={errors.balance?.message}
         onFlipSign={() => setValue("balance", flipCopInputSign(getValues("balance")))}
         {...register("balance")}
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1">
-          Save balance
+          {accounts.saveBalance}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

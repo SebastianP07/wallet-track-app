@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 interface RecoveryCodesDisplayProps {
@@ -13,6 +14,7 @@ export function RecoveryCodesDisplay({ codes, onContinue }: RecoveryCodesDisplay
   const [acknowledged, setAcknowledged] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const acknowledgeId = useId();
+  const t = useMessages().auth;
 
   useEffect(() => headingRef.current?.focus(), []);
 
@@ -34,11 +36,10 @@ export function RecoveryCodesDisplay({ codes, onContinue }: RecoveryCodesDisplay
         tabIndex={-1}
         className="font-heading text-xl font-semibold outline-none"
       >
-        Save your recovery codes
+        {t.saveCodes}
       </h3>
       <p className="text-sm text-muted-foreground">
-        Each one works once if you lose your authenticator. They will never be shown again, and
-        nothing here keeps a copy. Tap the list to select it all.
+        {t.saveCodesHelp}
       </p>
       <ol className="receipt-edge grid grid-cols-1 gap-x-4 gap-y-2.5 rounded-b-md bg-card px-4 pt-6 pb-4 font-mono text-sm select-all min-[26rem]:grid-cols-2">
         {codes.map((code) => (
@@ -58,10 +59,10 @@ export function RecoveryCodesDisplay({ codes, onContinue }: RecoveryCodesDisplay
           onChange={(event) => setAcknowledged(event.target.checked)}
           className="size-5 shrink-0 accent-signal"
         />
-        I saved these codes somewhere safe.
+        {t.savedCodes}
       </label>
       <Button disabled={!acknowledged} onClick={onContinue}>
-        Continue to the dashboard
+        {t.continueToDashboard}
       </Button>
     </section>
   );

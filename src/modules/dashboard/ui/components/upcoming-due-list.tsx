@@ -6,10 +6,10 @@ import { formatCOP } from "@/modules/accounts/domain/money";
 import { formatDueDate } from "@/modules/expenses/domain/expense-groups";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 import { UrgencyBadge } from "@/modules/expenses/ui/components/urgency-badge";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 const SHOWN_AT_FIRST = 6;
-const KIND_LABEL: Partial<Record<PeriodItem["kind"], string>> = { fixed: "Fixed", occasional: "Occasional" };
 
 interface UpcomingDueListProps {
   items: PeriodItem[];
@@ -18,13 +18,16 @@ interface UpcomingDueListProps {
 
 export function UpcomingDueList({ items, period }: UpcomingDueListProps) {
   const [showsAll, setShowsAll] = useState(false);
+  const { locale, messages } = useI18n();
+  const t = messages.dashboard.upcoming;
+  const kinds: Partial<Record<PeriodItem["kind"], string>> = messages.expenses.kinds;
   const shown = showsAll ? items : items.slice(0, SHOWN_AT_FIRST);
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <h4 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">Upcoming due</h4>
+      <h4 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">{t.title}</h4>
       {items.length === 0 ? (
         <p className="ledger-rows flex h-55 items-center justify-center text-sm text-muted-foreground">
-          <span className="bg-background px-2">Nothing pending this month.</span>
+          <span className="bg-background px-2">{t.nothingPending}</span>
         </p>
       ) : (
         <ol className="flex flex-col">
@@ -35,8 +38,8 @@ export function UpcomingDueList({ items, period }: UpcomingDueListProps) {
                 <span className="shrink-0 font-mono text-xs tabular-nums">{formatCOP(item.amount)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                <span>{item.dueDate ? `Due ${formatDueDate(item.dueDate, period)}` : "No due date"}</span>
-                <span>· {KIND_LABEL[item.kind]}</span>
+                <span>{item.dueDate ? t.due(formatDueDate(item.dueDate, period, locale)) : t.noDueDate}</span>
+                <span>· {kinds[item.kind]}</span>
                 <UrgencyBadge item={item} />
               </div>
             </li>
@@ -45,7 +48,7 @@ export function UpcomingDueList({ items, period }: UpcomingDueListProps) {
       )}
       {items.length > SHOWN_AT_FIRST ? (
         <Button variant="link" className="w-fit px-0" onClick={() => setShowsAll(!showsAll)}>
-          {showsAll ? "Show fewer" : `Show all ${items.length}`}
+          {showsAll ? t.showFewer : t.showAll(items.length)}
         </Button>
       ) : null}
     </div>

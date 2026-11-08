@@ -11,7 +11,7 @@ import { CardChargeSectionContainer } from "@/modules/cards/ui/containers/card-c
 import { ExpenseSectionContainer } from "@/modules/expenses/ui/containers/expense-section-container";
 import { IncomeSectionContainer } from "@/modules/income/ui/containers/income-section-container";
 import { OverdueSectionContainer } from "@/modules/overdue/ui/containers/overdue-section-container";
-import { monthName, yearOf } from "@/modules/periods/domain/year-month";
+import { monthLabel } from "@/modules/periods/domain/year-month";
 import { PeriodStatusContainer } from "@/modules/periods/ui/containers/period-status-container";
 import { TemplateSectionContainer } from "@/modules/periods/ui/containers/template-section-container";
 import { PlatformSectionContainer } from "@/modules/platforms/ui/containers/platform-section-container";
@@ -19,6 +19,7 @@ import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
 import { TagFilter } from "@/modules/tags/ui/components/tag-filter";
 import { TagSectionContainer } from "@/modules/tags/ui/containers/tag-section-container";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { clearOfflineData } from "@/shared/pwa/offline-data";
 import { useOnlineStatus } from "@/shared/pwa/use-online-status";
 import { Button } from "@/shared/ui/button";
@@ -43,6 +44,7 @@ export function DashboardContainer({
   currentPeriod,
 }: DashboardContainerProps) {
   const [period, setPeriod] = useState(initialPeriod);
+  const { locale, messages } = useI18n();
   // Every way a session ends here passes through this, so the saved Dashboard goes with it.
   const goToLogin = useCallback(() => {
     void clearOfflineData().finally(() => window.location.replace("/login"));
@@ -109,7 +111,7 @@ export function DashboardContainer({
         href="#main"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-2 focus-visible:z-30 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-4 focus-visible:py-3 focus-visible:font-semibold focus-visible:text-primary-foreground"
       >
-        Skip to the month
+        {messages.dashboard.skipToMonth}
       </a>
       <OfflineBannerContainer isOffline={!isOnline} period={period} onSessionEnded={goToLogin} />
       {/* A disabled fieldset turns off every control inside at once, so a section added later cannot miss it. */}
@@ -127,7 +129,7 @@ export function DashboardContainer({
               <MonthSwitcher period={period} onChange={changePeriod} />
               {period === currentPeriod ? null : (
                 <Button variant="link" className="w-fit px-0" onClick={() => changePeriod(currentPeriod)}>
-                  Go to {monthName(currentPeriod)} {yearOf(currentPeriod)}
+                  {messages.dashboard.goToMonth(monthLabel(currentPeriod, locale))}
                 </Button>
               )}
               <PeriodStatusContainer key={period} period={period} onSessionEnded={goToLogin} />

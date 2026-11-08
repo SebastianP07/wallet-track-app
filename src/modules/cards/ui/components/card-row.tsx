@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import type { CardDraft } from "../../domain/card-forms";
 import type { CreditCard, CreditCardUpdate } from "../../domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
@@ -23,27 +24,28 @@ interface CardRowProps {
 
 export function CardRow({ card, isUpdating, onUpdate, onDelete }: CardRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { common, cards: t, expenses } = useMessages();
   const toView = () => setMode("view");
 
   return (
     <li className="flex flex-col gap-1 border-t border-rule py-2">
       <span className="font-medium wrap-anywhere">{card.name}</span>
       <span className="text-xs text-muted-foreground wrap-anywhere">
-        {card.issuer} · Statement on day {card.statementDay} · Due on day {card.dueDay}
+        {t.cardDays(card.issuer, card.statementDay, card.dueDay)}
       </span>
 
       {mode === "view" ? (
         <div className="flex flex-wrap items-center">
-          <Button variant="link" className={ACTION} aria-label={`Edit card ${card.name}`} onClick={() => setMode("edit")}>
-            Edit
+          <Button variant="link" className={ACTION} aria-label={t.editCard(card.name)} onClick={() => setMode("edit")}>
+            {common.edit}
           </Button>
           <Button
             variant="link"
             className={ACTION}
-            aria-label={`Delete card ${card.name}`}
+            aria-label={t.deleteCard(card.name)}
             onClick={() => setMode("confirm-delete")}
           >
-            Delete
+            {common.delete}
           </Button>
         </div>
       ) : null}
@@ -56,7 +58,7 @@ export function CardRow({ card, isUpdating, onUpdate, onDelete }: CardRowProps) 
             statementDay: String(card.statementDay),
             dueDay: String(card.dueDay),
           }}
-          submitLabel="Save changes"
+          submitLabel={expenses.saveChanges}
           pending={isUpdating}
           onCancel={toView}
           onSubmit={(changes: CardDraft) => onUpdate(changes, { onSuccess: toView })}
@@ -65,16 +67,16 @@ export function CardRow({ card, isUpdating, onUpdate, onDelete }: CardRowProps) 
 
       {mode === "confirm-delete" ? (
         <ConfirmPanel
-          confirmLabel="Delete"
+          confirmLabel={common.delete}
           onConfirm={() => {
             onDelete();
             toView();
           }}
           onKeep={toView}
         >
-          Delete <span className="font-medium wrap-anywhere">{card.name}</span> for good? Its active
-          card charge templates become inactive, so months opened from now on won&apos;t get those
-          charges. Charges already in a month stay, under Deleted card.
+          {t.deleteBefore}
+          <span className="font-medium wrap-anywhere">{card.name}</span>
+          {t.deleteAfter}
         </ConfirmPanel>
       ) : null}
     </li>

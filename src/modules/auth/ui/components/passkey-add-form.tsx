@@ -7,6 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { addPasskeySchema, toProof, type AddPasskeyValues } from "../../domain/security-forms";
 import type { SecondFactorProof } from "../../domain/types";
 import { ProofFields } from "./proof-fields";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 
@@ -32,6 +33,7 @@ export function PasskeyAddForm({ pending, onSubmit, onCancel }: PasskeyAddFormPr
   const method = useWatch({ control, name: "method" });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, security: t } = useMessages();
 
   return (
     <form
@@ -47,8 +49,8 @@ export function PasskeyAddForm({ pending, onSubmit, onCancel }: PasskeyAddFormPr
       )}
     >
       <Field
-        label="Passkey name"
-        hint="To tell it apart later, like “Work laptop”."
+        label={t.passkeyName}
+        hint={t.passkeyNameHint}
         autoComplete="off"
         error={errors.name?.message}
         {...register("name")}
@@ -61,10 +63,10 @@ export function PasskeyAddForm({ pending, onSubmit, onCancel }: PasskeyAddFormPr
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Waiting…" : "Add passkey"}
+          {pending ? t.waiting : t.addPasskey}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

@@ -1,8 +1,8 @@
-import { kindLabel } from "../../domain/overdue-groups";
 import { formatDueDate } from "@/modules/expenses/domain/expense-groups";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
-import { monthName, yearOf } from "@/modules/periods/domain/year-month";
+import { monthLabel } from "@/modules/periods/domain/year-month";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import type { Tag } from "@/modules/tags/domain/types";
 
 const DETAIL = "text-xs whitespace-nowrap text-muted-foreground";
@@ -15,6 +15,8 @@ interface OverdueRowProps {
 
 // Editing and deleting stay in the item's own month, which the row names as where it comes from (D7).
 export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
+  const { locale, messages } = useI18n();
+  const t = messages.overdue;
   return (
     <ItemRow
       item={item}
@@ -24,11 +26,11 @@ export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
       details={
         <>
           <span className="text-xs font-medium whitespace-nowrap">
-            From {monthName(item.period)} {yearOf(item.period)}
+            {t.from(monthLabel(item.period, locale))}
           </span>
-          <span className={DETAIL}>{kindLabel(item)}</span>
-          {item.dueDate ? <span className={DETAIL}>Due {formatDueDate(item.dueDate, item.period)}</span> : null}
-          {item.personId ? <span className={DETAIL}>Shared platforms</span> : null}
+          <span className={DETAIL}>{t.kinds[item.kind]}</span>
+          {item.dueDate ? <span className={DETAIL}>{messages.expenses.due(formatDueDate(item.dueDate, item.period, locale))}</span> : null}
+          {item.personId ? <span className={DETAIL}>{messages.income.sharedPlatforms}</span> : null}
         </>
       }
     />

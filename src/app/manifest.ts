@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+import { DEFAULT_LOCALE, languageTag } from "@/shared/i18n/locale";
+import { MESSAGES } from "@/shared/i18n/messages";
+
 const BLACK = "#0a0a0a";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -7,7 +10,9 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "Wallet Track",
     short_name: "Wallet Track",
-    description: "Private monthly cash control.",
+    // A browser fetches the manifest without cookies, so it cannot follow the chosen language: it is in the default one.
+    description: MESSAGES[DEFAULT_LOCALE].common.appDescription,
+    lang: languageTag(DEFAULT_LOCALE),
     start_url: "/",
     scope: "/",
     display: "standalone",

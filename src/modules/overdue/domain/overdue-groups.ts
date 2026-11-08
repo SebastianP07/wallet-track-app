@@ -1,29 +1,9 @@
 import type { OverdueItemList } from "./types";
-import type { ItemListCopy } from "@/modules/expenses/domain/expense-groups";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 
-export const OVERDUE_COPY: ItemListCopy & { notOpened: string } = {
-  empty: "Nothing overdue. Earlier months left nothing unpaid for this one.",
-  notOpened: "Open this month to see what it owes from earlier months.",
-  filtered: "No overdue items with this tag.",
-  loadFailed: "The overdue list could not be loaded.",
-  refreshFailed: "Showing the overdue items last loaded; they could not be refreshed.",
-};
-
-const KIND_LABELS: Record<PeriodItem["kind"], string> = {
-  fixed: "Fixed",
-  occasional: "Occasional",
-  income: "Income",
-  card_charge: "Card charge",
-};
-
-export function kindLabel(item: PeriodItem): string {
-  return KIND_LABELS[item.kind];
-}
-
 export interface OverdueGroup {
+  // Also the key of its title in the messages.
   id: "expenses" | "income";
-  title: string;
   total: number;
   items: PeriodItem[];
 }
@@ -36,13 +16,11 @@ export function groupOverdue(list: OverdueItemList | undefined, items: PeriodIte
   const groups: OverdueGroup[] = [
     {
       id: "expenses",
-      title: "Expenses this month owes",
       total: list.expenseTotal,
       items: items.filter((item) => item.kind !== "income"),
     },
     {
       id: "income",
-      title: "Income to receive",
       total: list.incomeTotal,
       items: items.filter((item) => item.kind === "income"),
     },

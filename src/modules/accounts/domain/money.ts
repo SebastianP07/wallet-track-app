@@ -1,8 +1,10 @@
+import type { ValidationKey } from "@/shared/i18n/validation-key";
+
 const GROUPED = /^[0-9]{1,3}(?:([.,\s])[0-9]{3})(?:\1[0-9]{3})*$/;
 const PLAIN = /^[0-9]+$/;
 const MINUS = /^[-−]/;
 
-export type CopParseResult = { ok: true; value: number } | { ok: false; error: string };
+export type CopParseResult = { ok: true; value: number } | { ok: false; error: ValidationKey };
 
 function groupThousands(digits: string): string {
   return digits.replace(/\B(?=(\d{3})+$)/g, ".");
@@ -26,11 +28,11 @@ export function parseCopInput(input: string): CopParseResult {
   const negative = MINUS.test(trimmed);
   const unsigned = trimmed.replace(MINUS, "").replace(/^\$\s*/, "");
   if (!PLAIN.test(unsigned) && !GROUPED.test(unsigned)) {
-    return { ok: false, error: "Enter whole pesos, like 1.250.000 or -35.000. No decimals." };
+    return { ok: false, error: "wholePesos" };
   }
   const magnitude = Number(unsigned.replace(/[.,\s]/g, ""));
   if (!Number.isSafeInteger(magnitude)) {
-    return { ok: false, error: "That amount is too large." };
+    return { ok: false, error: "amountTooLarge" };
   }
   return { ok: true, value: negative && magnitude !== 0 ? -magnitude : magnitude };
 }

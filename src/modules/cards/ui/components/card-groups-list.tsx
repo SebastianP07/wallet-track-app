@@ -4,6 +4,7 @@ import { cn } from "cn";
 import type { CardGroup } from "../../domain/card-groups";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 interface CardGroupsListProps {
@@ -23,18 +24,19 @@ export function CardGroupsList({
   reloadTotals,
   renderRow,
 }: CardGroupsListProps) {
+  const { common, cards: t } = useMessages();
   return (
     <div className="flex flex-col gap-4">
       {totalsLoadFailed ? (
         <div className="flex items-center gap-3">
-          <p className="text-sm text-muted-foreground">The per-card totals could not be loaded.</p>
+          <p className="text-sm text-muted-foreground">{t.totalsLoadFailed}</p>
           <Button variant="link" className="shrink-0 px-2" onClick={reloadTotals}>
-            Try again
+            {common.tryAgain}
           </Button>
         </div>
       ) : null}
       {isFiltered ? (
-        <p className="text-sm text-muted-foreground">Card totals cover the whole month, whatever the tag.</p>
+        <p className="text-sm text-muted-foreground">{t.totalsWholeMonth}</p>
       ) : null}
 
       {groups.map((group) => (
@@ -52,12 +54,12 @@ export function CardGroupsList({
           </div>
           {group.cardId === null ? (
             <p className="text-sm text-muted-foreground">
-              Their card was deleted. Edit a charge to move it to another card.
+              {t.cardDeleted}
             </p>
           ) : null}
           {group.items.length === 0 ? (
             <p className="border-t border-rule py-2 text-sm text-muted-foreground">
-              No charges this month.
+              {t.noCharges}
             </p>
           ) : (
             <ul className="flex flex-col">{group.items.map(renderRow)}</ul>

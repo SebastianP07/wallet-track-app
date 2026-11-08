@@ -6,6 +6,8 @@ import { cn } from "cn";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import type { DashboardKpis } from "../../domain/types";
 import { ChartPlaceholder, DeferredChart } from "./deferred-chart";
+import type { Messages } from "@/shared/i18n/messages";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const TotalsBarsChart = dynamic(() => import("./totals-bars-chart").then((module) => module.TotalsBarsChart), {
   ssr: false,
@@ -18,26 +20,27 @@ interface TotalsBarsProps {
   kpis: DashboardKpis;
 }
 
-function rowsOf(kpis: DashboardKpis) {
+function rowsOf(kpis: DashboardKpis, t: Messages["dashboard"]["kpis"]) {
   return [
-    { name: "Total actual", value: kpis.currentTotal, fill: NEUTRAL },
-    { name: "To pay", value: kpis.toPay, fill: NEUTRAL },
+    { name: t.currentTotal, value: kpis.currentTotal, fill: NEUTRAL },
+    { name: t.toPay, value: kpis.toPay, fill: NEUTRAL },
     // The one bar the chart is about, and red when it is under water, its sign printed beside it too.
-    { name: "Left over", value: kpis.surplus, fill: kpis.surplus < 0 ? "var(--destructive)" : "var(--signal)" },
+    { name: t.surplus, value: kpis.surplus, fill: kpis.surplus < 0 ? "var(--destructive)" : "var(--signal)" },
   ];
 }
 
 export function TotalsBars({ kpis }: TotalsBarsProps) {
-  const rows = rowsOf(kpis);
+  const { kpis: kpiLabels, charts: t } = useMessages().dashboard;
+  const rows = rowsOf(kpis, kpiLabels);
   const isAllZero = rows.every((row) => row.value === 0);
   return (
     <figure className="flex min-w-0 flex-col gap-3">
       <figcaption className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-        How the totals compare
+        {t.totalsCompare}
       </figcaption>
       {isAllZero ? (
         <p className="ledger-rows flex h-55 items-center justify-center text-sm text-muted-foreground">
-          <span className="bg-background px-2">All of these are zero this month.</span>
+          <span className="bg-background px-2">{t.allZero}</span>
         </p>
       ) : (
         <DeferredChart className="h-55">
@@ -45,11 +48,11 @@ export function TotalsBars({ kpis }: TotalsBarsProps) {
         </DeferredChart>
       )}
       <table className="w-full text-sm">
-        <caption className="sr-only">The month&apos;s totals: the amounts behind the chart.</caption>
+        <caption className="sr-only">{t.totalsCaption}</caption>
         <thead className="sr-only">
           <tr>
-            <th scope="col">Total</th>
-            <th scope="col">Amount</th>
+            <th scope="col">{t.total}</th>
+            <th scope="col">{t.amount}</th>
           </tr>
         </thead>
         <tbody>

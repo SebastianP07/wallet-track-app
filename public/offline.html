@@ -1,22 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="es-CO">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0a0a0a" />
-    <meta name="description" content="Wallet Track while there is no connection." />
-    <title>Offline · Wallet Track</title>
+    <meta name="description" content="Wallet Track sin conexión." />
+    <title>Sin conexión · Wallet Track</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icons/icon-32.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="/offline.css" />
-    <script src="/offline.js" defer></script>
+    <!-- Not deferred: it sets <html lang> from the locale cookie before the body is drawn, so the language CSS
+         below shows only one notice, with no flash of the other. It waits for the DOM before rendering data. -->
+    <script src="/offline.js"></script>
   </head>
   <body>
     <header class="page-header">
       <h1>Wallet <span class="signal">Track</span></h1>
     </header>
     <main id="content">
-      <div id="no-data" class="notice">
+      <div id="no-data" class="notice" lang="es-CO" data-locale="es">
+        <p>Estás sin conexión y este dispositivo no tiene ningún tablero guardado.</p>
+        <p class="muted">Wallet Track necesita conexión para iniciar sesión y mostrar tus cifras.</p>
+        <a class="action" href="/">Intentar de nuevo</a>
+      </div>
+      <div class="notice" lang="en-US" data-locale="en">
         <p>You&rsquo;re offline, and this device holds no saved Dashboard.</p>
         <p class="muted">Wallet Track needs a connection to sign in and to show your numbers.</p>
         <a class="action" href="/">Try again</a>

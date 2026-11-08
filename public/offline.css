@@ -162,3 +162,14 @@ a:focus-visible {
     scroll-behavior: smooth;
   }
 }
+
+/* Both languages ship in offline.html; offline.js sets <html lang> from the locale cookie before the body is drawn. */
+html[lang^="es"] [data-locale="en"],
+html[lang^="en"] [data-locale="es"] {
+  display: none;
+}
+
+/* Spanish writes month names in lower case; as a heading it still starts with a capital. */
+.month-title::first-letter {
+  text-transform: uppercase;
+}

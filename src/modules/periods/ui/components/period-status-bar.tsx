@@ -4,7 +4,8 @@ import { useState } from "react";
 import { cn } from "cn";
 
 import type { Period } from "../../domain/types";
-import { monthName, yearOf } from "../../domain/year-month";
+import { monthLabel, monthName } from "../../domain/year-month";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 import { FormAlert } from "@/shared/ui/form-alert";
@@ -48,13 +49,15 @@ export function PeriodStatusBar({
   closeMonth,
 }: PeriodStatusBarProps) {
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
-  const month = `${monthName(period)} ${yearOf(period)}`;
+  const { locale, messages } = useI18n();
+  const t = messages.periods;
+  const month = monthLabel(period, locale);
 
   if (isLoading) {
     return (
       // As tall as the bar it turns into, so the page below does not jump when it answers.
       <p role="status" className="min-h-35 font-mono text-xs text-muted-foreground md:min-h-20">
-        Checking this month…
+        {t.checking}
       </p>
     );
   }
@@ -62,9 +65,9 @@ export function PeriodStatusBar({
   if (loadFailed) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <FormAlert message="The status of this month could not be loaded." />
+        <FormAlert message={t.statusLoadFailed} />
         <Button variant="outline" onClick={reload}>
-          Try again
+          {messages.common.tryAgain}
         </Button>
       </div>
     );
@@ -77,23 +80,22 @@ export function PeriodStatusBar({
       {selected === null ? (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2">
-            <StatusLabel>Not opened</StatusLabel>
+            <StatusLabel>{t.notOpened}</StatusLabel>
             <p className="text-sm text-muted-foreground">
-              {month} has no period yet. Opening it copies your active recurring templates into it.
+              {t.notOpenedText(month)}
             </p>
           </div>
           <Button className="shrink-0" disabled={isOpening} onClick={openMonth}>
-            {isOpening ? "Opening…" : "Open month"}
+            {isOpening ? t.opening : t.openMonth}
           </Button>
         </div>
       ) : null}
 
       {selected?.status === "closed" ? (
         <div className="flex flex-col gap-2">
-          <StatusLabel>Closed</StatusLabel>
+          <StatusLabel>{t.closed}</StatusLabel>
           <p className="text-sm text-muted-foreground">
-            {month} is closed. Its unpaid expenses moved to the Overdue section of the next month that is
-            not closed; income still to receive stays here as overdue.
+            {t.closedText(month)}
           </p>
         </div>
       ) : null}
@@ -101,8 +103,8 @@ export function PeriodStatusBar({
       {selected?.status === "open" && !isConfirmingClose ? (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2">
-            <StatusLabel active>Open</StatusLabel>
-            <p className="text-sm text-muted-foreground">{month} is open.</p>
+            <StatusLabel active>{t.open}</StatusLabel>
+            <p className="text-sm text-muted-foreground">{t.openText(month)}</p>
           </div>
           <Button
             variant="outline"
@@ -110,17 +112,17 @@ export function PeriodStatusBar({
             disabled={isClosing}
             onClick={() => setIsConfirmingClose(true)}
           >
-            {isClosing ? "Closing…" : "Close month"}
+            {isClosing ? t.closing : t.closeMonth}
           </Button>
         </div>
       ) : null}
 
       {selected?.status === "open" && isConfirmingClose ? (
         <div className="flex flex-col gap-3">
-          <StatusLabel active>Open</StatusLabel>
+          <StatusLabel active>{t.open}</StatusLabel>
           <ConfirmPanel
-            confirmLabel="Close month"
-            keepLabel="Keep it open"
+            confirmLabel={t.closeMonth}
+            keepLabel={t.keepOpen}
             actionsClassName="md:max-w-md"
             onConfirm={() => {
               closeMonth();
@@ -128,10 +130,7 @@ export function PeriodStatusBar({
             }}
             onKeep={() => setIsConfirmingClose(false)}
           >
-            Close {month}? Every unpaid fixed and occasional item, and everything still in its Overdue
-            section, moves to the Overdue section of the next month that is not closed, where it counts
-            toward to pay. Pending income becomes overdue and stays in {monthName(period)}. Card charges
-            stay as they are. A closed month can&apos;t be reopened.
+            {t.closeConfirm(month, monthName(period, locale))}
           </ConfirmPanel>
         </div>
       ) : null}

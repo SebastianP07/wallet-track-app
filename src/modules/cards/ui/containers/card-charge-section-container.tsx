@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useCardChargeSection } from "../../application/use-card-charge-section";
 import { useCardSection } from "../../application/use-card-section";
-import { CARD_CHARGE_COPY } from "../../domain/card-charge-copy";
 import { groupByCard } from "../../domain/card-groups";
 import { httpCardsRepository } from "../../infrastructure/http-cards-repository";
 import { CardChargeRow } from "../components/card-charge-row";
@@ -16,6 +15,7 @@ import { useSelectedPeriod } from "@/modules/periods/application/use-selected-pe
 import { httpPeriodsRepository } from "@/modules/periods/infrastructure/http-periods-repository";
 import { useTagList } from "@/modules/tags/application/use-tag-list";
 import { httpTagsRepository } from "@/modules/tags/infrastructure/http-tags-repository";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const CardChargeForm = dynamic(() => import("../components/card-charge-form").then((module) => module.CardChargeForm));
 
@@ -32,6 +32,7 @@ export function CardChargeSectionContainer({
   tagId,
   onSessionEnded,
 }: CardChargeSectionContainerProps) {
+  const { common, cards: t } = useMessages();
   const selected = useSelectedPeriod(httpPeriodsRepository, period);
   const { tags } = useTagList(httpTagsRepository);
   const isClosed = selected?.status === "closed";
@@ -62,11 +63,10 @@ export function CardChargeSectionContainer({
   return (
     <div className="flex flex-1 flex-col gap-4">
       <p className="border-l-2 border-signal pl-3 text-sm">
-        Informational: these charges never count toward To pay, Outgoing or Balance. The real outflow
-        is the statement payment, so register that as an occasional expense when you pay the card.
+        {t.informational}
       </p>
       <ItemSection
-        copy={CARD_CHARGE_COPY}
+        copy={t.chargeCopy}
         summary={section.totals?.total ?? null}
         isFiltered={isFiltered}
         isClosed={isClosed}
@@ -86,6 +86,7 @@ export function CardChargeSectionContainer({
               totals: section.totals?.items ?? [],
               cards,
               isFiltered,
+              deletedCardTitle: t.deletedCard,
             })}
             isFiltered={isFiltered}
             totalsLoadFailed={section.totalsLoadFailed}
@@ -100,7 +101,7 @@ export function CardChargeSectionContainer({
             cards={cards}
             cardIsRequired
             tags={tags}
-            submitLabel="Save"
+            submitLabel={common.save}
             pending={section.isCreating}
             onCancel={close}
             onSubmit={(draft) => section.createCharge(draft, { onSuccess: close })}

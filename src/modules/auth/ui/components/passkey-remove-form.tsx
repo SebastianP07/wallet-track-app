@@ -7,6 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { proofSchema, toProof, type ProofValues } from "../../domain/security-forms";
 import type { SecondFactorProof } from "../../domain/types";
 import { ProofFields } from "./proof-fields";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 interface PasskeyRemoveFormProps {
@@ -33,6 +34,7 @@ export function PasskeyRemoveForm({ name, isLast, pending, onSubmit, onCancel }:
   const method = useWatch({ control, name: "method" });
 
   useEffect(() => setFocus("code"), [setFocus]);
+  const { common, security: t } = useMessages();
 
   return (
     <form
@@ -48,10 +50,9 @@ export function PasskeyRemoveForm({ name, isLast, pending, onSubmit, onCancel }:
       )}
     >
       <p className="text-sm">
-        Remove <span className="font-medium wrap-anywhere">{name}</span> for good?{" "}
-        {isLast
-          ? "It's your only passkey, so you'll sign in with your authenticator from now on."
-          : "Your other passkeys keep working."}
+        {t.removeBefore}
+        <span className="font-medium wrap-anywhere">{name}</span>
+        {t.removeAfter} {isLast ? t.onlyPasskey : t.otherPasskeys}
       </p>
       <ProofFields
         method={method}
@@ -61,10 +62,10 @@ export function PasskeyRemoveForm({ name, isLast, pending, onSubmit, onCancel }:
       />
       <div className="flex gap-2">
         <Button type="submit" variant="destructive" className="flex-1" disabled={pending}>
-          {pending ? "Removing…" : "Remove"}
+          {pending ? t.removing : t.remove}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Keep it
+          {common.keepIt}
         </Button>
       </div>
     </form>

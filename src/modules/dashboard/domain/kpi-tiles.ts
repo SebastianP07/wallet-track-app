@@ -1,4 +1,5 @@
 import type { DashboardKpis } from "./types";
+import type { Messages } from "@/shared/i18n/messages";
 
 export interface KpiTile {
   label: string;
@@ -15,10 +16,9 @@ export interface KpiGroup {
 // What a month with no period can still say: balances are current values (D6).
 export type KnownKpis = Partial<DashboardKpis>;
 
-const TODAY = "Today's balances, in any month";
-
 // Every number is the backend's (D1). Tags narrow lists, never these (D5).
-export function kpiGroups(kpis: KnownKpis): [standing: KpiGroup, month: KpiGroup] {
+export function kpiGroups(kpis: KnownKpis, messages: Messages): [standing: KpiGroup, month: KpiGroup] {
+  const t = messages.dashboard.kpis;
   const tile = (label: string, hint: string, value: number | undefined): KpiTile => ({
     label,
     hint,
@@ -26,20 +26,20 @@ export function kpiGroups(kpis: KnownKpis): [standing: KpiGroup, month: KpiGroup
   });
   return [
     {
-      title: "Where you stand",
+      title: t.standing,
       tiles: [
-        tile("Total actual", TODAY, kpis.currentTotal),
-        tile("To pay", "Pending fixed and occasional, plus overdue", kpis.toPay),
-        tile("To arrive", "Pending income", kpis.toReceive),
-        tile("Left over", "Total actual − to pay + to arrive", kpis.surplus),
+        tile(t.currentTotal, t.currentTotalHint, kpis.currentTotal),
+        tile(t.toPay, t.toPayHint, kpis.toPay),
+        tile(t.toReceive, t.toReceiveHint, kpis.toReceive),
+        tile(t.surplus, t.surplusHint, kpis.surplus),
       ],
     },
     {
-      title: "The month's balance",
+      title: t.month,
       tiles: [
-        tile("Coming in", "All income, paid or not", kpis.incoming),
-        tile("Going out", "All fixed, occasional and overdue, paid or not", kpis.outgoing),
-        tile("Balance", "Coming in − going out", kpis.balance),
+        tile(t.incoming, t.incomingHint, kpis.incoming),
+        tile(t.outgoing, t.outgoingHint, kpis.outgoing),
+        tile(t.balance, t.balanceHint, kpis.balance),
       ],
     },
   ];

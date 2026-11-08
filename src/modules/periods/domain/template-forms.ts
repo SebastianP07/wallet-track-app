@@ -1,3 +1,4 @@
+import { issue } from "@/shared/i18n/validation-key";
 import { z } from "@/shared/validation/zod";
 
 import type { TemplateCreate, TemplateUpdate } from "./types";
@@ -26,18 +27,18 @@ export const templateFormSchema = z
       context.addIssue({
         code: "custom",
         path: ["amount"],
-        message: "Enter whole pesos, zero or more, like 1.250.000. No decimals.",
+        message: issue("itemAmount"),
       });
     }
     if (values.kind === "fixed" && !DUE_DAY.test(values.dueDay.trim())) {
       context.addIssue({
         code: "custom",
         path: ["dueDay"],
-        message: "Enter a day between 1 and 31.",
+        message: issue("day"),
       });
     }
     if (values.kind === "card_charge" && !values.cardId) {
-      context.addIssue({ code: "custom", path: ["cardId"], message: "Choose a card." });
+      context.addIssue({ code: "custom", path: ["cardId"], message: issue("card") });
     }
   })
   .transform((values): TemplateCreate => {

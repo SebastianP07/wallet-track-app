@@ -8,12 +8,80 @@
   const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
   const MINUTE_MS = 60 * 1000;
 
-  const dateTime = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
-  const dueDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-  const monthTitle = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  // src/shared/i18n/locale.ts names the cookie and the default too. The app's messages are not reachable from
+  // here, so the few this page needs are copied, with the same words.
+  const LOCALE_COOKIE = "locale";
+  const LANGUAGE_TAGS = { es: "es-CO", en: "en-US" };
+  const cookie = document.cookie.split("; ").find((entry) => entry.startsWith(`${LOCALE_COOKIE}=`));
+  const locale = cookie?.slice(LOCALE_COOKIE.length + 1) === "en" ? "en" : "es";
+  const tag = LANGUAGE_TAGS[locale];
 
-  const DONE_WORD = { fixed: "Paid", occasional: "Paid", income: "Received", card_charge: "Charged" };
-  const PENDING_WORD = { fixed: "To pay", occasional: "To pay", income: "Expected", card_charge: "Expected" };
+  const TEXT = {
+    es: {
+      title: "Sin conexión · Wallet Track",
+      dashboardTitle: "Tablero sin conexión · Wallet Track",
+      description: "Wallet Track sin conexión.",
+      tryAgain: "Intentar de nuevo",
+      saved: (age, at) =>
+        `Estás sin conexión. Este es el tablero guardado ${age} (${at}) y puede estar desactualizado. No se puede cambiar nada hasta que vuelvas a conectarte.`,
+      lessThanMinute: "hace menos de un minuto",
+      minutes: (n) => `hace ${n} minuto${n === 1 ? "" : "s"}`,
+      hours: (n) => `hace ${n} hora${n === 1 ? "" : "s"}`,
+      days: (n) => `hace ${n} día${n === 1 ? "" : "s"}`,
+      done: { fixed: "Pagado", occasional: "Pagado", income: "Recibido", card_charge: "Cobrado" },
+      pending: { fixed: "Por pagar", occasional: "Por pagar", income: "Esperado", card_charge: "Esperado" },
+      overdue: "Vencido",
+      due: (date) => `Vence el ${date}`,
+      from: (month) => `De ${month}`,
+      kpis: ["Total actual", "Por pagar", "Por llegar", "Sobrante", "Llega", "Se va", "Balance"],
+      sections: {
+        accounts: ["Cuentas", "No hay cuentas."],
+        fixed: ["Gastos fijos", "No hay gastos fijos."],
+        occasional: ["Gastos ocasionales", "No hay gastos ocasionales."],
+        income: ["Ingresos", "No hay ingresos."],
+        overdue: ["Vencidos", "No hay nada vencido."],
+        cardCharges: ["Cargos a tarjeta", "No hay cargos a tarjeta."],
+        people: ["Quién debe qué, por mes", "No hay personas."],
+      },
+    },
+    en: {
+      title: "Offline · Wallet Track",
+      dashboardTitle: "Offline Dashboard · Wallet Track",
+      description: "Wallet Track while there is no connection.",
+      tryAgain: "Try again",
+      saved: (age, at) =>
+        `You're offline. This is the Dashboard saved ${age} (${at}), and it may be out of date. Nothing can be changed until you reconnect.`,
+      lessThanMinute: "less than a minute ago",
+      minutes: (n) => `${n} minute${n === 1 ? "" : "s"} ago`,
+      hours: (n) => `${n} hour${n === 1 ? "" : "s"} ago`,
+      days: (n) => `${n} day${n === 1 ? "" : "s"} ago`,
+      done: { fixed: "Paid", occasional: "Paid", income: "Received", card_charge: "Charged" },
+      pending: { fixed: "To pay", occasional: "To pay", income: "Expected", card_charge: "Expected" },
+      overdue: "Overdue",
+      due: (date) => `Due ${date}`,
+      from: (month) => `From ${month}`,
+      kpis: ["Total actual", "To pay", "To arrive", "Left over", "Coming in", "Going out", "Balance"],
+      sections: {
+        accounts: ["Accounts", "No accounts."],
+        fixed: ["Fixed expenses", "No fixed expenses."],
+        occasional: ["Occasional expenses", "No occasional expenses."],
+        income: ["Income", "No income."],
+        overdue: ["Overdue", "Nothing overdue."],
+        cardCharges: ["Card charges", "No card charges."],
+        people: ["Who owes what, per month", "No people."],
+      },
+    },
+  }[locale];
+
+  // This runs from <head>, before the body exists: the CSS shows only the notice in this language.
+  document.documentElement.lang = tag;
+  document.title = TEXT.title;
+  document.querySelector('meta[name="description"]')?.setAttribute("content", TEXT.description);
+
+  const dateTime = new Intl.DateTimeFormat(tag, { dateStyle: "medium", timeStyle: "short" });
+  const dueDate = new Intl.DateTimeFormat(tag, { month: "short", day: "numeric", timeZone: "UTC" });
+  const monthTitle = new Intl.DateTimeFormat(tag, { month: "long", year: "numeric", timeZone: "UTC" });
+  const monthOnly = (period) => monthTitle.format(new Date(`${period}-01T00:00:00Z`));
 
   function el(tag, props = {}, ...children) {
     const node = document.createElement(tag);
@@ -29,12 +97,11 @@
 
   function describeAge(ms) {
     const minutes = Math.floor(ms / MINUTE_MS);
-    if (minutes < 1) return "less than a minute ago";
-    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    if (minutes < 1) return TEXT.lessThanMinute;
+    if (minutes < 60) return TEXT.minutes(minutes);
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days === 1 ? "" : "s"} ago`;
+    if (hours < 24) return TEXT.hours(hours);
+    return TEXT.days(Math.floor(hours / 24));
   }
 
   async function readSaved() {
@@ -88,8 +155,9 @@
   }
 
   function itemDetail(item) {
-    const status = item.status === "done" ? DONE_WORD[item.kind] : item.status === "overdue" ? "Overdue" : PENDING_WORD[item.kind];
-    const due = item.dueDate ? `Due ${dueDate.format(new Date(`${item.dueDate}T00:00:00Z`))} · ` : "";
+    const status =
+      item.status === "done" ? TEXT.done[item.kind] : item.status === "overdue" ? TEXT.overdue : TEXT.pending[item.kind];
+    const due = item.dueDate ? `${TEXT.due(dueDate.format(new Date(`${item.dueDate}T00:00:00Z`)))} · ` : "";
     return `${due}${status}`;
   }
 
@@ -107,46 +175,47 @@
     const { kpis: k, items, accounts, overdue, people, period } = dashboard;
     const ageText = el("p", {});
     const refreshAge = () => {
-      ageText.textContent = `You're offline. This is the Dashboard saved ${describeAge(Date.now() - savedAt)} (${dateTime.format(savedAt)}), and it may be out of date. Nothing can be changed until you reconnect.`;
+      ageText.textContent = TEXT.saved(describeAge(Date.now() - savedAt), dateTime.format(savedAt));
     };
     refreshAge();
     setInterval(refreshAge, MINUTE_MS);
 
-    const month = el("h2", { textContent: monthTitle.format(new Date(`${period.period}-01T00:00:00Z`)) });
+    const month = el("h2", { className: "month-title", textContent: monthOnly(period.period) });
     document.getElementById("content").replaceChildren(
       // Not a live region: it is the page's first content and its age changes each minute.
-      el("div", { className: "banner" }, ageText, el("a", { className: "action", href: "/", textContent: "Try again" })),
+      el("div", { className: "banner" }, ageText, el("a", { className: "action", href: "/", textContent: TEXT.tryAgain })),
       month,
-      kpis([
-        ["Total actual", k.currentTotal],
-        ["To pay", k.toPay],
-        ["To arrive", k.toReceive],
-        ["Left over", k.surplus],
-        ["Coming in", k.incoming],
-        ["Going out", k.outgoing],
-        ["Balance", k.balance],
-      ]),
+      kpis(
+        [k.currentTotal, k.toPay, k.toReceive, k.surplus, k.incoming, k.outgoing, k.balance].map((pesos, index) => [
+          TEXT.kpis[index],
+          pesos,
+        ]),
+      ),
       el(
         "div",
         { className: "grid" },
-        section("Accounts", accountEntries(accounts.items), "No accounts."),
-        section("Fixed expenses", itemEntries(items.items, "fixed"), "No fixed expenses."),
-        section("Occasional expenses", itemEntries(items.items, "occasional"), "No occasional expenses."),
-        section("Income", itemEntries(items.items, "income"), "No income."),
+        section(TEXT.sections.accounts[0], accountEntries(accounts.items), TEXT.sections.accounts[1]),
+        section(TEXT.sections.fixed[0], itemEntries(items.items, "fixed"), TEXT.sections.fixed[1]),
+        section(TEXT.sections.occasional[0], itemEntries(items.items, "occasional"), TEXT.sections.occasional[1]),
+        section(TEXT.sections.income[0], itemEntries(items.items, "income"), TEXT.sections.income[1]),
         section(
-          "Overdue",
-          overdue.items.map((item) => ({ name: item.name, pesos: item.amount, detail: `From ${item.period} · ${itemDetail(item)}` })),
-          "Nothing overdue.",
+          TEXT.sections.overdue[0],
+          overdue.items.map((item) => ({
+            name: item.name,
+            pesos: item.amount,
+            detail: `${TEXT.from(monthOnly(item.period))} · ${itemDetail(item)}`,
+          })),
+          TEXT.sections.overdue[1],
         ),
-        section("Card charges", itemEntries(items.items, "card_charge"), "No card charges."),
+        section(TEXT.sections.cardCharges[0], itemEntries(items.items, "card_charge"), TEXT.sections.cardCharges[1]),
         section(
-          "Who owes what, per month",
+          TEXT.sections.people[0],
           people.items.map((person) => ({ name: person.name, pesos: person.monthlyOwed })),
-          "No people.",
+          TEXT.sections.people[1],
         ),
       ),
     );
-    document.title = "Offline Dashboard · Wallet Track";
+    document.title = TEXT.dashboardTitle;
   }
 
   // Chromium can fire this with navigator.onLine still false while a navigation is on its way, and reloading then
@@ -156,13 +225,14 @@
   });
 
   // Only the Dashboard's own address shows saved numbers; /login and the rest get the plain page.
+  // This script runs from <head>, so the page's content is only there once the document is parsed.
   if (window.location.pathname === "/") {
-    readSaved()
-      .then((saved) => {
+    // On failure the plain offline page is already showing.
+    const savedDashboard = readSaved().catch(() => null);
+    document.addEventListener("DOMContentLoaded", () => {
+      void savedDashboard.then((saved) => {
         if (saved) render(saved);
-      })
-      .catch(() => {
-        // The plain offline page is already showing.
       });
+    });
   }
 })();

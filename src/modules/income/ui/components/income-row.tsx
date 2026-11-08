@@ -4,11 +4,9 @@ import { formatCopInput } from "@/modules/accounts/domain/money";
 import type { PeriodItem, PeriodItemUpdate } from "@/modules/expenses/domain/types";
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const IncomeForm = dynamic(() => import("./income-form").then((module) => module.IncomeForm));
-
-const PLATFORM_ITEM_DELETE_NOTE =
-  "A payment recorded for it stays, with its coverage. Opening the month again won't bring this item back.";
 
 interface IncomeRowProps {
   item: PeriodItem;
@@ -20,6 +18,7 @@ interface IncomeRowProps {
 }
 
 export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }: IncomeRowProps) {
+  const { income: t, expenses } = useMessages();
   return (
     <ItemRow
       item={item}
@@ -28,12 +27,12 @@ export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }
       doneWord="received"
       onSetDone={onSetDone}
       onDelete={onDelete}
-      deleteNote={item.personId ? PLATFORM_ITEM_DELETE_NOTE : undefined}
+      deleteNote={item.personId ? t.platformDeleteNote : undefined}
       details={
         <>
           <IncomeStatusBadge status={item.status} />
           {item.personId ? (
-            <span className="text-xs whitespace-nowrap text-muted-foreground">Shared platforms</span>
+            <span className="text-xs whitespace-nowrap text-muted-foreground">{t.sharedPlatforms}</span>
           ) : null}
         </>
       }
@@ -45,7 +44,7 @@ export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }
             tagId: item.tagId ?? "",
           }}
           tags={tags}
-          submitLabel="Save changes"
+          submitLabel={expenses.saveChanges}
           onCancel={close}
           onSubmit={({ name, amount, tagId }) => {
             onUpdate({ name, amount, tagId });

@@ -1,13 +1,17 @@
 import { useId, type ComponentProps } from "react";
 
+import { useMessages } from "@/shared/i18n/use-i18n";
+import { fieldError } from "@/shared/i18n/validation-key";
+
 interface SelectFieldProps extends ComponentProps<"select"> {
   label: string;
   options: readonly { value: string; label: string }[];
   error?: string;
 }
 
-export function SelectField({ label, options, error, ...selectProps }: SelectFieldProps) {
+export function SelectField({ label, options, error: errorKey, ...selectProps }: SelectFieldProps) {
   const id = useId();
+  const error = fieldError(useMessages(), errorKey);
   const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-2">

@@ -1,11 +1,14 @@
+import { issue } from "@/shared/i18n/validation-key";
 import { z } from "@/shared/validation/zod";
 
 import { nameField } from "@/modules/accounts/domain/account-forms";
 import { ITEM_AMOUNT_MESSAGE, parseItemAmount } from "@/modules/expenses/domain/expense-forms";
 import { currentYearMonth } from "@/modules/periods/domain/year-month";
+import { languageTag, type Locale } from "@/shared/i18n/locale";
+import type { Messages } from "@/shared/i18n/messages";
 
 const MONTHS = /^0*([1-9][0-9]?|1[01][0-9]|120)$/;
-const MONTHS_MESSAGE = "Enter a whole number of months, from 1 to 120.";
+const MONTHS_MESSAGE = issue("months");
 const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const FIRST_DATE = "2000-01-01";
 const LAST_DATE = "9989-12-31";
@@ -28,7 +31,7 @@ export const paymentFormSchema = z.object({
   paidAt: z
     .string()
     .refine((value) => DATE.test(value) && value >= FIRST_DATE && value <= LAST_DATE, {
-      error: "Choose the date of the payment.",
+      error: issue("paymentDate"),
     }),
   monthsCovered: monthsField,
 });
@@ -68,22 +71,23 @@ export function defaultPaymentDate(period: string, now: Date): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(now);
 }
 
-export function billingFrequency(months: number): string {
+export function billingFrequency(months: number, messages: Messages): string {
+  const t = messages.platforms;
   switch (months) {
     case 1:
-      return "Monthly";
+      return t.monthly;
     case 6:
-      return "Semiannual";
+      return t.semiannual;
     case 12:
-      return "Yearly";
+      return t.yearly;
     default:
-      return `Every ${months} months`;
+      return t.everyMonths(months);
   }
 }
 
-export function formatDate(date: string): string {
+export function formatDate(date: string, locale: Locale): string {
   const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(languageTag(locale), {
     timeZone: "UTC",
     day: "numeric",
     month: "short",

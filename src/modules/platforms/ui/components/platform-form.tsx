@@ -10,6 +10,7 @@ import {
   type PlatformFormValues,
 } from "../../domain/platform-forms";
 import type { CreditCard } from "@/modules/cards/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
@@ -42,12 +43,13 @@ export function PlatformForm({
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, platforms: t } = useMessages();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
-      <Field label="Platform name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={t.platformName} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <Field
-        label="Monthly cost in pesos"
+        label={t.monthlyCost}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -57,19 +59,19 @@ export function PlatformForm({
         {...register("monthlyCost")}
       />
       <SelectField
-        label="Card"
+        label={t.card}
         options={[
-          { value: "", label: "No card" },
+          { value: "", label: t.noCard },
           ...cards.map((card) => ({ value: card.id, label: card.name })),
         ]}
         {...register("cardId")}
       />
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { useDashboard } from "../../application/use-dashboard";
 import { httpDashboardRepository } from "../../infrastructure/http-dashboard-repository";
 import { ChartPanels } from "../components/chart-panels";
 import { DashboardLoadFailed, DashboardLoading, DashboardRefreshFailed } from "../components/dashboard-states";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 interface ChartsContainerProps {
   period: string;
@@ -11,6 +12,7 @@ interface ChartsContainerProps {
 }
 
 export function ChartsContainer({ period, onSessionEnded }: ChartsContainerProps) {
+  const t = useMessages().dashboard;
   const { dashboard, notOpened, isLoading, loadFailed, refreshFailed, isSettling, reload } = useDashboard(
     httpDashboardRepository,
     period,
@@ -21,10 +23,10 @@ export function ChartsContainer({ period, onSessionEnded }: ChartsContainerProps
     return <DashboardLoading className="min-h-268 md:min-h-180 lg:min-h-98" />;
   }
   if (notOpened) {
-    return <p className="text-sm text-muted-foreground">Open this month to see its charts.</p>;
+    return <p className="text-sm text-muted-foreground">{t.chartsNotOpened}</p>;
   }
   if (loadFailed || !dashboard) {
-    return <DashboardLoadFailed what="The charts" onRetry={reload} />;
+    return <DashboardLoadFailed message={t.chartsLoadFailed} onRetry={reload} />;
   }
   return (
     <>

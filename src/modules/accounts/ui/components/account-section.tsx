@@ -7,6 +7,7 @@ import { cn } from "cn";
 import { formatCOP } from "../../domain/money";
 import type { Account, AccountCreate } from "../../domain/types";
 import { AccountRow } from "./account-row";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -44,11 +45,12 @@ export function AccountSection({
   deleteAccount,
 }: AccountSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const { common, accounts: t } = useMessages();
 
   if (isLoading) {
     return (
       <div role="status" className="ledger-rows flex h-36 items-end">
-        <p className="pb-2 font-mono text-xs text-muted-foreground">Loading…</p>
+        <p className="pb-2 font-mono text-xs text-muted-foreground">{common.loading}</p>
       </div>
     );
   }
@@ -56,9 +58,9 @@ export function AccountSection({
   if (loadFailed) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <FormAlert message="These balances could not be loaded." />
+        <FormAlert message={t.loadFailed} />
         <Button variant="outline" onClick={reload}>
-          Try again
+          {common.tryAgain}
         </Button>
       </div>
     );
@@ -67,7 +69,7 @@ export function AccountSection({
   return (
     <div className="flex flex-1 flex-col gap-3">
       <div className="flex flex-col gap-1" aria-busy={totalIsSettling}>
-        <p className="text-sm text-muted-foreground">Total actual</p>
+        <p className="text-sm text-muted-foreground">{t.totalActual}</p>
         <p
           className={cn(
             "font-mono text-[clamp(1.25rem,6vw,1.75rem)] leading-tight font-medium wrap-anywhere text-signal transition-opacity",
@@ -82,13 +84,13 @@ export function AccountSection({
       <FormAlert message={failure} />
       {refreshFailed ? (
         <p className="text-sm text-muted-foreground">
-          Showing the last values received; they could not be refreshed.
+          {t.refreshFailed}
         </p>
       ) : null}
 
       {accounts.length === 0 ? (
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-          No accounts yet. Add the first one to see your total.
+          {t.empty}
         </p>
       ) : (
         // Two or three columns on wider screens, so a name and its balance never sit a page apart.
@@ -113,7 +115,7 @@ export function AccountSection({
         />
       ) : (
         <Button variant="outline" className="mt-auto md:self-start" onClick={() => setIsAdding(true)}>
-          Add account
+          {t.add}
         </Button>
       )}
     </div>

@@ -1,17 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { EXPENSE_COPY } from "../../domain/expense-groups";
 import type { ExpenseDraft } from "../../domain/expense-forms";
 import type { ExpenseKind, PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ExpenseRow } from "./expense-row";
 import { ItemSection } from "./item-section";
 import { lastDayOf } from "@/modules/periods/domain/year-month";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 
 const ExpenseForm = dynamic(() => import("./expense-form").then((module) => module.ExpenseForm));
-
-const REPEAT_HINT = "Every month you open from now on gets it too, due on the same day. Untick it for this month only.";
 
 // A fixed expense repeats unless the owner says otherwise. An occasional one is due by the month's end unless
 // another date is chosen, so only its name and amount are needed.
@@ -66,9 +64,10 @@ export function ExpenseSection({
   failure,
   reload,
 }: ExpenseSectionProps) {
+  const { common, expenses } = useMessages();
   return (
     <ItemSection
-      copy={EXPENSE_COPY[kind]}
+      copy={expenses.copy[kind]}
       summary={toPay}
       isFiltered={isFiltered}
       isClosed={isClosed}
@@ -95,9 +94,9 @@ export function ExpenseSection({
         <ExpenseForm
           defaultValues={newExpense(kind, period)}
           tags={tags}
-          submitLabel="Save"
+          submitLabel={common.save}
           pending={isCreating}
-          repeatHint={kind === "fixed" ? REPEAT_HINT : undefined}
+          repeatHint={kind === "fixed" ? expenses.repeatHintFixed : undefined}
           onCancel={close}
           onSubmit={(draft) => createExpense(draft, { onSuccess: close })}
         />

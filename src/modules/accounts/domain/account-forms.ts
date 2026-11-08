@@ -1,6 +1,7 @@
 import { z } from "@/shared/validation/zod";
 
 import { parseCopInput } from "./money";
+import { issue } from "@/shared/i18n/validation-key";
 
 const NAME_MAX_CHARS = 120;
 // Matches the backend, which counts code points and refuses control characters.
@@ -9,11 +10,9 @@ const CONTROL_CHARACTERS = /\p{Cc}/u;
 export const nameField = z
   .string()
   .trim()
-  .min(1, { error: "Enter a name." })
-  .refine((value) => Array.from(value).length <= NAME_MAX_CHARS, {
-    error: "Use at most 120 characters.",
-  })
-  .refine((value) => !CONTROL_CHARACTERS.test(value), { error: "Use only printable characters." });
+  .min(1, { error: issue("nameRequired") })
+  .refine((value) => Array.from(value).length <= NAME_MAX_CHARS, { error: issue("nameTooLong") })
+  .refine((value) => !CONTROL_CHARACTERS.test(value), { error: issue("namePrintable") });
 
 const pesos = (emptyMeansZero: boolean) =>
   z.string().transform((raw, context) => {

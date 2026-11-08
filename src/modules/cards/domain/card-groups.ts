@@ -1,4 +1,3 @@
-import { DELETED_CARD_TITLE } from "./card-charge-copy";
 import type { CardChargeTotal, CreditCard } from "./types";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 
@@ -16,18 +15,19 @@ interface GroupSources {
   totals: CardChargeTotal[];
   cards: CreditCard[];
   isFiltered: boolean;
+  deletedCardTitle: string;
 }
 
 // The backend orders the totals and always has a row for a card. A filter hides the cards it leaves
 // empty, while their totals still cover the whole month (D5).
-export function groupByCard({ items, totals, cards, isFiltered }: GroupSources): CardGroup[] {
+export function groupByCard({ items, totals, cards, isFiltered, deletedCardTitle }: GroupSources): CardGroup[] {
   const itemsOf = (cardId: string | null) => items.filter((item) => item.cardId === cardId);
   const fromTotals = totals
     .filter(({ cardId }) => !isFiltered || itemsOf(cardId).length > 0)
     .map(
       ({ cardId, cardName, total }): CardGroup => ({
         cardId,
-        title: cardName ?? DELETED_CARD_TITLE,
+        title: cardName ?? deletedCardTitle,
         total,
         items: itemsOf(cardId),
       }),
@@ -39,7 +39,7 @@ export function groupByCard({ items, totals, cards, isFiltered }: GroupSources):
     .map(
       (cardId): CardGroup => ({
         cardId,
-        title: cards.find(({ id }) => id === cardId)?.name ?? DELETED_CARD_TITLE,
+        title: cards.find(({ id }) => id === cardId)?.name ?? deletedCardTitle,
         total: null,
         items: itemsOf(cardId),
       }),

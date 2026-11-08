@@ -11,13 +11,15 @@ import {
 } from "../domain/optimistic-templates";
 import type { Template, TemplateCreate, TemplateList, TemplateUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { CREDIT_CARDS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 
 const TEMPLATES_KEY = RECURRING_TEMPLATES_KEY;
 
 export function useTemplateSection(repository: TemplatesRepository, onSessionEnded: () => void) {
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
 
   const retry = (count: number, error: unknown) => statusOf(error) !== 401 && count < 2;
   const query = useQuery({
@@ -44,7 +46,8 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
       onSessionEnded();
       return;
     }
-    setFailure(describeTemplateFailure(statusOf(error)));
+    const status = statusOf(error);
+    setFailure(() => (current: typeof messages) => describeTemplateFailure(status, current));
   };
 
   const create = useOptimisticMutation<TemplateList, TemplateCreate, Template>({
@@ -121,7 +124,7 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     loadFailed: query.isError && !list,
     refreshFailed: query.isError && Boolean(list),
     isCreating: create.isPending,
-    failure,
+    failure: failure?.(messages) ?? null,
     reload: () => void query.refetch(),
     createTemplate: create.mutate,
     updateTemplate: (id: string, changes: TemplateUpdate) => update.mutate({ id, changes }),

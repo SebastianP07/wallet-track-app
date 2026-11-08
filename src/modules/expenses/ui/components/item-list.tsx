@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import type { ItemListCopy } from "../../domain/expense-groups";
 import type { PeriodItem } from "../../domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -37,10 +38,11 @@ export function ItemList({
   renderRow,
   renderItems,
 }: ItemListProps) {
+  const t = useMessages().common;
   if (isLoading) {
     return (
       <div role="status" className="ledger-rows flex h-36 items-end">
-        <p className="pb-2 font-mono text-xs text-muted-foreground">Loading…</p>
+        <p className="pb-2 font-mono text-xs text-muted-foreground">{t.loading}</p>
       </div>
     );
   }
@@ -50,7 +52,7 @@ export function ItemList({
       <div className="flex flex-col items-start gap-3">
         <FormAlert message={copy.loadFailed} />
         <Button variant="outline" onClick={reload}>
-          Try again
+          {t.tryAgain}
         </Button>
       </div>
     );

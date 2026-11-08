@@ -3,14 +3,11 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import {
-  TEMPLATE_GROUP_TITLES,
-  TEMPLATE_KINDS,
-  templatesOf,
-} from "../../domain/template-groups";
+import { TEMPLATE_KINDS, templatesOf } from "../../domain/template-groups";
 import type { CreditCard, Template, TemplateCreate, TemplateUpdate } from "../../domain/types";
 import { TemplateRow } from "./template-row";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -54,6 +51,8 @@ export function TemplateSection({
   deleteTemplate,
 }: TemplateSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const { common, periods } = useMessages();
+  const t = periods.templates;
   const cardChoices = {
     cards,
     isLoading: cardsAreLoading,
@@ -64,7 +63,7 @@ export function TemplateSection({
   if (isLoading) {
     return (
       <div role="status" className="ledger-rows flex h-36 items-end">
-        <p className="pb-2 font-mono text-xs text-muted-foreground">Loading…</p>
+        <p className="pb-2 font-mono text-xs text-muted-foreground">{common.loading}</p>
       </div>
     );
   }
@@ -72,9 +71,9 @@ export function TemplateSection({
   if (loadFailed) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <FormAlert message="The templates could not be loaded." />
+        <FormAlert message={t.loadFailed} />
         <Button variant="outline" onClick={reload}>
-          Try again
+          {common.tryAgain}
         </Button>
       </div>
     );
@@ -85,13 +84,13 @@ export function TemplateSection({
       <FormAlert message={failure} />
       {refreshFailed ? (
         <p className="text-sm text-muted-foreground">
-          Showing the last templates received; they could not be refreshed.
+          {t.refreshFailed}
         </p>
       ) : null}
 
       {templates.length === 0 ? (
         <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-          No templates yet. Add what repeats every month.
+          {t.empty}
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-3">
@@ -100,11 +99,11 @@ export function TemplateSection({
             return (
               <div key={kind} className="flex min-w-0 flex-col gap-2">
                 <h4 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                  {TEMPLATE_GROUP_TITLES[kind]}
+                  {t.groups[kind]}
                 </h4>
                 {rows.length === 0 ? (
                   <p className="border-t border-rule py-3 text-sm text-muted-foreground">
-                    None yet.
+                    {t.noneYet}
                   </p>
                 ) : (
                   <ul className="flex flex-col">
@@ -133,7 +132,7 @@ export function TemplateSection({
             canChooseKind
             cardChoices={cardChoices}
             tags={tags}
-            submitLabel="Save"
+            submitLabel={common.save}
             pending={isCreating}
             onCancel={() => setIsAdding(false)}
             onSubmit={(template) =>
@@ -143,7 +142,7 @@ export function TemplateSection({
         </div>
       ) : (
         <Button variant="outline" className="mt-auto lg:self-start" onClick={() => setIsAdding(true)}>
-          Add template
+          {t.add}
         </Button>
       )}
     </div>

@@ -10,6 +10,7 @@ import {
   type IncomeFormValues,
 } from "../../domain/income-forms";
 import type { Tag } from "@/modules/tags/domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { CheckboxField } from "@/shared/ui/checkbox-field";
 import { Field } from "@/shared/ui/field";
@@ -46,12 +47,13 @@ export function IncomeForm({
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, expenses } = useMessages();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <Field
-        label="Amount in pesos"
+        label={common.amountInPesos}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -61,22 +63,22 @@ export function IncomeForm({
         {...register("amount")}
       />
       <SelectField
-        label="Tag"
+        label={common.tag}
         options={[
-          { value: "", label: "No tag" },
+          { value: "", label: common.noTag },
           ...tags.map((tag) => ({ value: tag.id, label: tag.name })),
         ]}
         {...register("tagId")}
       />
       {repeatHint ? (
-        <CheckboxField label="Repeat every month" hint={repeatHint} {...register("repeatsMonthly")} />
+        <CheckboxField label={expenses.repeatMonthly} hint={repeatHint} {...register("repeatsMonthly")} />
       ) : null}
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

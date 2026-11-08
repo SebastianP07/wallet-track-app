@@ -9,6 +9,7 @@ import {
   type PersonDraft,
   type PersonFormValues,
 } from "../../domain/platform-forms";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 
@@ -32,13 +33,14 @@ export function PersonForm({ defaultValues, submitLabel, pending, onSubmit, onCa
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const { common, platforms: t } = useMessages();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <Field
-        label="Billed every (months)"
-        hint="1 is monthly, 6 is semiannual."
+        label={t.billedEvery}
+        hint={t.billedEveryHint}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -48,14 +50,14 @@ export function PersonForm({ defaultValues, submitLabel, pending, onSubmit, onCa
       />
       <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
         <input type="checkbox" className="size-5 accent-primary" {...register("isOwner")} />
-        This is the owner, who owes nothing but counts in the split
+        {t.isOwner}
       </label>
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

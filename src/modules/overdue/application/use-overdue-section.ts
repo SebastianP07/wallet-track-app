@@ -10,6 +10,7 @@ import { statusOf } from "@/shared/api/http-client";
 import { OVERDUE_ITEMS_KEY, PERIOD_ITEMS_KEY } from "@/shared/api/query-keys";
 import { withoutRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 const NOT_FOUND = 404;
 
@@ -24,7 +25,8 @@ export function useOverdueSection(
   tagId: string | null,
   onSessionEnded: () => void,
 ) {
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailure] = useState<Translatable | null>(null);
   const queryKey = overdueItemsKey(period);
 
   const query = useQuery({
@@ -66,7 +68,8 @@ export function useOverdueSection(
         onSessionEnded();
         return;
       }
-      setFailure(describeOverdueFailure(statusOf(cause)));
+      const status = statusOf(cause);
+      setFailure(() => (current: typeof messages) => describeOverdueFailure(status, current));
     },
   });
 
@@ -84,7 +87,7 @@ export function useOverdueSection(
     // The rows are ahead of the totals until the refetch after a change brings them back in step.
     totalsAreSettling: inFlight > 0 || query.isFetching,
     reload: () => void query.refetch(),
-    failure,
+    failure: failure?.(messages) ?? null,
     settle: (id: string) => settle.mutate(id),
   };
 }

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { formatDateTime } from "../../domain/security-display";
 import type { Passkey, SecondFactorProof } from "../../domain/types";
+import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
 const PasskeyNameForm = dynamic(() => import("./passkey-name-form").then((module) => module.PasskeyNameForm));
@@ -25,14 +26,16 @@ interface PasskeyRowProps {
 
 export function PasskeyRow({ passkey, isLast, isRenaming, isRemoving, onRename, onRemove }: PasskeyRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  const { locale, messages } = useI18n();
+  const t = messages.security;
   const toView = () => setMode("view");
 
   return (
     <li className="flex flex-col gap-1 border-t border-rule py-2">
       <p className="font-medium wrap-anywhere">{passkey.name}</p>
       <p className="font-mono text-xs text-muted-foreground">
-        Added {formatDateTime(passkey.createdAt)} ·{" "}
-        {passkey.lastUsedAt ? `Last used ${formatDateTime(passkey.lastUsedAt)}` : "Not used yet"}
+        {t.added(formatDateTime(passkey.createdAt, locale))} ·{" "}
+        {passkey.lastUsedAt ? t.lastUsed(formatDateTime(passkey.lastUsedAt, locale)) : t.notUsed}
       </p>
 
       {mode === "view" ? (
@@ -40,18 +43,18 @@ export function PasskeyRow({ passkey, isLast, isRenaming, isRemoving, onRename, 
           <Button
             variant="link"
             className={ACTION}
-            aria-label={`Rename passkey ${passkey.name}`}
+            aria-label={t.renamePasskey(passkey.name)}
             onClick={() => setMode("rename")}
           >
-            Rename
+            {messages.common.rename}
           </Button>
           <Button
             variant="link"
             className={ACTION}
-            aria-label={`Remove passkey ${passkey.name}`}
+            aria-label={t.removePasskey(passkey.name)}
             onClick={() => setMode("remove")}
           >
-            Remove
+            {t.remove}
           </Button>
         </div>
       ) : null}

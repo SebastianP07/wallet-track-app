@@ -9,6 +9,7 @@ import {
   type PaymentDraft,
   type PaymentFormValues,
 } from "../../domain/platform-forms";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 
@@ -32,18 +33,19 @@ export function PaymentForm({ name, defaultValues, pending, onSubmit, onCancel }
   });
 
   useEffect(() => setFocus("paidAt"), [setFocus]);
+  const { common, platforms: t } = useMessages();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
       <Field
-        label="Paid on"
-        hint="Coverage counts from this date's month, and doesn't add to any earlier coverage."
+        label={t.paidOn}
+        hint={t.paidOnHint}
         type="date"
         error={errors.paidAt?.message}
         {...register("paidAt")}
       />
       <Field
-        label="Months covered"
+        label={t.monthsCovered}
         type="text"
         inputMode="numeric"
         autoComplete="off"
@@ -52,11 +54,11 @@ export function PaymentForm({ name, defaultValues, pending, onSubmit, onCancel }
         {...register("monthsCovered")}
       />
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1" disabled={pending} aria-label={`Confirm payment from ${name}`}>
-          {pending ? "Saving…" : "Confirm"}
+        <Button type="submit" className="flex-1" disabled={pending} aria-label={t.confirmPaymentFrom(name)}>
+          {pending ? common.saving : t.confirm}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

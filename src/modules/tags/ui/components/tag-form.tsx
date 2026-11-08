@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 
 import { tagFormSchema, type TagFormValues } from "../../domain/tag-forms";
 import type { TagCreate } from "../../domain/types";
+import { useMessages } from "@/shared/i18n/use-i18n";
+import { fieldError } from "@/shared/i18n/validation-key";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 
@@ -30,13 +32,15 @@ export function TagForm({ defaultValues, submitLabel, pending, onSubmit, onCance
   });
 
   useEffect(() => setFocus("name"), [setFocus]);
+  const messages = useMessages();
+  const { common } = messages;
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1 md:max-w-md">
-      <Field label="Name" autoComplete="off" error={errors.name?.message} {...register("name")} />
+      <Field label={common.name} autoComplete="off" error={errors.name?.message} {...register("name")} />
       <div className="flex flex-col gap-2">
         <label htmlFor={colorId} className="text-sm font-medium">
-          Color
+          {messages.tags.color}
         </label>
         <input
           id={colorId}
@@ -46,16 +50,16 @@ export function TagForm({ defaultValues, submitLabel, pending, onSubmit, onCance
         />
         {errors.color ? (
           <p role="alert" className="text-sm text-destructive">
-            {errors.color.message}
+            {fieldError(messages, errors.color.message)}
           </p>
         ) : null}
       </div>
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? common.saving : submitLabel}
         </Button>
         <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancel
+          {common.cancel}
         </Button>
       </div>
     </form>

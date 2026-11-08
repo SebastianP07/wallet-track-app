@@ -8,7 +8,6 @@ import {
   recoveryCodeSchema,
   totpCodeSchema,
 } from "../../domain/credentials";
-import type { LoginStage } from "../../domain/login-flow";
 import { browserPasskeys } from "../../infrastructure/browser-passkeys";
 import { httpAuthRepository } from "../../infrastructure/http-auth-repository";
 import { EnrollmentQr } from "../components/enrollment-qr";
@@ -17,39 +16,8 @@ import { PasskeyStep } from "../components/passkey-step";
 import { PasswordForm } from "../components/password-form";
 import { RecoveryCodesDisplay } from "../components/recovery-codes-display";
 import { CODE_INPUT_PROPS, SingleFieldForm } from "../components/single-field-form";
+import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
-
-const STAGE_COPY: Record<LoginStage["name"], { eyebrow: string; title: string; description?: string }> = {
-  password: { eyebrow: "Sign in", title: "Welcome back" },
-  passkey: {
-    eyebrow: "Second factor",
-    title: "Use your passkey",
-    description: "Confirm with your device's screen lock or your security key.",
-  },
-  totp: {
-    eyebrow: "Second factor",
-    title: "Enter your code",
-    description: "Open your authenticator app for the current 6-digit code.",
-  },
-  "recovery-code": {
-    eyebrow: "Second factor",
-    title: "Use a recovery code",
-    description: "Each recovery code works once.",
-  },
-  "enrollment-secret": {
-    eyebrow: "First sign-in · 1 of 3",
-    title: "Set up two-factor",
-    description: "Enter the one-time enrollment secret that create-owner printed.",
-  },
-  "enrollment-confirm": {
-    eyebrow: "First sign-in · 2 of 3",
-    title: "Add your authenticator",
-  },
-  "recovery-codes": {
-    eyebrow: "First sign-in · 3 of 3",
-    title: "You're set up",
-  },
-};
 
 export function LoginContainer() {
   const goToDashboard = useCallback(() => window.location.replace("/"), []);
@@ -58,22 +26,23 @@ export function LoginContainer() {
     browserPasskeys,
     goToDashboard,
   );
-  const copy = STAGE_COPY[stage.name];
+  const t = useMessages().auth;
+  const copy = t.stages[stage.name];
 
   const startOver = (
     <Button variant="link" className="px-0" onClick={() => goTo({ name: "password" })}>
-      Start over
+      {t.startOver}
     </Button>
   );
 
   const usePasskeyInstead = passkeyAvailable ? (
     <Button variant="link" className="px-0" onClick={() => goTo({ name: "passkey" })}>
-      Use your passkey
+      {t.usePasskey}
     </Button>
   ) : null;
 
   return (
-    <LoginLayout eyebrow={copy.eyebrow} title={copy.title} description={copy.description}>
+    <LoginLayout eyebrow={copy.eyebrow} title={copy.title} description={copy.description || undefined}>
       {stage.name === "password" ? (
         <PasswordForm
           failure={failure}
@@ -90,10 +59,10 @@ export function LoginContainer() {
           onStart={() => submit({ operation: "passkey" })}
         >
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "totp" })}>
-            Use your authenticator
+            {t.useAuthenticator}
           </Button>
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "recovery-code" })}>
-            Use a recovery code
+            {t.useRecoveryCode}
           </Button>
           {startOver}
         </PasskeyStep>
@@ -103,8 +72,8 @@ export function LoginContainer() {
         <SingleFieldForm
           key="totp"
           schema={totpCodeSchema}
-          label="Authentication code"
-          submitLabel="Verify"
+          label={t.authenticationCode}
+          submitLabel={t.verify}
           inputProps={CODE_INPUT_PROPS}
           failure={failure}
           pending={isPending}
@@ -113,7 +82,7 @@ export function LoginContainer() {
         >
           {usePasskeyInstead}
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "recovery-code" })}>
-            Use a recovery code
+            {t.useRecoveryCode}
           </Button>
           {startOver}
         </SingleFieldForm>
@@ -123,8 +92,8 @@ export function LoginContainer() {
         <SingleFieldForm
           key="recovery-code"
           schema={recoveryCodeSchema}
-          label="Recovery code"
-          submitLabel="Verify"
+          label={t.recoveryCode}
+          submitLabel={t.verify}
           inputProps={{
             type: "text",
             autoComplete: "off",
@@ -139,7 +108,7 @@ export function LoginContainer() {
         >
           {usePasskeyInstead}
           <Button variant="link" className="px-0" onClick={() => goTo({ name: "totp" })}>
-            Use your authenticator
+            {t.useAuthenticator}
           </Button>
           {startOver}
         </SingleFieldForm>
@@ -149,8 +118,8 @@ export function LoginContainer() {
         <SingleFieldForm
           key="enrollment-secret"
           schema={enrollmentSecretSchema}
-          label="Enrollment secret"
-          submitLabel="Continue"
+          label={t.enrollmentSecret}
+          submitLabel={t.continue}
           inputProps={{
             type: "password",
             autoComplete: "off",
@@ -172,8 +141,8 @@ export function LoginContainer() {
           <SingleFieldForm
             key="enrollment-confirm"
             schema={totpCodeSchema}
-            label="Code from your app"
-            submitLabel="Confirm"
+            label={t.codeFromApp}
+            submitLabel={t.confirm}
             inputProps={CODE_INPUT_PROPS}
             failure={failure}
             pending={isPending}

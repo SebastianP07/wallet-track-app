@@ -1,3 +1,4 @@
+import { issue } from "@/shared/i18n/validation-key";
 import { z } from "@/shared/validation/zod";
 
 import { nameField } from "@/modules/accounts/domain/account-forms";
@@ -6,7 +7,7 @@ import { parseCopInput } from "@/modules/accounts/domain/money";
 const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const FIRST_DUE_DATE = "2000-01-01";
 
-export const ITEM_AMOUNT_MESSAGE = "Enter whole pesos, zero or more, like 1.250.000. No decimals.";
+export const ITEM_AMOUNT_MESSAGE = issue("itemAmount");
 
 export function parseItemAmount(raw: string): number | null {
   const parsed = parseCopInput(raw);
@@ -39,7 +40,7 @@ export const expenseFormSchema = z
       context.addIssue({ code: "custom", path: ["amount"], message: ITEM_AMOUNT_MESSAGE });
     }
     if (!isDueDate(values.dueDate)) {
-      context.addIssue({ code: "custom", path: ["dueDate"], message: "Choose a due date." });
+      context.addIssue({ code: "custom", path: ["dueDate"], message: issue("dueDate") });
     }
   })
   .transform(

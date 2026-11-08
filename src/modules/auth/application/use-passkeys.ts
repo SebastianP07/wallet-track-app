@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { PasskeyAuthenticator } from "./passkey-authenticator";
 import type { SecurityRepository } from "./security-repository";
-import { describeRegistrationCeremonyFailure, PasskeyCeremonyError } from "../domain/passkey-failure";
+import { PasskeyCeremonyError } from "../domain/passkey-failure";
 import {
   describeProofFailure,
   describeRegistrationFailure,
@@ -11,6 +11,7 @@ import {
 } from "../domain/security-display";
 import type { SecondFactorProof } from "../domain/types";
 import { ApiError, statusOf } from "@/shared/api/http-client";
+import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 const PASSKEYS_KEY = ["auth", "passkeys"];
 const SECURITY_META = { keepsDashboard: true };
@@ -29,7 +30,9 @@ export function usePasskeys(
   onSessionEnded: () => void,
 ) {
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
+  const messages = useMessages();
+  const [failure, setFailureState] = useState<Translatable | null>(null);
+  const setFailure = (describe: Translatable | null) => setFailureState(() => describe);
   const isSupported = useSyncExternalStore(subscribeToNothing, authenticator.isSupported, () => true);
 
   const query = useQuery({ queryKey: PASSKEYS_KEY, queryFn: () => repository.listPasskeys() });
@@ -43,7 +46,7 @@ export function usePasskeys(
   const refresh = () => queryClient.invalidateQueries({ queryKey: PASSKEYS_KEY });
 
   // A rejected code and an ended session both answer 401, and only asking again tells them apart.
-  const reportUnlessSessionEnded = async (error: unknown, describe: () => string) => {
+  const reportUnlessSessionEnded = async (error: unknown, describe: Translatable) => {
     if (statusOf(error) === 401) {
       try {
         await repository.listPasskeys();
@@ -54,7 +57,7 @@ export function usePasskeys(
         }
       }
     }
-    setFailure(describe());
+    setFailure(describe);
   };
 
   const add = useMutation({
@@ -99,7 +102,7 @@ export function usePasskeys(
     refreshFailed: query.isError && query.data !== undefined,
     reload: () => query.refetch(),
     isSupported,
-    failure,
+    failure: failure?.(messages) ?? null,
     isAdding: add.isPending,
     isRenaming: rename.isPending,
     isRemoving: remove.isPending,
@@ -124,7 +127,8 @@ export function usePasskeys(
               onSessionEnded();
               return;
             }
-            setFailure(describeRenameFailure(statusOf(error)));
+            const status = statusOf(error);
+            setFailure((t) => describeRenameFailure(status, t));
           },
         },
       ),
@@ -135,8 +139,8 @@ export function usePasskeys(
           onSuccess: callbacks.onSuccess,
           onError: (error) => {
             callbacks.onFailure();
-            void reportUnlessSessionEnded(error, () =>
-              describeProofFailure(statusOf(error), retryAfterOf(error)),
+            void reportUnlessSessionEnded(error, (t) =>
+              describeProofFailure(statusOf(error), retryAfterOf(error), t),
             );
           },
         },
@@ -154,17 +158,18 @@ class ProofSpentError extends Error {
 
 async function reportAddFailure(
   error: unknown,
-  report: (error: unknown, describe: () => string) => Promise<void>,
-  setFailure: (message: string) => void,
+  report: (error: unknown, describe: Translatable) => Promise<void>,
+  setFailure: (describe: Translatable) => void,
 ) {
   if (!(error instanceof ProofSpentError)) {
-    await report(error, () => describeProofFailure(statusOf(error), retryAfterOf(error)));
+    await report(error, (t) => describeProofFailure(statusOf(error), retryAfterOf(error), t));
     return;
   }
   const { reason } = error;
   if (reason instanceof PasskeyCeremonyError) {
-    setFailure(describeRegistrationCeremonyFailure(reason.kind));
+    const { kind } = reason;
+    setFailure((t) => t.security.failures.registrationCeremony[kind]);
     return;
   }
-  await report(reason, () => describeRegistrationFailure(statusOf(reason), retryAfterOf(reason)));
+  await report(reason, (t) => describeRegistrationFailure(statusOf(reason), retryAfterOf(reason), t));
 }
