@@ -24,4 +24,7 @@ export const httpExpensesRepository: ExpensesRepository = {
   unmarkDone(id) {
     return apiDelete<PeriodItem>(`${itemPath(id)}/done`);
   },
+  reorder(period, kind, ids) {
+    return apiPut<void>(`/periods/${encodeURIComponent(period)}/items/order`, { kind, ids });
+  },
 };

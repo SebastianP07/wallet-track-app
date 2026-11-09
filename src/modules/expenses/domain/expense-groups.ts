@@ -1,4 +1,4 @@
-import type { ExpenseKind, PeriodItem, PeriodItemList } from "./types";
+import type { OrderedKind, PeriodItem, PeriodItemList } from "./types";
 
 export interface ItemListCopy {
   empty: string;
@@ -14,6 +14,6 @@ export interface ItemSectionCopy extends ItemListCopy {
   summary: string;
 }
 
-export function itemsOf(list: PeriodItemList | undefined, kind: ExpenseKind): PeriodItem[] {
+export function itemsOf(list: PeriodItemList | undefined, kind: OrderedKind): PeriodItem[] {
   return list ? list.items.filter((item) => item.kind === kind) : [];
 }

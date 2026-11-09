@@ -5,6 +5,7 @@ import { cn } from "cn";
 
 import type { PeriodItem } from "../../domain/types";
 import { DoneToggle } from "./done-toggle";
+import type { RowReorder } from "./reorderable-item-list";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import type { Tag } from "@/modules/tags/domain/types";
 import { monthLabel } from "@/modules/periods/domain/year-month";
@@ -30,6 +31,8 @@ interface ItemRowProps {
   renderEditForm?: (close: () => void) => ReactNode;
   onDelete?: (stopRepeating: boolean) => void;
   onSetDone: (done: boolean) => void;
+  // Its handle and move buttons, in a list the owner can reorder (D13).
+  reorder?: RowReorder;
 }
 
 export function ItemRow({
@@ -42,6 +45,7 @@ export function ItemRow({
   renderEditForm,
   onSetDone,
   onDelete,
+  reorder,
 }: ItemRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
   const { locale, messages } = useI18n();
@@ -63,7 +67,11 @@ export function ItemRow({
   const doneNote = done ? t.doneMarkGoes(doneWord) : "";
 
   return (
-    <li className="flex gap-3 border-t border-rule py-3">
+    <li
+      data-item-id={item.id}
+      className="flex gap-3 border-t border-rule bg-background py-3 data-dragging:relative data-dragging:z-10 data-dragging:shadow-lg data-dragging:ring-1 data-dragging:ring-ring"
+    >
+      {reorder?.handle}
       <DoneToggle
         name={item.name}
         word={doneWord}
@@ -107,6 +115,8 @@ export function ItemRow({
             </Button>
           </div>
         ) : null}
+
+        {mode === "view" ? reorder?.controls : null}
 
         {mode === "edit" ? renderEditForm?.(toView) : null}
 

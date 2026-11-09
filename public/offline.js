@@ -177,10 +177,14 @@
     return `${due}${status}`;
   }
 
+  // Items come in the owner's order (D13). Fixed, occasional and income list the done ones first, as the app does.
   function itemEntries(items, kind) {
-    return items
-      .filter((item) => item.kind === kind)
-      .map((item) => ({ name: item.name, pesos: item.amount, detail: itemDetail(item) }));
+    const ofKind = items.filter((item) => item.kind === kind);
+    const ordered =
+      kind === "card_charge"
+        ? ofKind
+        : [...ofKind.filter((item) => item.status === "done"), ...ofKind.filter((item) => item.status !== "done")];
+    return ordered.map((item) => ({ name: item.name, pesos: item.amount, detail: itemDetail(item) }));
   }
 
   function accountEntries(accounts) {

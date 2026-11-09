@@ -3,6 +3,7 @@ import { IncomeStatusBadge } from "./income-status-badge";
 import { formatCopInput } from "@/modules/accounts/domain/money";
 import type { PeriodItem, PeriodItemUpdate } from "@/modules/expenses/domain/types";
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
+import type { RowReorder } from "@/modules/expenses/ui/components/reorderable-item-list";
 import type { Tag } from "@/modules/tags/domain/types";
 import { useMessages } from "@/shared/i18n/use-i18n";
 
@@ -15,9 +16,10 @@ interface IncomeRowProps {
   repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
   onDelete: (stopRepeating: boolean) => void;
+  reorder?: RowReorder;
 }
 
-export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }: IncomeRowProps) {
+export function IncomeRow({ item, tags, repeats, reorder, onSetDone, onUpdate, onDelete }: IncomeRowProps) {
   const { income: t, expenses } = useMessages();
   return (
     <ItemRow
@@ -27,6 +29,7 @@ export function IncomeRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }
       doneWord="received"
       onSetDone={onSetDone}
       onDelete={onDelete}
+      reorder={reorder}
       deleteNote={item.personId ? t.platformDeleteNote : undefined}
       details={
         <>

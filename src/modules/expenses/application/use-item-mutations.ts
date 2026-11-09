@@ -3,7 +3,8 @@ import { useState } from "react";
 import type { ExpensesRepository } from "./expenses-repository";
 import { monthItemsKey, monthItemsListKey } from "./use-expense-list";
 import { describeExpenseFailure } from "../domain/failures";
-import type { ItemCreate, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
+import { withKindOrder } from "../domain/item-order";
+import type { ItemCreate, OrderedKind, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
 import { OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { pendingRowId, withoutRow, withReplacedRow, withRow } from "@/shared/query/optimistic-rows";
@@ -138,6 +139,22 @@ export function useItemMutations({
     onFailure,
   });
 
+  const reorder = useOptimisticMutation<PeriodItemList, { kind: OrderedKind; ids: string[] }, void>({
+    ...keys,
+    // Moves made one after another reach the server in that order, so the last one is what stays.
+    scope: "period-item-order",
+    mutationFn: ({ kind, ids }) => repository.reorder(period, kind, ids),
+    change: (list, { kind, ids }) => {
+      const previous = list.items.filter((item) => item.kind === kind).map((item) => item.id);
+      return {
+        next: withKindOrder(list, kind, ids),
+        undo: (current) => withKindOrder(current, kind, previous),
+      };
+    },
+    onStart,
+    onFailure,
+  });
+
   return {
     failure: failure?.(messages) ?? null,
     isCreating: create.isPending,
@@ -145,5 +162,6 @@ export function useItemMutations({
     updateItem: (id: string, changes: PeriodItemUpdate) => update.mutate({ id, changes }),
     deleteItem: (id: string, stopRepeating = false) => remove.mutate({ id, stopRepeating }),
     setDone: (id: string, done: boolean) => toggleDone.mutate({ id, done }),
+    reorderItems: (kind: OrderedKind, ids: string[]) => reorder.mutate({ kind, ids }),
   };
 }

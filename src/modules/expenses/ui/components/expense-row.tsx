@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import type { PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ItemRow } from "./item-row";
+import type { RowReorder } from "./reorderable-item-list";
 import { UrgencyBadge } from "./urgency-badge";
 import { formatCopInput } from "@/modules/accounts/domain/money";
 import { monthLabel } from "@/modules/periods/domain/year-month";
@@ -17,9 +18,10 @@ interface ExpenseRowProps {
   repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
   onDelete: (stopRepeating: boolean) => void;
+  reorder?: RowReorder;
 }
 
-export function ExpenseRow({ item, tags, repeats, onSetDone, onUpdate, onDelete }: ExpenseRowProps) {
+export function ExpenseRow({ item, tags, repeats, reorder, onSetDone, onUpdate, onDelete }: ExpenseRowProps) {
   const { locale, messages } = useI18n();
   const t = messages.expenses;
   return (
@@ -30,6 +32,7 @@ export function ExpenseRow({ item, tags, repeats, onSetDone, onUpdate, onDelete 
       doneWord="paid"
       onSetDone={onSetDone}
       onDelete={onDelete}
+      reorder={reorder}
       details={
         <>
           {item.dueDate ? (

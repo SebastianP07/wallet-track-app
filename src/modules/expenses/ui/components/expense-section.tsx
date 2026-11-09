@@ -5,6 +5,8 @@ import type { ExpenseDraft } from "../../domain/expense-forms";
 import type { ExpenseKind, PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ExpenseRow } from "./expense-row";
 import { ItemSection } from "./item-section";
+import { ReorderableItemList } from "./reorderable-item-list";
+import { isPendingRow } from "@/shared/query/optimistic-rows";
 import { lastDayOf } from "@/modules/periods/domain/year-month";
 import type { Tag } from "@/modules/tags/domain/types";
 import { useMessages } from "@/shared/i18n/use-i18n";
@@ -40,6 +42,7 @@ interface ExpenseSectionProps {
   updateExpense: (id: string, changes: PeriodItemUpdate) => void;
   deleteExpense: (id: string, stopRepeating: boolean) => void;
   setDone: (id: string, done: boolean) => void;
+  reorderItems: (kind: ExpenseKind, ids: string[]) => void;
 }
 
 export function ExpenseSection({
@@ -53,6 +56,7 @@ export function ExpenseSection({
   updateExpense,
   deleteExpense,
   setDone,
+  reorderItems,
   isFiltered,
   isClosed,
   items,
@@ -79,15 +83,24 @@ export function ExpenseSection({
       totalsAreSettling={totalsAreSettling}
       failure={failure}
       reload={reload}
-      renderRow={(item) => (
-        <ExpenseRow
-          key={item.id}
-          item={item}
-          tags={tags}
-          repeats={item.templateId !== null && activeTemplateIds.has(item.templateId)}
-          onSetDone={(done) => setDone(item.id, done)}
-          onUpdate={(changes) => updateExpense(item.id, changes)}
-          onDelete={(stopRepeating) => deleteExpense(item.id, stopRepeating)}
+      renderItems={(sectionItems) => (
+        <ReorderableItemList
+          items={sectionItems}
+          // A tag filter shows only some of the items, and an unconfirmed row has no id the API knows (D13).
+          canReorder={!isFiltered && sectionItems.length > 1 && !sectionItems.some(isPendingRow)}
+          onReorder={(ids) => reorderItems(kind, ids)}
+          renderRow={(item, reorder) => (
+            <ExpenseRow
+              key={item.id}
+              item={item}
+              tags={tags}
+              reorder={reorder}
+              repeats={item.templateId !== null && activeTemplateIds.has(item.templateId)}
+              onSetDone={(done) => setDone(item.id, done)}
+              onUpdate={(changes) => updateExpense(item.id, changes)}
+              onDelete={(stopRepeating) => deleteExpense(item.id, stopRepeating)}
+            />
+          )}
         />
       )}
       renderAddForm={(close) => (

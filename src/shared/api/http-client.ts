@@ -117,8 +117,8 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return sendMutation<T>("PATCH", path, body);
 }
 
-export function apiPut<T>(path: string): Promise<T> {
-  return sendMutation<T>("PUT", path);
+export function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  return sendMutation<T>("PUT", path, body);
 }
 
 export function apiDelete<T = void>(path: string): Promise<T> {

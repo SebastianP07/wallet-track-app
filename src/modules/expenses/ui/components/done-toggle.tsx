@@ -20,6 +20,7 @@ export function DoneToggle({ name, word, done, disabled, onToggle, ref }: DoneTo
   return (
     <Button
       ref={ref}
+      data-focus-role="toggle"
       variant={done ? "primary" : "outline"}
       className={cn("size-12 shrink-0 px-0", !done && "text-muted-foreground")}
       disabled={disabled}

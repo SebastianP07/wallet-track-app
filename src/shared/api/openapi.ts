@@ -536,7 +536,7 @@ export interface paths {
         };
         /**
          * List a month's items
-         * @description Filters narrow `items` only. `totals` always covers the whole month, because tags never affect totals (D5).
+         * @description Filters narrow `items` only. `totals` always covers the whole month, because tags never affect totals (D5). Items come section by section (fixed, occasional, income, card charge), each kind in its manual order (D13); the client groups them, but never reorders them.
          */
         get: operations["listPeriodItems"];
         put?: never;
@@ -545,6 +545,26 @@ export interface paths {
          * @description 409 if the month is closed. With `repeatsMonthly` on a fixed or income item, the same transaction also creates an active recurring template with the item's name, amount, tag and, on a fixed item, the day of its `dueDate` as `dueDay`, and links the item to it (`templateId`). Every month opened from then on gets the item; months already opened do not.
          */
         post: operations["createPeriodItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{period}/items/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Order a month's items of one kind
+         * @description Stores the manual order of one kind's items in the month (D13). `ids` must list every item of that kind in the month exactly once, in the new order; anything else is a 400 and nothing changes. The same transaction puts the recurring templates of those items in the same order, among the positions they already hold, so the next month opened gets its items from them in that order. Order moves no total, so a closed month can be reordered too. Items added later go to the end.
+         */
+        put: operations["reorderPeriodItems"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1253,6 +1273,15 @@ export interface components {
             tagId?: components["schemas"]["Id"] | null;
         };
         PeriodItemCreate: components["schemas"]["ExpenseItemCreate"] | components["schemas"]["IncomeItemCreate"] | components["schemas"]["CardChargeItemCreate"];
+        PeriodItemOrder: {
+            /**
+             * @description The kinds with their own section; card charges are not ordered by hand.
+             * @enum {string}
+             */
+            kind: "fixed" | "occasional" | "income";
+            /** @description Every item of that kind in the month, each once, first to last. */
+            ids: components["schemas"]["Id"][];
+        };
         /** @description `kind` and `status` cannot be edited; the done endpoints change `status`. `dueDate` is refused on income and card charge items, which have none. `cardId` moves a card charge to another card, including one whose card was deleted, but null cannot remove it (400); any other kind refuses a card. */
         PeriodItemUpdate: {
             name?: components["schemas"]["Name"];
@@ -2527,6 +2556,37 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    reorderPeriodItems: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path: {
+                period: components["parameters"]["Period"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PeriodItemOrder"];
+            };
+        };
+        responses: {
+            /** @description Order stored. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     getPeriodItem: {

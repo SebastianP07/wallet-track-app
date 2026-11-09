@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { ExpensesRepository } from "./expenses-repository";
 import { useExpenseList } from "./use-expense-list";
 import { useItemMutations } from "./use-item-mutations";
@@ -32,10 +34,12 @@ export function useExpenseSection({
   });
 
   const { list } = expenseList;
+  // Kept while the list is the same, so a move can tell when the list it was made on has been replaced.
+  const items = useMemo(() => itemsOf(list, kind), [list, kind]);
   return {
     ...expenseList,
     ...mutations,
-    items: itemsOf(list, kind),
+    items,
     toPay: list ? list.totals[kind].pending : null,
     createExpense: (draft: ExpenseDraft, callbacks: { onSuccess: () => void }) =>
       createItem({ kind, ...draft }, callbacks),

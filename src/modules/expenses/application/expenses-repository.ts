@@ -1,4 +1,4 @@
-import type { ItemCreate, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
+import type { ItemCreate, OrderedKind, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
 
 export interface ExpensesRepository {
   // Totals in the answer always cover the whole month, whatever the tag (D5).
@@ -9,4 +9,6 @@ export interface ExpensesRepository {
   remove(id: string, stopRepeating: boolean): Promise<void>;
   markDone(id: string): Promise<PeriodItem>;
   unmarkDone(id: string): Promise<PeriodItem>;
+  // ids are every item of that kind in the month, in the new order; their templates follow it too (D13).
+  reorder(period: string, kind: OrderedKind, ids: string[]): Promise<void>;
 }

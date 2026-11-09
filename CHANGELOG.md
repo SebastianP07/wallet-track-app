@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.18.0 — 2026-11-09 — Ordering
+
+- D13: sections 04, 05 and 06 show done items first, each group in the API's order (`doneFirst`, grouping only). A
+  toggle moves the row at once (optimistic, as before) and focus returns to its toggle when the row moves in the DOM.
+- Manual order with no new dependency: a grip handle (32 x 48 px button, `touch-action: none`, so the rest of the row
+  still scrolls and taps) drags with pointer events on touch, pen and mouse, auto-scrolls near the viewport edges and
+  stays within the item's group. With the handle focused, arrow up and down move the item; pressing it shows Up, Down
+  and Done buttons. Each move is announced in a polite live region ("Arriendo moved to position 3 of 16" / "Arriendo
+  movido a la posición 3 de 16"), and focus follows the control that moved. Rows move by CSSOM transforms only, which
+  the nonce CSP allows. Handles are hidden while a tag filter is on or a new row is unconfirmed, and disabled offline.
+- Reorder writes `PUT /periods/{period}/items/order` optimistically (scoped, so moves land in order) and refetches;
+  the stored order keeps the other group's places (`storedOrder`). Contract refreshed and types regenerated. The
+  offline page lists done items first in 04, 05 and 06; the cached Dashboard's shape is unchanged.
+
 ## 0.17.0 — 2026-11-07 — Owner feedback
 
 - Date inputs (expense due date, payment date) use one shared DateField: DD/MM/YY on a numeric keypad with auto slashes, translated format hint and impossible-date message, and a calendar button that opens the native picker; the API still gets YYYY-MM-DD.

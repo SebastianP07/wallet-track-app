@@ -22,7 +22,7 @@ interface ItemSectionProps {
   totalsAreSettling: boolean;
   failure: string | null;
   reload: () => void;
-  renderRow: (item: PeriodItem) => ReactNode;
+  renderRow?: (item: PeriodItem) => ReactNode;
   // For a section that lays out its rows some other way than one plain list.
   renderItems?: (items: PeriodItem[]) => ReactNode;
   renderAddForm: (close: () => void) => ReactNode;
