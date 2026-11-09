@@ -1,4 +1,6 @@
+import { isCalendarDate } from "@/shared/format/date-input";
 import { issue } from "@/shared/i18n/validation-key";
+import { dateIssue } from "@/shared/validation/date";
 import { z } from "@/shared/validation/zod";
 
 import { nameField } from "@/modules/accounts/domain/account-forms";
@@ -8,7 +10,6 @@ import type { Messages } from "@/shared/i18n/messages";
 
 const MONTHS = /^0*([1-9][0-9]?|1[01][0-9]|120)$/;
 const MONTHS_MESSAGE = issue("months");
-const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const FIRST_DATE = "2000-01-01";
 const LAST_DATE = "9989-12-31";
 
@@ -27,11 +28,11 @@ export type PersonFormValues = z.input<typeof personFormSchema>;
 export type PersonDraft = z.output<typeof personFormSchema>;
 
 export const paymentFormSchema = z.object({
-  paidAt: z
-    .string()
-    .refine((value) => DATE.test(value) && value >= FIRST_DATE && value <= LAST_DATE, {
-      error: issue("paymentDate"),
-    }),
+  paidAt: z.string().superRefine((value, context) => {
+    if (!(isCalendarDate(value) && value >= FIRST_DATE && value <= LAST_DATE)) {
+      context.addIssue({ code: "custom", message: dateIssue(value, "paymentDate") });
+    }
+  }),
   monthsCovered: monthsField,
 });
 

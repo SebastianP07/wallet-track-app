@@ -1,10 +1,11 @@
+import { isCalendarDate } from "@/shared/format/date-input";
 import { issue } from "@/shared/i18n/validation-key";
+import { dateIssue } from "@/shared/validation/date";
 import { z } from "@/shared/validation/zod";
 
 import { nameField } from "@/modules/accounts/domain/account-forms";
 import { parseCopInput } from "@/modules/accounts/domain/money";
 
-const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const FIRST_DUE_DATE = "2000-01-01";
 
 export const ITEM_AMOUNT_MESSAGE = issue("itemAmount");
@@ -15,7 +16,7 @@ export function parseItemAmount(raw: string): number | null {
 }
 
 function isDueDate(raw: string): boolean {
-  return DATE.test(raw) && raw >= FIRST_DUE_DATE && !Number.isNaN(Date.parse(`${raw}T00:00:00Z`));
+  return isCalendarDate(raw) && raw >= FIRST_DUE_DATE;
 }
 
 export interface ExpenseDraft {
@@ -40,7 +41,7 @@ export const expenseFormSchema = z
       context.addIssue({ code: "custom", path: ["amount"], message: ITEM_AMOUNT_MESSAGE });
     }
     if (!isDueDate(values.dueDate)) {
-      context.addIssue({ code: "custom", path: ["dueDate"], message: issue("dueDate") });
+      context.addIssue({ code: "custom", path: ["dueDate"], message: dateIssue(values.dueDate, "dueDate") });
     }
   })
   .transform(

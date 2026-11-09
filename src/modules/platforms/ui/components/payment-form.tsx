@@ -11,6 +11,7 @@ import {
 } from "../../domain/platform-forms";
 import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
+import { DateField } from "@/shared/ui/date-field";
 import { Field } from "@/shared/ui/field";
 
 interface PaymentFormProps {
@@ -24,6 +25,7 @@ interface PaymentFormProps {
 export function PaymentForm({ name, defaultValues, pending, onSubmit, onCancel }: PaymentFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     setFocus,
     formState: { errors },
@@ -37,12 +39,12 @@ export function PaymentForm({ name, defaultValues, pending, onSubmit, onCancel }
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 pt-1">
-      <Field
+      <DateField
+        control={control}
+        name="paidAt"
         label={t.paidOn}
         hint={t.paidOnHint}
-        type="date"
         error={errors.paidAt?.message}
-        {...register("paidAt")}
       />
       <Field
         label={t.monthsCovered}

@@ -2,6 +2,7 @@
 
 ## 0.17.0 — 2026-11-07 — Owner feedback
 
+- Date inputs (expense due date, payment date) use one shared DateField: DD/MM/YY on a numeric keypad with auto slashes, translated format hint and impossible-date message, and a calendar button that opens the native picker; the API still gets YYYY-MM-DD.
 - Every displayed date reads DD/MM/YY (DD/MM/YY HH:mm, 24-hour, Bogotá time where a time shows) in both languages,
   offline page included; month titles and relative ages unchanged.
 - Section 08 is per month now: it reads `GET /periods/{period}/overdue-items`, shows the expenses the selected month owes

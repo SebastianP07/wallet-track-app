@@ -17,6 +17,9 @@ const en = {
   newName: "New name",
   amountInPesos: "Amount in pesos",
   flipSign: "Switch between positive and negative",
+  datePlaceholder: "DD/MM/YY",
+  dateFormatHint: "Day, month and year, like 09/11/26.",
+  openCalendar: (field: string) => `${field}: open calendar`,
   cannotBeUndone: "This can't be undone.",
   // Status-based API failures shared by every section.
   unverified: "This request could not be verified. Reload the page and try again.",
@@ -58,6 +61,9 @@ const es: CommonMessages = {
   newName: "Nuevo nombre",
   amountInPesos: "Valor en pesos",
   flipSign: "Cambiar entre positivo y negativo",
+  datePlaceholder: "DD/MM/AA",
+  dateFormatHint: "Día, mes y año, como 09/11/26.",
+  openCalendar: (field: string) => `${field}: abrir calendario`,
   cannotBeUndone: "Esto no se puede deshacer.",
   unverified: "No se pudo verificar esta solicitud. Recarga la página e inténtalo de nuevo.",
   unreachable:

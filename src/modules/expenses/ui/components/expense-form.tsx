@@ -13,6 +13,7 @@ import type { Tag } from "@/modules/tags/domain/types";
 import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { CheckboxField } from "@/shared/ui/checkbox-field";
+import { DateField } from "@/shared/ui/date-field";
 import { Field } from "@/shared/ui/field";
 import { SelectField } from "@/shared/ui/select-field";
 
@@ -38,6 +39,7 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     setFocus,
     formState: { errors },
@@ -62,13 +64,7 @@ export function ExpenseForm({
         error={errors.amount?.message}
         {...register("amount")}
       />
-      <Field
-        label={expenses.dueDate}
-        type="date"
-        className="font-mono"
-        error={errors.dueDate?.message}
-        {...register("dueDate")}
-      />
+      <DateField control={control} name="dueDate" label={expenses.dueDate} error={errors.dueDate?.message} />
       <SelectField
         label={common.tag}
         options={[
