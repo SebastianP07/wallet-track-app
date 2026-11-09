@@ -4,7 +4,6 @@ import { z } from "@/shared/validation/zod";
 import { nameField } from "@/modules/accounts/domain/account-forms";
 import { ITEM_AMOUNT_MESSAGE, parseItemAmount } from "@/modules/expenses/domain/expense-forms";
 import { currentYearMonth } from "@/modules/periods/domain/year-month";
-import { languageTag, type Locale } from "@/shared/i18n/locale";
 import type { Messages } from "@/shared/i18n/messages";
 
 const MONTHS = /^0*([1-9][0-9]?|1[01][0-9]|120)$/;
@@ -83,14 +82,4 @@ export function billingFrequency(months: number, messages: Messages): string {
     default:
       return t.everyMonths(months);
   }
-}
-
-export function formatDate(date: string, locale: Locale): string {
-  const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat(languageTag(locale), {
-    timeZone: "UTC",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1)));
 }

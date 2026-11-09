@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 import { formatCOP } from "@/modules/accounts/domain/money";
-import { formatDueDate } from "@/modules/expenses/domain/expense-groups";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 import { UrgencyBadge } from "@/modules/expenses/ui/components/urgency-badge";
+import { formatDate } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
@@ -13,12 +13,11 @@ const SHOWN_AT_FIRST = 6;
 
 interface UpcomingDueListProps {
   items: PeriodItem[];
-  period: string;
 }
 
-export function UpcomingDueList({ items, period }: UpcomingDueListProps) {
+export function UpcomingDueList({ items }: UpcomingDueListProps) {
   const [showsAll, setShowsAll] = useState(false);
-  const { locale, messages } = useI18n();
+  const { messages } = useI18n();
   const t = messages.dashboard.upcoming;
   const kinds: Partial<Record<PeriodItem["kind"], string>> = messages.expenses.kinds;
   const shown = showsAll ? items : items.slice(0, SHOWN_AT_FIRST);
@@ -38,7 +37,7 @@ export function UpcomingDueList({ items, period }: UpcomingDueListProps) {
                 <span className="shrink-0 font-mono text-xs tabular-nums">{formatCOP(item.amount)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                <span>{item.dueDate ? t.due(formatDueDate(item.dueDate, period, locale)) : t.noDueDate}</span>
+                <span>{item.dueDate ? t.due(formatDate(item.dueDate)) : t.noDueDate}</span>
                 <span>· {kinds[item.kind]}</span>
                 <UrgencyBadge item={item} />
               </div>

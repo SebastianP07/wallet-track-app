@@ -1,14 +1,5 @@
 import { describeTooMany } from "./auth-failure";
-import { languageTag, type Locale } from "@/shared/i18n/locale";
 import type { Messages } from "@/shared/i18n/messages";
-
-export function formatDateTime(timestamp: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(languageTag(locale), {
-    timeZone: "America/Bogota",
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
-}
 
 const BROWSERS: readonly [RegExp, string][] = [
   [/Edg(e|A|iOS)?\//, "Edge"],

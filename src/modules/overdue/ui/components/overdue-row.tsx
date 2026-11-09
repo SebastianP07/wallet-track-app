@@ -1,7 +1,7 @@
-import { formatDueDate } from "@/modules/expenses/domain/expense-groups";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 import { ItemRow } from "@/modules/expenses/ui/components/item-row";
 import { monthLabel } from "@/modules/periods/domain/year-month";
+import { formatDate } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import type { Tag } from "@/modules/tags/domain/types";
 
@@ -29,7 +29,7 @@ export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
             {t.from(monthLabel(item.period, locale))}
           </span>
           <span className={DETAIL}>{t.kinds[item.kind]}</span>
-          {item.dueDate ? <span className={DETAIL}>{messages.expenses.due(formatDueDate(item.dueDate, item.period, locale))}</span> : null}
+          {item.dueDate ? <span className={DETAIL}>{messages.expenses.due(formatDate(item.dueDate))}</span> : null}
           {item.personId ? <span className={DETAIL}>{messages.income.sharedPlatforms}</span> : null}
         </>
       }

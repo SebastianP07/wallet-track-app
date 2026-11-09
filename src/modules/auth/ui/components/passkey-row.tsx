@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { formatDateTime } from "../../domain/security-display";
 import type { Passkey, SecondFactorProof } from "../../domain/types";
+import { formatDateTime } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 
@@ -26,7 +26,7 @@ interface PasskeyRowProps {
 
 export function PasskeyRow({ passkey, isLast, isRenaming, isRemoving, onRename, onRemove }: PasskeyRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
-  const { locale, messages } = useI18n();
+  const { messages } = useI18n();
   const t = messages.security;
   const toView = () => setMode("view");
 
@@ -34,8 +34,8 @@ export function PasskeyRow({ passkey, isLast, isRenaming, isRemoving, onRename, 
     <li className="flex flex-col gap-1 border-t border-rule py-2">
       <p className="font-medium wrap-anywhere">{passkey.name}</p>
       <p className="font-mono text-xs text-muted-foreground">
-        {t.added(formatDateTime(passkey.createdAt, locale))} ·{" "}
-        {passkey.lastUsedAt ? t.lastUsed(formatDateTime(passkey.lastUsedAt, locale)) : t.notUsed}
+        {t.added(formatDateTime(passkey.createdAt))} ·{" "}
+        {passkey.lastUsedAt ? t.lastUsed(formatDateTime(passkey.lastUsedAt)) : t.notUsed}
       </p>
 
       {mode === "view" ? (

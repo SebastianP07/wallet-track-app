@@ -23,7 +23,7 @@ export function ChartPanels({ dashboard, isSettling }: ChartPanelsProps) {
       <ToPayDonut breakdown={dashboard.toPayBreakdown} toPay={dashboard.kpis.toPay} />
       <TotalsBars kpis={dashboard.kpis} />
       <div className="md:col-span-2 lg:col-span-1">
-        <UpcomingDueList items={dashboard.upcomingDue} period={dashboard.period.period} />
+        <UpcomingDueList items={dashboard.upcomingDue} />
       </div>
     </div>
   );

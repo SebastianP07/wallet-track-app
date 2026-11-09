@@ -78,8 +78,24 @@
   document.title = TEXT.title;
   document.querySelector('meta[name="description"]')?.setAttribute("content", TEXT.description);
 
-  const dateTime = new Intl.DateTimeFormat(tag, { dateStyle: "medium", timeStyle: "short" });
-  const dueDate = new Intl.DateTimeFormat(tag, { month: "short", day: "numeric", timeZone: "UTC" });
+  // The same DD/MM/YY and DD/MM/YY HH:mm as src/shared/format/date.ts, which this page cannot import.
+  const bogotaParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Bogota",
+    year: "2-digit",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  const formatDate = (date) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(date);
+    return match ? `${match[3]}/${match[2]}/${match[1].slice(2)}` : date;
+  };
+  const formatDateTime = (timestamp) => {
+    const parts = Object.fromEntries(bogotaParts.formatToParts(new Date(timestamp)).map(({ type, value }) => [type, value]));
+    return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+  };
   const monthTitle = new Intl.DateTimeFormat(tag, { month: "long", year: "numeric", timeZone: "UTC" });
   const monthOnly = (period) => monthTitle.format(new Date(`${period}-01T00:00:00Z`));
 
@@ -157,7 +173,7 @@
   function itemDetail(item) {
     const status =
       item.status === "done" ? TEXT.done[item.kind] : item.status === "overdue" ? TEXT.overdue : TEXT.pending[item.kind];
-    const due = item.dueDate ? `${TEXT.due(dueDate.format(new Date(`${item.dueDate}T00:00:00Z`)))} · ` : "";
+    const due = item.dueDate ? `${TEXT.due(formatDate(item.dueDate))} · ` : "";
     return `${due}${status}`;
   }
 
@@ -175,7 +191,7 @@
     const { kpis: k, items, accounts, overdue, people, period } = dashboard;
     const ageText = el("p", {});
     const refreshAge = () => {
-      ageText.textContent = TEXT.saved(describeAge(Date.now() - savedAt), dateTime.format(savedAt));
+      ageText.textContent = TEXT.saved(describeAge(Date.now() - savedAt), formatDateTime(savedAt));
     };
     refreshAge();
     setInterval(refreshAge, MINUTE_MS);

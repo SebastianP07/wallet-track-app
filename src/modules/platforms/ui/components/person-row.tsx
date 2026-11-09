@@ -8,7 +8,6 @@ import { cn } from "cn";
 import {
   billingFrequency,
   defaultPaymentDate,
-  formatDate,
   type PaymentDraft,
   type PersonDraft,
 } from "../../domain/platform-forms";
@@ -16,6 +15,7 @@ import type { Person } from "../../domain/types";
 import { formatCOP } from "@/modules/accounts/domain/money";
 import { DoneToggle } from "@/modules/expenses/ui/components/done-toggle";
 import { BADGE } from "@/modules/expenses/ui/components/urgency-badge";
+import { formatDate } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
@@ -50,7 +50,7 @@ export function PersonRow({
   onUndoPayment,
 }: PersonRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
-  const { locale, messages } = useI18n();
+  const { messages } = useI18n();
   const { common, expenses, platforms: t } = messages;
   const toView = () => setMode("view");
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -91,8 +91,8 @@ export function PersonRow({
         </div>
         {person.lastPaymentDate ? (
           <p className="text-xs text-muted-foreground">
-            {t.lastPaid(formatDate(person.lastPaymentDate, locale))}
-            {person.coveredUntil ? t.coveredUntil(formatDate(person.coveredUntil, locale)) : null}
+            {t.lastPaid(formatDate(person.lastPaymentDate))}
+            {person.coveredUntil ? t.coveredUntil(formatDate(person.coveredUntil)) : null}
           </p>
         ) : !person.isOwner ? (
           <p className="text-xs text-muted-foreground">{t.noPayments}</p>

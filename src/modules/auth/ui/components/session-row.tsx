@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 
-import { describeDevice, formatDateTime } from "../../domain/security-display";
+import { describeDevice } from "../../domain/security-display";
 import type { ActiveSession } from "../../domain/types";
+import { formatDateTime } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
@@ -16,7 +17,7 @@ interface SessionRowProps {
 
 export function SessionRow({ session, isRevoking, onRevoke }: SessionRowProps) {
   const [isConfirming, setIsConfirming] = useState(false);
-  const { locale, messages } = useI18n();
+  const { messages } = useI18n();
   const t = messages.security;
   const device = describeDevice(session.userAgent, messages);
 
@@ -34,8 +35,8 @@ export function SessionRow({ session, isRevoking, onRevoke }: SessionRowProps) {
       <p className="font-mono text-xs break-words text-muted-foreground">
         {t.sessionTimes(
           session.ip ?? t.unknownAddress,
-          formatDateTime(session.lastSeenAt, locale),
-          formatDateTime(session.createdAt, locale),
+          formatDateTime(session.lastSeenAt),
+          formatDateTime(session.createdAt),
         )}
       </p>
       {session.mfaPending ? (

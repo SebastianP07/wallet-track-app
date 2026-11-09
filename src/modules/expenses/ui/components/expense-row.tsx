@@ -1,10 +1,10 @@
 import dynamic from "next/dynamic";
-import { formatDueDate } from "../../domain/expense-groups";
 import type { PeriodItem, PeriodItemUpdate } from "../../domain/types";
 import { ItemRow } from "./item-row";
 import { UrgencyBadge } from "./urgency-badge";
 import { formatCopInput } from "@/modules/accounts/domain/money";
 import { monthLabel } from "@/modules/periods/domain/year-month";
+import { formatDate } from "@/shared/format/date";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import type { Tag } from "@/modules/tags/domain/types";
 
@@ -34,7 +34,7 @@ export function ExpenseRow({ item, tags, repeats, onSetDone, onUpdate, onDelete 
         <>
           {item.dueDate ? (
             <span className="text-xs whitespace-nowrap text-muted-foreground">
-              {t.due(formatDueDate(item.dueDate, item.period, locale))}
+              {t.due(formatDate(item.dueDate))}
             </span>
           ) : null}
           <UrgencyBadge item={item} />
