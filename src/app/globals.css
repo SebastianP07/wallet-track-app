@@ -154,6 +154,20 @@
   & > :nth-child(12) { animation-delay: 440ms; }
 }
 
+/* The Dashboard's bottom navigation. A field brought into view by focus or Tab stops above it. */
+html:has(.bottom-nav) {
+  scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+/* On a narrow screen a focused text field most likely has the on-screen keyboard open, and the bar would sit
+   on top of the form's buttons; it steps aside until the field is left. */
+@media (max-width: 39.99rem) {
+  body:has(:is(input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"]), textarea):focus)
+    .bottom-nav {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;

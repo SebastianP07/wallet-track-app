@@ -25,12 +25,14 @@ import { useOnlineStatus } from "@/shared/pwa/use-online-status";
 import { Button } from "@/shared/ui/button";
 import { FocusKeeper } from "@/shared/ui/focus-keeper";
 import { DashboardHeader } from "../components/dashboard-header";
+import { BottomNav } from "../components/bottom-nav";
 import { MonthSwitcher } from "../components/month-switcher";
-import { SectionGrid } from "../components/section-grid";
 import { ChartsContainer } from "./charts-container";
 import { ExportContainer } from "./export-container";
 import { OfflineBannerContainer } from "./offline-banner-container";
 import { OverviewContainer } from "./overview-container";
+import { SectionGridContainer } from "./section-grid-container";
+import { useSectionNavigation } from "./use-section-navigation";
 
 interface DashboardContainerProps {
   initialUser: User;
@@ -50,6 +52,7 @@ export function DashboardContainer({
     void clearOfflineData().finally(() => window.location.replace("/login"));
   }, []);
   const isOnline = useOnlineStatus();
+  const navigation = useSectionNavigation();
   const { user, logOut, isLoggingOut, logoutFailure } = useSession(
     httpAuthRepository,
     initialUser,
@@ -116,7 +119,7 @@ export function DashboardContainer({
       <OfflineBannerContainer isOffline={!isOnline} period={period} onSessionEnded={goToLogin} />
       {/* A disabled fieldset turns off every control inside at once, so a section added later cannot miss it. */}
       <fieldset disabled={!isOnline} className="contents">
-        <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 md:gap-8 md:py-8">
+        <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-6 px-4 pt-5 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 md:gap-8 md:pt-8">
           <DashboardHeader
             email={user.email}
             pending={isLoggingOut}
@@ -136,10 +139,20 @@ export function DashboardContainer({
               <ExportContainer key={`export-${period}`} period={period} onSessionEnded={goToLogin} />
               <TagFilter tags={tags} selectedId={tagId} isLoading={isLoadingTags} onChange={setChosenTagId} />
             </div>
-            <SectionGrid sections={sections} />
+            <SectionGridContainer
+              period={period}
+              tagId={tagId}
+              sections={sections}
+              openIds={navigation.openIds}
+              openedIds={navigation.openedIds}
+              allOpen={!isOnline}
+              onToggle={navigation.toggle}
+            />
           </main>
         </div>
       </fieldset>
+      {/* Outside the fieldset: offline, moving around the page still works. */}
+      <BottomNav current={navigation.current} onNavigate={navigation.goTo} />
     </FocusKeeper>
   );
 }

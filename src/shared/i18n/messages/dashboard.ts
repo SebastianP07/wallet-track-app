@@ -77,6 +77,32 @@ const en = {
         "Your passkeys and the devices signed in right now. Your authenticator app and recovery codes keep working alongside them.",
     },
   },
+  // A closed section's header: how many items it holds and, where it has one, what they add up to.
+  summaries: {
+    accounts: (count: number, amount: string) => `${count} account${count === 1 ? "" : "s"} · ${amount}`,
+    "fixed-expenses": (count: number, amount: string) =>
+      `${count} item${count === 1 ? "" : "s"} · ${amount} to pay`,
+    "occasional-expenses": (count: number, amount: string) =>
+      `${count} item${count === 1 ? "" : "s"} · ${amount} to pay`,
+    income: (count: number, amount: string) => `${count} item${count === 1 ? "" : "s"} · ${amount} to arrive`,
+    overdue: (count: number, amount: string) =>
+      count === 0 ? "Nothing overdue" : `${count} overdue · ${amount} to pay`,
+    "card-charges": (count: number, amount: string) =>
+      `${count} charge${count === 1 ? "" : "s"} · ${amount} pending`,
+    platforms: (count: number) => `${count} platform${count === 1 ? "" : "s"}`,
+    templates: (count: number) => `${count} template${count === 1 ? "" : "s"}`,
+    tags: (count: number) => `${count} tag${count === 1 ? "" : "s"}`,
+  },
+  // The bottom bar; each label stays short enough for six of them on a phone.
+  nav: {
+    label: "Sections",
+    overview: "Overview",
+    accounts: "Accounts",
+    expenses: "Expenses",
+    income: "Income",
+    cards: "Cards",
+    templates: "Templates",
+  },
   export: {
     action: "Export CSV",
     exporting: "Exporting…",
@@ -212,6 +238,30 @@ const es: DashboardMessages = {
       description:
         "Tus llaves de acceso y los dispositivos con sesión iniciada en este momento. Tu app de autenticación y tus códigos de recuperación siguen funcionando junto a ellas.",
     },
+  },
+  summaries: {
+    accounts: (count: number, amount: string) => `${count} cuenta${count === 1 ? "" : "s"} · ${amount}`,
+    "fixed-expenses": (count: number, amount: string) =>
+      `${count} ítem${count === 1 ? "" : "s"} · ${amount} por pagar`,
+    "occasional-expenses": (count: number, amount: string) =>
+      `${count} ítem${count === 1 ? "" : "s"} · ${amount} por pagar`,
+    income: (count: number, amount: string) => `${count} ítem${count === 1 ? "" : "s"} · ${amount} por llegar`,
+    overdue: (count: number, amount: string) =>
+      count === 0 ? "Nada vencido" : `${count} vencido${count === 1 ? "" : "s"} · ${amount} por pagar`,
+    "card-charges": (count: number, amount: string) =>
+      `${count} cargo${count === 1 ? "" : "s"} · ${amount} pendiente`,
+    platforms: (count: number) => `${count} plataforma${count === 1 ? "" : "s"}`,
+    templates: (count: number) => `${count} plantilla${count === 1 ? "" : "s"}`,
+    tags: (count: number) => `${count} etiqueta${count === 1 ? "" : "s"}`,
+  },
+  nav: {
+    label: "Secciones",
+    overview: "Resumen",
+    accounts: "Cuentas",
+    expenses: "Gastos",
+    income: "Ingresos",
+    cards: "Tarjetas",
+    templates: "Plantillas",
   },
   export: {
     action: "Exportar CSV",

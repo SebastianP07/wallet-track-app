@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.0 — 2026-11-09 — Ordering
+## 0.18.0 — 2026-11-09 — Ordering and navigation
 
 - D13: sections 04, 05 and 06 show done items first, each group in the API's order (`doneFirst`, grouping only). A
   toggle moves the row at once (optimistic, as before) and focus returns to its toggle when the row moves in the DOM.
@@ -13,6 +13,7 @@
 - Reorder writes `PUT /periods/{period}/items/order` optimistically (scoped, so moves land in order) and refetches;
   the stored order keeps the other group's places (`storedOrder`). Contract refreshed and types regenerated. The
   offline page lists done items first in 04, 05 and 06; the cached Dashboard's shape is unchanged.
+- Bottom navigation (`BottomNav`, lucide icons, `aria-current` from an IntersectionObserver, hidden while a text field has focus under 640 px) and accordion sections (`SectionFrame` toggle with `aria-expanded`/`aria-controls`, closed by default, summaries read from the query cache with no extra request, charts mounted on first open; offline, every section but never-opened Charts shows open).
 
 ## 0.17.0 — 2026-11-07 — Owner feedback
 

@@ -23,3 +23,14 @@ export interface DashboardSection {
   title: string;
   description: string;
 }
+
+// The overview is the one section always open; every other one is an accordion that starts closed on each load.
+export function isCollapsible(id: DashboardSectionId): boolean {
+  return id !== "kpis";
+}
+
+// Sections too heavy to render while closed: they mount the first time they open and stay mounted after. The rest
+// render while closed too, hidden, so their data loads as before and the closed header can summarize it.
+export function mountsWhenOpened(id: DashboardSectionId): boolean {
+  return id === "charts";
+}

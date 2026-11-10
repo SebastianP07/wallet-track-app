@@ -18,7 +18,7 @@ export function OfflineBanner({ isOffline, wasOffline, dataAgeMs }: OfflineBanne
         {isOffline ? t.nowOffline : wasOffline ? t.backOnline : ""}
       </p>
       {isOffline ? (
-        <p className="sticky top-0 z-20 border-b border-signal bg-[#1c1503] px-4 py-2.5 text-sm sm:px-6">
+        <p data-sticky-top className="sticky top-0 z-20 border-b border-signal bg-[#1c1503] px-4 py-2.5 text-sm sm:px-6">
           {t.offline}{" "}
           {dataAgeMs === null ? t.neverLoaded : t.lastUpdated(describeDataAge(dataAgeMs, messages))}{" "}
           {t.nothingCanChange}
