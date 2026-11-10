@@ -60,6 +60,7 @@ export function useItemMutations({
         tagId: item.tagId ?? null,
         templateId: null,
         personId: null,
+        platformId: null,
         cardId: item.kind === "card_charge" ? item.cardId : null,
         status: "pending",
         doneAt: null,

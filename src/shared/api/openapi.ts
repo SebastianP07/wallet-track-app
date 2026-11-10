@@ -441,7 +441,7 @@ export interface paths {
         put?: never;
         /**
          * Open a month
-         * @description Idempotent on retry: templates are cloned once per month.
+         * @description Idempotent on retry: templates are cloned once per month. A month this call creates also gets one income item per owing platform member (D4) and one pending card charge per platform with a card (D14), after the template items.
          */
         post: operations["openPeriod"];
         delete?: never;
@@ -584,14 +584,14 @@ export interface paths {
         post?: never;
         /**
          * Delete an item
-         * @description Deletes the item from its own month only. A payment linked to a person-linked income item stays, as history, with its coverage. With `stopRepeating=true` the same transaction also deactivates the item's template, if it has one, so no month opened from then on gets it; the template is kept, inactive, and items of other months, paid or not, stay as they are. An overdue expense deleted from its month of origin leaves the totals of the month that owed it (D1, D7).
+         * @description Deletes the item from its own month only. A payment linked to a person-linked income item stays, as history, with its coverage. With `stopRepeating=true` the same transaction also deactivates the item's template, if it has one, so no month opened from then on gets it; the template is kept, inactive, and items of other months, paid or not, stay as they are. An overdue expense deleted from its month of origin leaves the totals of the month that owed it (D1, D7). A platform's card charge (`platformId` set) answers 409; remove the platform's card or the platform instead (D14).
          */
         delete: operations["deletePeriodItem"];
         options?: never;
         head?: never;
         /**
          * Edit an item
-         * @description Affects this month only, never its template.
+         * @description Affects this month only, never its template. A platform's card charge (`platformId` set) answers 409; edit the platform instead (D14).
          */
         patch: operations["updatePeriodItem"];
         trace?: never;
@@ -839,7 +839,10 @@ export interface paths {
         /** List platforms */
         get: operations["listPlatforms"];
         put?: never;
-        /** Create a platform */
+        /**
+         * Create a platform
+         * @description A platform with a card also puts its pending card charge in every open month (D14).
+         */
         post: operations["createPlatform"];
         delete?: never;
         options?: never;
@@ -858,11 +861,17 @@ export interface paths {
         get: operations["getPlatform"];
         put?: never;
         post?: never;
-        /** Delete a platform */
+        /**
+         * Delete a platform
+         * @description Also removes the platform's pending card charges of open months; done ones and closed months keep theirs, no longer linked (D14).
+         */
         delete: operations["deletePlatform"];
         options?: never;
         head?: never;
-        /** Edit a platform */
+        /**
+         * Edit a platform
+         * @description The platform's card charge follows it in every open month while pending (D14): a new card adds it where a month has none, a name, cost or card change updates it, and clearing the card removes it. Done charges and closed months stay as they are. Members' income items already in a month keep their amount (D4).
+         */
         patch: operations["updatePlatform"];
         trace?: never;
     };
@@ -1220,6 +1229,8 @@ export interface components {
             templateId: components["schemas"]["Id"] | null;
             /** @description Platform member this income item is for (D4). */
             personId: components["schemas"]["Id"] | null;
+            /** @description Platform whose card charge this is (D14). Every month opened, and every open month when the platform changes, gets one such pending charge per platform with a card, named and priced after it; only the platform edits or removes it, so `updatePeriodItem` and `deletePeriodItem` answer 409, while marking it done works as on any card charge. Null on every other item, and on a done charge once its platform is deleted. */
+            platformId: components["schemas"]["Id"] | null;
             cardId: components["schemas"]["Id"] | null;
             tagId: components["schemas"]["Id"] | null;
             status: components["schemas"]["ItemStatus"];
@@ -2642,6 +2653,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     updatePeriodItem: {
@@ -2675,6 +2687,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     markPeriodItemDone: {

@@ -22,6 +22,29 @@ interface CardChargeRowProps {
 
 export function CardChargeRow({ item, cards, tags, onSetDone, onUpdate, onDelete }: CardChargeRowProps) {
   const { cards: t, expenses } = useMessages();
+  const status = (
+    <span className={cn(BADGE, "border-rule text-muted-foreground")}>
+      {item.status === "done" ? t.charged : t.expected}
+    </span>
+  );
+  // A platform's charge follows its platform, so it is edited or removed there and only marked here (D14).
+  if (item.platformId) {
+    return (
+      <ItemRow
+        item={item}
+        tags={tags}
+        doneWord="charged"
+        onSetDone={onSetDone}
+        details={
+          <>
+            {status}
+            <span className={cn(BADGE, "border-signal text-signal")}>{t.fromPlatform}</span>
+            <span className="text-xs text-muted-foreground">{t.fromPlatformHint}</span>
+          </>
+        }
+      />
+    );
+  }
   return (
     <ItemRow
       item={item}
@@ -29,11 +52,7 @@ export function CardChargeRow({ item, cards, tags, onSetDone, onUpdate, onDelete
       doneWord="charged"
       onSetDone={onSetDone}
       onDelete={onDelete}
-      details={
-        <span className={cn(BADGE, "border-rule text-muted-foreground")}>
-          {item.status === "done" ? t.charged : t.expected}
-        </span>
-      }
+      details={status}
       renderEditForm={(close) => (
         <CardChargeForm
           defaultValues={{

@@ -66,6 +66,7 @@ export function PlatformForm({
         ]}
         {...register("cardId")}
       />
+      <p className="-mt-1 text-sm text-muted-foreground">{t.cardChargeHint}</p>
       <div className="flex gap-2">
         <Button type="submit" className="flex-1" disabled={pending}>
           {pending ? common.saving : submitLabel}

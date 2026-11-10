@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.19.0 — 2026-11-10 — Platforms feed card charges
+
+- D14: contract refreshed and types regenerated (`PeriodItem.platformId`). `CardChargeRow` renders a platform's charge
+  with a "Platform"/"Plataforma" badge and an "Edit or remove it under Platforms" hint, and only its charged toggle (no
+  edit or delete); manual charges are unchanged. Optimistic new items set `platformId: null`.
+- The platform form explains that a card puts its monthly cost under Card charges in every open month; the platform and
+  card delete confirmations say what happens to their expected charges (en/es). Platform writes already refresh every
+  month's items and card totals, so the section follows at once. The offline page lists the generated charges read-only.
+
 ## 0.18.0 — 2026-11-09 — Ordering and navigation
 
 - D13: sections 04, 05 and 06 show done items first, each group in the API's order (`doneFirst`, grouping only). A

@@ -18,6 +18,8 @@ const en = {
   needsCard: "A card charge needs a card. Add your first one under Cards, below.",
   charged: "Charged",
   expected: "Expected",
+  fromPlatform: "Platform",
+  fromPlatformHint: "Edit or remove it under Platforms.",
   cardName: "Card name",
   issuer: "Issuer",
   statementDay: "Statement day",
@@ -37,7 +39,7 @@ const en = {
   deleteCard: (name: string) => `Delete card ${name}`,
   deleteBefore: "Delete ",
   deleteAfter:
-    " for good? Its active card charge templates become inactive, so months opened from now on won't get those charges. Charges already in a month stay, under Deleted card.",
+    " for good? Its active card charge templates become inactive, so months opened from now on won't get those charges. Its platforms lose the card, so their expected charges leave the open months. Other charges already in a month stay, under Deleted card.",
   failures: {
     rejected: "That card was not accepted. Check its name, issuer and days.",
     notFound: "That card no longer exists.",
@@ -67,6 +69,8 @@ const es: CardsMessages = {
   needsCard: "Un cargo a tarjeta necesita una tarjeta. Agrega la primera en Tarjetas, más abajo.",
   charged: "Cobrado",
   expected: "Esperado",
+  fromPlatform: "Plataforma",
+  fromPlatformHint: "Edítalo o quítalo en Plataformas.",
   cardName: "Nombre de la tarjeta",
   issuer: "Banco emisor",
   statementDay: "Día de corte",
@@ -86,7 +90,7 @@ const es: CardsMessages = {
   deleteCard: (name: string) => `Eliminar la tarjeta ${name}`,
   deleteBefore: "¿Eliminar ",
   deleteAfter:
-    " para siempre? Sus plantillas activas de cargos a tarjeta quedan inactivas, así que los meses que abras de ahora en adelante no tendrán esos cargos. Los cargos que ya están en un mes se quedan, en Tarjeta eliminada.",
+    " para siempre? Sus plantillas activas de cargos a tarjeta quedan inactivas, así que los meses que abras de ahora en adelante no tendrán esos cargos. Sus plataformas quedan sin tarjeta, así que sus cargos esperados salen de los meses abiertos. Los demás cargos que ya están en un mes se quedan, en Tarjeta eliminada.",
   failures: {
     rejected: "Esa tarjeta no se aceptó. Revisa su nombre, el banco emisor y los días.",
     notFound: "Esa tarjeta ya no existe.",
