@@ -14,6 +14,7 @@
   the stored order keeps the other group's places (`storedOrder`). Contract refreshed and types regenerated. The
   offline page lists done items first in 04, 05 and 06; the cached Dashboard's shape is unchanged.
 - Bottom navigation (`BottomNav`, lucide icons, `aria-current` from an IntersectionObserver, hidden while a text field has focus under 640 px) and accordion sections (`SectionFrame` toggle with `aria-expanded`/`aria-controls`, closed by default, summaries read from the query cache with no extra request, charts mounted on first open; offline, every section but never-opened Charts shows open).
+- `CollapseAllAction` beside Export CSV (outline `Button`, lucide `ChevronsDownUp`, wraps under 390 px) calls `collapseAll` on `useSectionNavigation`, the one open-state owner (opened sections stay mounted); stays enabled when nothing is open, announces via its own `role="status"`, disabled offline by the fieldset.
 
 ## 0.17.0 — 2026-11-07 — Owner feedback
 

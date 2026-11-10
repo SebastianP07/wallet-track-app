@@ -61,6 +61,11 @@ export function useSectionNavigation() {
     });
   }, []);
 
+  // Closes every open section; those opened before stay in `opened`, so what they mounted is kept for reopening.
+  const collapseAll = useCallback(() => {
+    setState((previous) => (previous.open.size === 0 ? previous : { ...previous, open: new Set() }));
+  }, []);
+
   const goTo = useCallback((id: DestinationId) => {
     const destination = DASHBOARD_DESTINATIONS.find((candidate) => candidate.id === id);
     if (!destination) {
@@ -126,5 +131,5 @@ export function useSectionNavigation() {
     return () => observer.disconnect();
   }, []);
 
-  return { openIds: state.open, openedIds: state.opened, current, toggle, goTo };
+  return { openIds: state.open, openedIds: state.opened, current, toggle, collapseAll, goTo };
 }

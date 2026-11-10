@@ -26,6 +26,7 @@ import { Button } from "@/shared/ui/button";
 import { FocusKeeper } from "@/shared/ui/focus-keeper";
 import { DashboardHeader } from "../components/dashboard-header";
 import { BottomNav } from "../components/bottom-nav";
+import { CollapseAllAction } from "../components/collapse-all-action";
 import { MonthSwitcher } from "../components/month-switcher";
 import { ChartsContainer } from "./charts-container";
 import { ExportContainer } from "./export-container";
@@ -136,7 +137,11 @@ export function DashboardContainer({
                 </Button>
               )}
               <PeriodStatusContainer key={period} period={period} onSessionEnded={goToLogin} />
-              <ExportContainer key={`export-${period}`} period={period} onSessionEnded={goToLogin} />
+              {/* Wraps on a narrow phone instead of scrolling sideways. */}
+              <div className="flex flex-wrap items-start gap-2">
+                <ExportContainer key={`export-${period}`} period={period} onSessionEnded={goToLogin} />
+                <CollapseAllAction anyOpen={navigation.openIds.size > 0} onCollapseAll={navigation.collapseAll} />
+              </div>
               <TagFilter tags={tags} selectedId={tagId} isLoading={isLoadingTags} onChange={setChosenTagId} />
             </div>
             <SectionGridContainer

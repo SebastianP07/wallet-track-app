@@ -114,6 +114,10 @@ const en = {
     offline: "The export needs a connection. Nothing was downloaded.",
     failed: "The export failed. Nothing was downloaded.",
   },
+  collapseAll: {
+    action: "Collapse all",
+    done: "Sections collapsed.",
+  },
   offline: {
     nowOffline: "You're offline. Nothing can be changed until you reconnect.",
     backOnline: "You're back online.",
@@ -273,6 +277,10 @@ const es: DashboardMessages = {
     tooMany: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
     offline: "La exportación necesita conexión. No se descargó nada.",
     failed: "La exportación falló. No se descargó nada.",
+  },
+  collapseAll: {
+    action: "Colapsar todo",
+    done: "Secciones colapsadas.",
   },
   offline: {
     nowOffline: "Estás sin conexión. No se puede cambiar nada hasta que vuelvas a conectarte.",
