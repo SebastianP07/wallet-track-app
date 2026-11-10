@@ -36,7 +36,7 @@ export function ExpenseRow({ item, tags, repeats, reorder, onSetDone, onUpdate, 
       details={
         <>
           {item.dueDate ? (
-            <span className="text-xs whitespace-nowrap text-muted-foreground">
+            <span className="text-xs whitespace-nowrap text-due">
               {t.due(formatDate(item.dueDate))}
             </span>
           ) : null}

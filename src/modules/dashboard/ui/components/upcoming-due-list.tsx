@@ -37,7 +37,7 @@ export function UpcomingDueList({ items }: UpcomingDueListProps) {
                 <span className="shrink-0 font-mono text-xs tabular-nums">{formatCOP(item.amount)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                <span>{item.dueDate ? t.due(formatDate(item.dueDate)) : t.noDueDate}</span>
+                {item.dueDate ? <span className="text-due">{t.due(formatDate(item.dueDate))}</span> : <span>{t.noDueDate}</span>}
                 <span>· {kinds[item.kind]}</span>
                 <UrgencyBadge item={item} />
               </div>

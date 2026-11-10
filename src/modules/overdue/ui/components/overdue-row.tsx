@@ -29,7 +29,7 @@ export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
             {t.from(monthLabel(item.period, locale))}
           </span>
           <span className={DETAIL}>{t.kinds[item.kind]}</span>
-          {item.dueDate ? <span className={DETAIL}>{messages.expenses.due(formatDate(item.dueDate))}</span> : null}
+          {item.dueDate ? <span className="text-xs whitespace-nowrap text-due">{messages.expenses.due(formatDate(item.dueDate))}</span> : null}
           {item.personId ? <span className={DETAIL}>{messages.income.sharedPlatforms}</span> : null}
         </>
       }
