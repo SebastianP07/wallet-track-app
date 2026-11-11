@@ -1,5 +1,5 @@
 import type { PeriodsRepository, TemplatesRepository } from "../application/periods-repository";
-import type { Period, PeriodList, Template, TemplateList } from "../domain/types";
+import type { Period, PeriodList, PeriodUpdate, Template, TemplateList } from "../domain/types";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/shared/api/http-client";
 import type { components } from "@/shared/api/openapi";
 
@@ -12,6 +12,10 @@ export const httpPeriodsRepository: PeriodsRepository = {
   },
   close(period) {
     return apiPost<Period>(`/periods/${encodeURIComponent(period)}/close`);
+  },
+  setOpeningBalance(period, openingBalance) {
+    const body: PeriodUpdate = { openingBalance };
+    return apiPatch<Period>(`/periods/${encodeURIComponent(period)}`, body);
   },
 };
 

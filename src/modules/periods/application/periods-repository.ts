@@ -12,6 +12,8 @@ export interface PeriodsRepository {
   list(): Promise<PeriodList>;
   open(period: string): Promise<Period>;
   close(period: string): Promise<Period>;
+  // Null clears the month's opening balance.
+  setOpeningBalance(period: string, openingBalance: number | null): Promise<Period>;
 }
 
 export interface TemplatesRepository {

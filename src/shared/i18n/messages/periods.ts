@@ -51,6 +51,7 @@ const en = {
     periodNotFound: "This month has not been opened. Reload the page to see it as it is now.",
     templateRejected: "That change was not accepted. Check the values; an active card charge must keep a card.",
     templateNotFound: "That template no longer exists.",
+    openingBalanceRejected: "That opening balance was not accepted. Use whole pesos.",
   },
 };
 
@@ -113,6 +114,7 @@ const es: PeriodsMessages = {
     periodNotFound: "Este mes no se ha abierto. Recarga la página para verlo como está ahora.",
     templateRejected: "Ese cambio no se aceptó. Revisa los valores; un cargo a tarjeta activo debe conservar una tarjeta.",
     templateNotFound: "Esa plantilla ya no existe.",
+    openingBalanceRejected: "Ese inicio del mes no se aceptó. Usa pesos enteros.",
   },
 };
 

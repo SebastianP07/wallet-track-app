@@ -464,7 +464,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Set or clear a month's opening balance
+         * @description The opening balance is what the accounts held when the month began. Opening a month sets it to Total actual at that moment; this call overrides it, or clears it with null. Allowed on open and closed months alike, because it is informational and changes no item, balance or total (D6).
+         */
+        patch: operations["updatePeriod"];
         trace?: never;
     };
     "/periods/{period}/close": {
@@ -1197,11 +1201,17 @@ export interface components {
             id: components["schemas"]["Id"];
             period: components["schemas"]["YearMonth"];
             status: components["schemas"]["PeriodStatus"];
+            /** @description What the accounts held when the month began. Snapshot of Total actual when the month was opened, or set by the owner; null when unknown (months opened before it existed). */
+            openingBalance: components["schemas"]["Money"] | null;
             createdAt: components["schemas"]["Timestamp"];
             updatedAt: components["schemas"]["Timestamp"];
         };
         PeriodList: {
             items: components["schemas"]["Period"][];
+        };
+        PeriodUpdate: {
+            /** @description The month's opening balance; null clears it. */
+            openingBalance: components["schemas"]["Money"] | null;
         };
         PeriodOpenRequest: {
             period: components["schemas"]["YearMonth"];
@@ -1542,6 +1552,12 @@ export interface components {
             outgoing: components["schemas"]["NonNegativeMoney"];
             /** @description Balance: incoming - outgoing (D2). */
             balance: components["schemas"]["Money"];
+            /** @description Inicio del mes: the period's opening balance; null when unknown. */
+            openingBalance: components["schemas"]["Money"] | null;
+            /** @description Cierre esperado: openingBalance + balance, stopping at the money bound in either direction. Null when openingBalance is. */
+            expectedClose: components["schemas"]["Money"] | null;
+            /** @description Descuadre: surplus - expectedClose, stopping at the money bound. Zero when the month squares; positive when the accounts hold more than the items explain. Null when openingBalance is. */
+            mismatch: components["schemas"]["Money"] | null;
         };
         /** @description Pending amounts behind `toPay`, for the donut chart. */
         ToPayBreakdown: {
@@ -2424,6 +2440,39 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updatePeriod: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Must match the `__Host-csrf` cookie (double-submit). See `GET /auth/csrf`. */
+                "X-CSRF-Token": components["parameters"]["CsrfToken"];
+            };
+            path: {
+                period: components["parameters"]["Period"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PeriodUpdate"];
+            };
+        };
+        responses: {
+            /** @description Opening balance updated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Period"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };

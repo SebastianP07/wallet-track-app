@@ -27,6 +27,22 @@ const en = {
     outgoingHint: "All fixed, occasional and overdue, paid or not",
     balance: "Balance",
     balanceHint: "Coming in − going out",
+    openingBalance: "Start of the month",
+    openingBalanceHint: "What the accounts held when the month began",
+    openingBalanceMissing: "Set what the accounts held when this month began to check it squares.",
+    setOpeningBalance: "Set",
+    editOpeningBalance: "Edit",
+    setOpeningBalanceLabel: "Set the start of the month",
+    editOpeningBalanceLabel: "Edit the start of the month",
+    clearOpeningBalance: "Clear",
+    openingBalanceInPesos: "Start of the month in pesos",
+    saveOpeningBalance: "Save start",
+    expectedClose: "Expected close",
+    expectedCloseHint: "Start of the month + balance",
+    mismatch: "Mismatch",
+    mismatchHint: "Left over − expected close: money the items don't explain",
+    mismatchSquaredHint: "Left over − expected close: the month squares",
+    mismatchUnknownHint: "Set the start of the month to see it",
     notOpenedNote: "Open this month to see the rest. Its balances are the same as in any month.",
     closedNote:
       "This month is closed, so what was pending is overdue: it stays in Coming in and Going out, and is out of To pay and To arrive. Unpaid expenses moved to the Overdue section of the next month that is not closed. Left over is therefore today's Total actual.",
@@ -35,7 +51,7 @@ const en = {
     kpis: {
       title: "Overview",
       description:
-        "Total actual, to pay, to arrive, left over and the month's balance. Card charges count toward none of them; overdue expenses this month owes count in to pay and going out.",
+        "Total actual, to pay, to arrive and left over; then the month's balance from its start: start of the month, coming in, going out, balance, expected close and mismatch. Card charges count toward none of them; overdue expenses this month owes count in to pay and going out.",
     },
     charts: { title: "Charts", description: "To pay by kind, how the totals compare, and what is due next." },
     accounts: {
@@ -187,6 +203,22 @@ const es: DashboardMessages = {
     outgoingHint: "Todos los fijos, ocasionales y vencidos, pagados o no",
     balance: "Balance",
     balanceHint: "Llega − se va",
+    openingBalance: "Inicio del mes",
+    openingBalanceHint: "Lo que tenían las cuentas cuando empezó el mes",
+    openingBalanceMissing: "Define cuánto tenían las cuentas al empezar este mes para ver si cuadra.",
+    setOpeningBalance: "Definir",
+    editOpeningBalance: "Editar",
+    setOpeningBalanceLabel: "Definir el inicio del mes",
+    editOpeningBalanceLabel: "Editar el inicio del mes",
+    clearOpeningBalance: "Quitar",
+    openingBalanceInPesos: "Inicio del mes en pesos",
+    saveOpeningBalance: "Guardar inicio",
+    expectedClose: "Cierre esperado",
+    expectedCloseHint: "Inicio del mes + balance",
+    mismatch: "Descuadre",
+    mismatchHint: "Sobrante − cierre esperado: plata que los ítems no explican",
+    mismatchSquaredHint: "Sobrante − cierre esperado: el mes cuadra",
+    mismatchUnknownHint: "Define el inicio del mes para verlo",
     notOpenedNote: "Abre este mes para ver el resto. Sus saldos son los mismos que en cualquier mes.",
     closedNote:
       "Este mes está cerrado, así que lo que estaba pendiente quedó vencido: sigue en Llega y Se va, y sale de Por pagar y Por llegar. Los gastos sin pagar pasaron a la sección Vencidos del siguiente mes que no esté cerrado. Por eso el Sobrante es el Total actual de hoy.",
@@ -195,7 +227,7 @@ const es: DashboardMessages = {
     kpis: {
       title: "Resumen",
       description:
-        "Total actual, por pagar, por llegar, sobrante y el balance del mes. Los cargos a tarjeta no cuentan en ninguno; los gastos vencidos que debe este mes cuentan en por pagar y en se va.",
+        "Total actual, por pagar, por llegar y sobrante; luego el balance del mes desde su inicio: inicio del mes, llega, se va, balance, cierre esperado y descuadre. Los cargos a tarjeta no cuentan en ninguno; los gastos vencidos que debe este mes cuentan en por pagar y en se va.",
     },
     charts: {
       title: "Gráficas",

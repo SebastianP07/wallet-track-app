@@ -2,6 +2,8 @@
 
 import { useAccountTotals } from "@/modules/accounts/application/use-account-totals";
 import { httpAccountsRepository } from "@/modules/accounts/infrastructure/http-accounts-repository";
+import { useOpeningBalance } from "@/modules/periods/application/use-opening-balance";
+import { httpPeriodsRepository } from "@/modules/periods/infrastructure/http-periods-repository";
 import { useDashboard } from "../../application/use-dashboard";
 import { httpDashboardRepository } from "../../infrastructure/http-dashboard-repository";
 import {
@@ -24,6 +26,7 @@ export function OverviewContainer({ period, onSessionEnded }: OverviewContainerP
     onSessionEnded,
   );
   const balances = useAccountTotals(httpAccountsRepository, notOpened);
+  const opening = useOpeningBalance(httpPeriodsRepository, period, onSessionEnded);
   const t = useMessages().dashboard;
 
   if (isLoading) {
@@ -39,9 +42,16 @@ export function OverviewContainer({ period, onSessionEnded }: OverviewContainerP
     <>
       {refreshFailed ? <DashboardRefreshFailed /> : null}
       <KpiOverview
+        // A form left open must not save into the month switched to.
+        key={period}
         kpis={dashboard.kpis}
         note={dashboard.period.status === "closed" ? t.kpis.closedNote : null}
         isSettling={isSettling}
+        openingBalance={{
+          onSave: opening.setOpeningBalance,
+          isSaving: opening.isSaving,
+          failure: opening.failure,
+        }}
       />
     </>
   );
