@@ -33,7 +33,7 @@
       overdue: "Vencido",
       due: (date) => `Vence el ${date}`,
       from: (month) => `De ${month}`,
-      kpis: ["Total actual", "Por pagar", "Por llegar", "Sobrante", "Llega", "Se va", "Balance"],
+      kpis: ["Total actual", "Por pagar", "Por llegar", "Sobrante", "Inicio del mes", "Llega", "Se va", "Balance", "Cierre esperado", "Descuadre"],
       sections: {
         accounts: ["Cuentas", "No hay cuentas."],
         fixed: ["Gastos fijos", "No hay gastos fijos."],
@@ -60,7 +60,7 @@
       overdue: "Overdue",
       due: (date) => `Due ${date}`,
       from: (month) => `From ${month}`,
-      kpis: ["Total actual", "To pay", "To arrive", "Left over", "Coming in", "Going out", "Balance"],
+      kpis: ["Total actual", "To pay", "To arrive", "Left over", "Start of the month", "Coming in", "Going out", "Balance", "Expected close", "Mismatch"],
       sections: {
         accounts: ["Accounts", "No accounts."],
         fixed: ["Fixed expenses", "No fixed expenses."],
@@ -205,11 +205,11 @@
       // Not a live region: it is the page's first content and its age changes each minute.
       el("div", { className: "banner" }, ageText, el("a", { className: "action", href: "/", textContent: TEXT.tryAgain })),
       month,
+      // The opening balance and what follows from it are null until set, and absent from data saved before them.
       kpis(
-        [k.currentTotal, k.toPay, k.toReceive, k.surplus, k.incoming, k.outgoing, k.balance].map((pesos, index) => [
-          TEXT.kpis[index],
-          pesos,
-        ]),
+        [k.currentTotal, k.toPay, k.toReceive, k.surplus, k.openingBalance, k.incoming, k.outgoing, k.balance, k.expectedClose, k.mismatch]
+          .map((pesos, index) => [TEXT.kpis[index], pesos])
+          .filter(([, pesos]) => pesos != null),
       ),
       el(
         "div",
