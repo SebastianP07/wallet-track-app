@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 
 import type { LoginFailure } from "../../application/use-login-flow";
 import type { PasswordLoginRequest } from "../../domain/types";
@@ -31,8 +32,10 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
     defaultValues: { email: "", password: "" },
   });
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
   useEffect(() => setFocus("email"), [setFocus]);
   const t = useMessages().auth;
+  const toggleLabel = passwordVisible ? t.hidePassword : t.showPassword;
 
   useEffect(() => {
     if (failure) {
@@ -42,7 +45,12 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
   }, [failure, resetField, setFocus]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="flex flex-col gap-5">
+    <form
+      method="post"
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      noValidate
+      className="flex flex-col gap-5"
+    >
       <FormAlert message={failure?.message} />
       <Field
         label={t.email}
@@ -55,9 +63,25 @@ export function PasswordForm({ failure, pending, onSubmit, onInvalid }: Password
       />
       <Field
         label={t.password}
-        type="password"
+        type={passwordVisible ? "text" : "password"}
         autoComplete="current-password"
+        autoCapitalize="none"
+        spellCheck={false}
         error={errors.password?.message}
+        trailing={
+          <Button
+            variant="outline"
+            className="shrink-0 px-3"
+            aria-label={toggleLabel}
+            aria-pressed={passwordVisible}
+            title={toggleLabel}
+            // Keeps focus on the password input when the toggle is clicked with a pointer.
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => setPasswordVisible((visible) => !visible)}
+          >
+            {passwordVisible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+          </Button>
+        }
         {...register("password")}
       />
       <Button type="submit" disabled={pending} className="mt-1">

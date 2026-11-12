@@ -63,6 +63,7 @@ export function SingleFieldForm({
 
   return (
     <form
+      method="post"
       onSubmit={handleSubmit(({ value }) => onSubmit(value), onInvalid)}
       noValidate
       className="flex flex-col gap-5"
