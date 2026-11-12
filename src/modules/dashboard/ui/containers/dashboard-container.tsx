@@ -32,6 +32,7 @@ import { ChartsContainer } from "./charts-container";
 import { ExportContainer } from "./export-container";
 import { OfflineBannerContainer } from "./offline-banner-container";
 import { OverviewContainer } from "./overview-container";
+import { RefreshContainer } from "./refresh-container";
 import { SectionGridContainer } from "./section-grid-container";
 import { useSectionNavigation } from "./use-section-navigation";
 
@@ -54,7 +55,7 @@ export function DashboardContainer({
   }, []);
   const isOnline = useOnlineStatus();
   const navigation = useSectionNavigation();
-  const { user, logOut, isLoggingOut, logoutFailure } = useSession(
+  const { user, logOut, logOutEverywhere, isLoggingOut, logoutFailure } = useSession(
     httpAuthRepository,
     initialUser,
     goToLogin,
@@ -120,13 +121,13 @@ export function DashboardContainer({
       <OfflineBannerContainer isOffline={!isOnline} period={period} onSessionEnded={goToLogin} />
       {/* A disabled fieldset turns off every control inside at once, so a section added later cannot miss it. */}
       <fieldset disabled={!isOnline} className="contents">
-        <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-6 px-4 pt-5 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 md:gap-8 md:pt-8">
+        <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-6 px-4 pt-5 pb-[calc(6.75rem+env(safe-area-inset-bottom))] sm:px-6 md:gap-8 md:pt-8">
           <DashboardHeader
             email={user.email}
             pending={isLoggingOut}
             failure={logoutFailure}
-            onLogout={() => logOut("this-device")}
-            onLogoutAll={() => logOut("all-devices")}
+            onLogout={logOut}
+            onLogoutAll={logOutEverywhere}
           />
           <main id="main" tabIndex={-1} className="flex flex-col gap-6 outline-none md:gap-8">
             <div className="flex flex-col gap-3">
@@ -141,6 +142,7 @@ export function DashboardContainer({
               <div className="flex flex-wrap items-start gap-2">
                 <ExportContainer key={`export-${period}`} period={period} onSessionEnded={goToLogin} />
                 <CollapseAllAction anyOpen={navigation.openIds.size > 0} onCollapseAll={navigation.collapseAll} />
+                <RefreshContainer />
               </div>
               <TagFilter tags={tags} selectedId={tagId} isLoading={isLoadingTags} onChange={setChosenTagId} />
             </div>

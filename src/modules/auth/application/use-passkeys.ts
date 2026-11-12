@@ -11,6 +11,7 @@ import {
 } from "../domain/security-display";
 import type { SecondFactorProof } from "../domain/types";
 import { ApiError, statusOf } from "@/shared/api/http-client";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 const PASSKEYS_KEY = ["auth", "passkeys"];
@@ -32,7 +33,12 @@ export function usePasskeys(
   const queryClient = useQueryClient();
   const messages = useMessages();
   const [failure, setFailureState] = useState<Translatable | null>(null);
-  const setFailure = (describe: Translatable | null) => setFailureState(() => describe);
+  const setFailure = (describe: Translatable | null) => {
+    setFailureState(() => describe);
+    if (describe) {
+      notify.error(describe(messages));
+    }
+  };
   const isSupported = useSyncExternalStore(subscribeToNothing, authenticator.isSupported, () => true);
 
   const query = useQuery({ queryKey: PASSKEYS_KEY, queryFn: () => repository.listPasskeys() });
@@ -110,7 +116,10 @@ export function usePasskeys(
       add.mutate(
         { name, proof },
         {
-          onSuccess: callbacks.onSuccess,
+          onSuccess: () => {
+            notify.success(messages.feedback.added(name));
+            callbacks.onSuccess();
+          },
           onError: (error) => {
             callbacks.onFailure();
             void reportAddFailure(error, reportUnlessSessionEnded, setFailure);
@@ -121,7 +130,10 @@ export function usePasskeys(
       rename.mutate(
         { id, name },
         {
-          onSuccess: callbacks.onSuccess,
+          onSuccess: () => {
+            notify.success(messages.feedback.saved(name));
+            callbacks.onSuccess();
+          },
           onError: (error) => {
             if (statusOf(error) === 401) {
               onSessionEnded();
@@ -136,7 +148,11 @@ export function usePasskeys(
       remove.mutate(
         { id, proof },
         {
-          onSuccess: callbacks.onSuccess,
+          onSuccess: () => {
+            const removed = query.data?.find((passkey) => passkey.id === id)?.name ?? "";
+            notify.success(messages.feedback.deleted(removed));
+            callbacks.onSuccess();
+          },
           onError: (error) => {
             callbacks.onFailure();
             void reportUnlessSessionEnded(error, (t) =>

@@ -2,11 +2,14 @@ import { useState } from "react";
 
 import type { ExpensesRepository } from "./expenses-repository";
 import { monthItemsKey, monthItemsListKey } from "./use-expense-list";
+import { doneWordOf } from "../domain/done-word";
 import { describeExpenseFailure } from "../domain/failures";
 import { withKindOrder } from "../domain/item-order";
 import type { ItemCreate, OrderedKind, PeriodItem, PeriodItemList, PeriodItemUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
 import { OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
+import { settled } from "@/shared/feedback/action-error";
+import { notify } from "@/shared/feedback/toast-store";
 import { pendingRowId, withoutRow, withReplacedRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
@@ -37,6 +40,10 @@ export function useItemMutations({
     // Adding an item that repeats, or deleting one to stop it, changes the templates.
     refreshes: [monthItemsKey(period), OVERDUE_ITEMS_KEY, RECURRING_TEMPLATES_KEY],
   };
+  const t = messages.feedback;
+  const describe = (error: unknown) => describeExpenseFailure(statusOf(error), messages);
+  const nameIn = (list: PeriodItemList | undefined, id: string) =>
+    list?.items.find((item) => item.id === id)?.name ?? "";
   const onStart = () => setFailure(null);
   const onFailure = (error: unknown) => {
     if (statusOf(error) === 401) {
@@ -45,6 +52,7 @@ export function useItemMutations({
     }
     const status = statusOf(error);
     setFailure(() => (current: typeof messages) => describeExpenseFailure(status, current));
+    notify.error(describe(error));
   };
 
   const create = useOptimisticMutation<PeriodItemList, ItemCreate, PeriodItem>({
@@ -76,6 +84,7 @@ export function useItemMutations({
       };
     },
     onStart,
+    onSuccess: (created) => notify.success(t.added(created.name)),
     onFailure,
   });
 
@@ -94,6 +103,7 @@ export function useItemMutations({
       };
     },
     onStart,
+    onSuccess: (updated) => notify.success(t.saved(updated.name)),
     onFailure,
   });
 
@@ -112,6 +122,7 @@ export function useItemMutations({
       };
     },
     onStart,
+    onSuccess: (_result, { id }, before) => notify.success(t.deleted(nameIn(before, id))),
     onFailure,
   });
 
@@ -137,6 +148,10 @@ export function useItemMutations({
       };
     },
     onStart,
+    onSuccess: (updated, { done }) => {
+      const word = doneWordOf(updated.kind);
+      notify.success(done ? t.markedDone(updated.name, word) : t.unmarkedDone(updated.name, word));
+    },
     onFailure,
   });
 
@@ -153,6 +168,7 @@ export function useItemMutations({
       };
     },
     onStart,
+    onSuccess: () => notify.success(t.orderSaved),
     onFailure,
   });
 
@@ -162,7 +178,7 @@ export function useItemMutations({
     createItem: create.mutate,
     updateItem: (id: string, changes: PeriodItemUpdate) => update.mutate({ id, changes }),
     deleteItem: (id: string, stopRepeating = false) => remove.mutate({ id, stopRepeating }),
-    setDone: (id: string, done: boolean) => toggleDone.mutate({ id, done }),
+    setDone: (id: string, done: boolean) => settled(toggleDone.mutateAsync({ id, done }), describe),
     reorderItems: (kind: OrderedKind, ids: string[]) => reorder.mutate({ kind, ids }),
   };
 }

@@ -11,6 +11,8 @@ import {
 } from "../domain/optimistic-templates";
 import type { Template, TemplateCreate, TemplateList, TemplateUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { settled } from "@/shared/feedback/action-error";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { CREDIT_CARDS_KEY, RECURRING_TEMPLATES_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
@@ -48,7 +50,9 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     }
     const status = statusOf(error);
     setFailure(() => (current: typeof messages) => describeTemplateFailure(status, current));
+    notify.error(describeTemplateFailure(status, messages));
   };
+  const nameIn = (list: TemplateList | undefined, id: string) => list?.items.find((row) => row.id === id)?.name ?? "";
 
   const create = useOptimisticMutation<TemplateList, TemplateCreate, Template>({
     queryKey: TEMPLATES_KEY,
@@ -74,6 +78,7 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
       };
     },
     onStart,
+    onSuccess: (created) => notify.success(messages.feedback.added(created.name)),
     onFailure,
   });
 
@@ -92,6 +97,15 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
       };
     },
     onStart,
+    onSuccess: (updated, { changes }) => {
+      const t = messages.feedback;
+      const onlyActive = Object.keys(changes).length === 1 && changes.active !== undefined;
+      if (!onlyActive) {
+        notify.success(t.saved(updated.name));
+      } else {
+        notify.success(updated.active ? t.templateActivated(updated.name) : t.templateDeactivated(updated.name));
+      }
+    },
     onFailure,
   });
 
@@ -110,6 +124,7 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
       };
     },
     onStart,
+    onSuccess: (_result, id, before) => notify.success(messages.feedback.deleted(nameIn(before, id))),
     onFailure,
   });
 
@@ -128,6 +143,10 @@ export function useTemplateSection(repository: TemplatesRepository, onSessionEnd
     reload: () => void query.refetch(),
     createTemplate: create.mutate,
     updateTemplate: (id: string, changes: TemplateUpdate) => update.mutate({ id, changes }),
+    setTemplateActive: (id: string, active: boolean) =>
+      settled(update.mutateAsync({ id, changes: { active } }), (error) =>
+        describeTemplateFailure(statusOf(error), messages),
+      ),
     deleteTemplate: (id: string) => remove.mutate(id),
   };
 }

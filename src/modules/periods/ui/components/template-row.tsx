@@ -15,6 +15,7 @@ import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import type { Messages } from "@/shared/i18n/messages";
 import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
 const TemplateForm = dynamic(() => import("./template-form").then((module) => module.TemplateForm));
@@ -44,12 +45,17 @@ interface TemplateRowProps {
   cardChoices: CardChoices;
   tags: Tag[];
   onUpdate: (changes: TemplateUpdate) => void;
+  // Asked first, then waited on: it decides whether the months opened from now on get this item.
+  onSetActive: (active: boolean) => Promise<unknown>;
   onDelete: () => void;
 }
 
-export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }: TemplateRowProps) {
+export function TemplateRow({ template, cardChoices, tags, onUpdate, onSetActive, onDelete }: TemplateRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
-  const { common, expenses, periods } = useMessages();
+  // What the confirmation asks for, kept as asked: the optimistic change flips the row while it waits.
+  const [activeTarget, setActiveTarget] = useState<boolean | null>(null);
+  const { common, expenses, feedback, periods } = useMessages();
+  const askActive = activeTarget ? feedback.confirm.activateTemplate : feedback.confirm.deactivateTemplate;
   const t = periods.templates;
   const pending = isPendingTemplate(template);
   const blockedFromActivating = !template.active && needsCardToActivate(template);
@@ -93,7 +99,7 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
             className={ACTION}
             disabled={pending || blockedFromActivating}
             aria-label={template.active ? t.deactivateItem(template.name) : t.activateItem(template.name)}
-            onClick={() => onUpdate({ active: !template.active })}
+            onClick={() => setActiveTarget(!template.active)}
           >
             {template.active ? t.deactivate : t.activate}
           </Button>
@@ -108,6 +114,15 @@ export function TemplateRow({ template, cardChoices, tags, onUpdate, onDelete }:
           </Button>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={activeTarget !== null}
+        title={askActive.title(template.name)}
+        description={askActive.text}
+        confirmLabel={activeTarget ? t.activate : t.deactivate}
+        onConfirm={() => (activeTarget === null ? undefined : onSetActive(activeTarget))}
+        onClose={() => setActiveTarget(null)}
+      />
 
       {mode === "view" && blockedFromActivating ? (
         <p className="text-xs text-muted-foreground">{t.chooseCardToActivate}</p>

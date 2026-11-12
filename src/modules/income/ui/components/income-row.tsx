@@ -12,7 +12,7 @@ const IncomeForm = dynamic(() => import("./income-form").then((module) => module
 interface IncomeRowProps {
   item: PeriodItem;
   tags: Tag[];
-  onSetDone: (done: boolean) => void;
+  onSetDone: (done: boolean) => Promise<unknown>;
   repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
   onDelete: (stopRepeating: boolean) => void;

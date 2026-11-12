@@ -134,6 +134,11 @@ const en = {
     action: "Collapse all",
     done: "Sections collapsed.",
   },
+  refresh: {
+    action: "Refresh data",
+    done: "Data refreshed.",
+    failed: "The data could not be refreshed. Try again.",
+  },
   offline: {
     nowOffline: "You're offline. Nothing can be changed until you reconnect.",
     backOnline: "You're back online.",
@@ -313,6 +318,11 @@ const es: DashboardMessages = {
   collapseAll: {
     action: "Colapsar todo",
     done: "Secciones colapsadas.",
+  },
+  refresh: {
+    action: "Actualizar datos",
+    done: "Datos actualizados.",
+    failed: "No se pudieron actualizar los datos. Inténtalo de nuevo.",
   },
   offline: {
     nowOffline: "Estás sin conexión. No se puede cambiar nada hasta que vuelvas a conectarte.",

@@ -30,6 +30,7 @@ interface TemplateSectionProps {
   reload: () => void;
   createTemplate: (template: TemplateCreate, callbacks: { onSuccess: () => void }) => void;
   updateTemplate: (id: string, changes: TemplateUpdate) => void;
+  setTemplateActive: (id: string, active: boolean) => Promise<unknown>;
   deleteTemplate: (id: string) => void;
 }
 
@@ -48,6 +49,7 @@ export function TemplateSection({
   reload,
   createTemplate,
   updateTemplate,
+  setTemplateActive,
   deleteTemplate,
 }: TemplateSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
@@ -114,6 +116,7 @@ export function TemplateSection({
                         cardChoices={cardChoices}
                         tags={tags}
                         onUpdate={(changes) => updateTemplate(template.id, changes)}
+                        onSetActive={(active) => setTemplateActive(template.id, active)}
                         onDelete={() => deleteTemplate(template.id)}
                       />
                     ))}

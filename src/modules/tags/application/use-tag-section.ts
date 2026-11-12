@@ -6,6 +6,7 @@ import { useTagList } from "./use-tag-list";
 import { describeTagFailure } from "../domain/failures";
 import type { TagCreate, TagUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { PERIOD_ITEMS_KEY, RECURRING_TEMPLATES_KEY, TAGS_KEY } from "@/shared/api/query-keys";
 
@@ -32,6 +33,7 @@ export function useTagSection(repository: TagsRepository, onSessionEnded: () => 
       }
       const status = statusOf(error);
       setFailure(() => (current: typeof messages) => describeTagFailure(status, current));
+      notify.error(describeTagFailure(status, messages));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: TAGS_KEY }),
   };
@@ -39,19 +41,24 @@ export function useTagSection(repository: TagsRepository, onSessionEnded: () => 
   const create = useMutation({
     mutationFn: (tag: TagCreate) => repository.create(tag),
     ...mutationOptions,
+    onSuccess: (created) => notify.success(messages.feedback.added(created.name)),
   });
   const update = useMutation({
     mutationFn: ({ id, changes }: { id: string; changes: TagUpdate }) => repository.update(id, changes),
     ...mutationOptions,
+    onSuccess: (updated) => notify.success(messages.feedback.saved(updated.name)),
   });
   const remove = useMutation({
     mutationFn: (id: string) => repository.remove(id),
     ...mutationOptions,
-    onSuccess: () =>
-      Promise.all([
+    onSuccess: (_result, id) => {
+      const name = list.tags.find((tag) => tag.id === id)?.name ?? "";
+      notify.success(messages.feedback.deleted(name));
+      return Promise.all([
         queryClient.invalidateQueries({ queryKey: PERIOD_ITEMS_KEY }),
         queryClient.invalidateQueries({ queryKey: RECURRING_TEMPLATES_KEY }),
-      ]),
+      ]);
+    },
   });
 
   return {

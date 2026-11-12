@@ -41,7 +41,7 @@ interface ExpenseSectionProps {
   createExpense: (draft: ExpenseDraft, callbacks: { onSuccess: () => void }) => void;
   updateExpense: (id: string, changes: PeriodItemUpdate) => void;
   deleteExpense: (id: string, stopRepeating: boolean) => void;
-  setDone: (id: string, done: boolean) => void;
+  setDone: (id: string, done: boolean) => Promise<unknown>;
   reorderItems: (kind: ExpenseKind, ids: string[]) => void;
 }
 

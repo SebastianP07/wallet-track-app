@@ -8,6 +8,8 @@ import { monthItemsKey } from "@/modules/expenses/application/use-expense-list";
 import { statusOf } from "@/shared/api/http-client";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import { CREDIT_CARDS_KEY, PERIOD_ITEMS_KEY, PLATFORMS_KEY } from "@/shared/api/query-keys";
+import { settled } from "@/shared/feedback/action-error";
+import { notify } from "@/shared/feedback/toast-store";
 
 interface Callbacks {
   onSuccess: () => void;
@@ -50,6 +52,14 @@ export function usePlatformSection(
     }
   }, [peopleError, platformsError, onSessionEnded]);
 
+  const t = messages.feedback;
+  const personName = (id: string) => people.data?.find((person) => person.id === id)?.name ?? "";
+  const platformName = (id: string) => platforms.data?.find((platform) => platform.id === id)?.name ?? "";
+  const payerName = (paymentId: string) =>
+    people.data?.find((person) => person.periodPaymentId === paymentId)?.name ?? "";
+  const describe = (error: unknown, conflict?: PlatformConflict) =>
+    describePlatformFailure(statusOf(error), messages, conflict);
+
   const options = (conflict?: PlatformConflict) => ({
     onMutate: () => setFailure(null),
     onError: (error: unknown) => {
@@ -59,6 +69,7 @@ export function usePlatformSection(
       }
       const status = statusOf(error);
       setFailure(() => (current: typeof messages) => describePlatformFailure(status, current, conflict));
+      notify.error(describe(error, conflict));
     },
     onSettled: () =>
       Promise.all([
@@ -70,37 +81,46 @@ export function usePlatformSection(
   const createPerson = useMutation({
     mutationFn: (person: PersonDraft) => repository.createPerson(person),
     ...options("ownerConflict"),
+    onSuccess: (_result, person) => notify.success(t.added(person.name)),
   });
   const updatePerson = useMutation({
     mutationFn: ({ id, changes }: { id: string; changes: PersonDraft }) =>
       repository.updatePerson(id, changes),
     ...options("ownerConflict"),
+    onSuccess: (_result, { changes }) => notify.success(t.saved(changes.name)),
   });
   const removePerson = useMutation({
     mutationFn: (id: string) => repository.removePerson(id),
     ...options("personHasPayments"),
+    onSuccess: (_result, id) => notify.success(t.deleted(personName(id))),
   });
   const recordPayment = useMutation({
     mutationFn: ({ personId, payment }: { personId: string; payment: PaymentDraft }) =>
       repository.recordPayment(personId, payment),
     ...options(),
+    onSuccess: (_result, { personId }) =>
+      notify.success(t.paymentRecorded(personName(personId))),
   });
   const removePayment = useMutation({
     mutationFn: (id: string) => repository.removePayment(id),
     ...options(),
+    onSuccess: (_result, id) => notify.success(t.paymentRemoved(payerName(id))),
   });
   const createPlatform = useMutation({
     mutationFn: (platform: PlatformDraft) => repository.createPlatform(platform),
     ...options(),
+    onSuccess: (_result: unknown, platform: PlatformDraft) => notify.success(t.added(platform.name)),
   });
   const updatePlatform = useMutation({
     mutationFn: ({ id, changes }: { id: string; changes: PlatformDraft }) =>
       repository.updatePlatform(id, changes),
     ...options(),
+    onSuccess: (_result, { changes }) => notify.success(t.saved(changes.name)),
   });
   const removePlatform = useMutation({
     mutationFn: (id: string) => repository.removePlatform(id),
     ...options(),
+    onSuccess: (_result, id) => notify.success(t.deleted(platformName(id))),
   });
   const setMember = useMutation({
     mutationFn: ({
@@ -116,6 +136,10 @@ export function usePlatformSection(
         ? repository.addMember(platformId, personId)
         : repository.removeMember(platformId, personId),
     ...options(),
+    onSuccess: (_result, { platformId, personId, member }) => {
+      const [person, platform] = [personName(personId), platformName(platformId)];
+      notify.success(member ? t.memberAdded(person, platform) : t.memberRemoved(person, platform));
+    },
   });
 
   return {
@@ -147,6 +171,6 @@ export function usePlatformSection(
       updatePlatform.mutate({ id, changes }, callbacks),
     deletePlatform: (id: string) => removePlatform.mutate(id),
     setMember: (platformId: string, personId: string, member: boolean) =>
-      setMember.mutate({ platformId, personId, member }),
+      settled(setMember.mutateAsync({ platformId, personId, member }), (error) => describe(error)),
   };
 }

@@ -15,7 +15,7 @@ interface CardChargeRowProps {
   item: PeriodItem;
   cards: CreditCard[];
   tags: Tag[];
-  onSetDone: (done: boolean) => void;
+  onSetDone: (done: boolean) => Promise<unknown>;
   onUpdate: (changes: PeriodItemUpdate) => void;
   onDelete: () => void;
 }

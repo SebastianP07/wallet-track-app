@@ -13,6 +13,7 @@ import { useI18n } from "@/shared/i18n/use-i18n";
 import { TagLabel } from "@/modules/tags/ui/components/tag-label";
 import { isPendingRow } from "@/shared/query/optimistic-rows";
 import { Button } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
 const ACTION = "min-h-11 px-2 text-sm first:-ml-2";
@@ -30,7 +31,11 @@ interface ItemRowProps {
   // A row without these has only its done toggle.
   renderEditForm?: (close: () => void) => ReactNode;
   onDelete?: (stopRepeating: boolean) => void;
-  onSetDone: (done: boolean) => void;
+  // Asked first, then waited on: the confirmation stays open until the server answers.
+  onSetDone?: (done: boolean) => Promise<unknown>;
+  // Replaces the row's own confirmation, for an item that leaves the list once done: the question has to
+  // outlive the row.
+  onToggleDone?: () => void;
   // Its handle and move buttons, in a list the owner can reorder (D13).
   reorder?: RowReorder;
 }
@@ -44,12 +49,16 @@ export function ItemRow({
   repeats = false,
   renderEditForm,
   onSetDone,
+  onToggleDone,
   onDelete,
   reorder,
 }: ItemRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
+  // What the confirmation asks for, kept as asked: the optimistic change flips the row while it waits.
+  const [doneTarget, setDoneTarget] = useState<boolean | null>(null);
   const { locale, messages } = useI18n();
   const t = messages.expenses;
+  const ask = messages.feedback.confirm;
   const pending = isPendingRow(item);
   const done = item.status === "done";
   const tag = tags.find(({ id }) => id === item.tagId);
@@ -77,7 +86,15 @@ export function ItemRow({
         word={doneWord}
         done={done}
         disabled={pending}
-        onToggle={() => onSetDone(!done)}
+        onToggle={onToggleDone ?? (() => setDoneTarget(!done))}
+      />
+      <ConfirmDialog
+        open={doneTarget !== null}
+        title={doneTarget ? ask.markDone.title(item.name, doneWord) : ask.unmarkDone.title(item.name)}
+        description={doneTarget ? ask.markDone.text : ask.unmarkDone.text(doneWord)}
+        confirmLabel={doneTarget ? ask.markDone.action(doneWord) : ask.unmarkDone.action}
+        onConfirm={() => (doneTarget === null ? undefined : onSetDone?.(doneTarget))}
+        onClose={() => setDoneTarget(null)}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start justify-between gap-3">

@@ -19,6 +19,8 @@ export function useOptimisticMutation<List, Variables, Result>(options: {
   mutationFn: (variables: Variables) => Promise<Result>;
   change: (list: List, variables: Variables) => OptimisticChange<List, Result>;
   onStart: () => void;
+  // With the list as it was before the change, which still names a row the change removed.
+  onSuccess?: (result: Result, variables: Variables, before: List | undefined) => void;
   onFailure: (error: unknown) => void;
 }) {
   const queryClient = useQueryClient();
@@ -33,22 +35,24 @@ export function useOptimisticMutation<List, Variables, Result>(options: {
     onMutate: async (variables) => {
       options.onStart();
       await queryClient.cancelQueries({ queryKey: syncKey });
-      const list = queryClient.getQueryData<List>(queryKey);
-      if (!list) {
-        return null;
+      const before = queryClient.getQueryData<List>(queryKey);
+      if (!before) {
+        return { before, change: null };
       }
-      const change = options.change(list, variables);
+      const change = options.change(before, variables);
       queryClient.setQueryData(queryKey, change.next);
-      return change;
+      return { before, change };
     },
-    onSuccess: (result, _variables, change) => {
+    onSuccess: (result, variables, context) => {
+      const change = context?.change;
       if (change?.confirm) {
         update((list) => change.confirm!(list, result));
       }
+      options.onSuccess?.(result, variables, context?.before);
     },
-    onError: (error, _variables, change) => {
-      if (change) {
-        update(change.undo);
+    onError: (error, _variables, context) => {
+      if (context?.change) {
+        update(context.change.undo);
       }
       options.onFailure(error);
     },

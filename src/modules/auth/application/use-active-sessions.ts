@@ -5,6 +5,7 @@ import type { SecurityRepository } from "./security-repository";
 import { describeRevokeFailure } from "../domain/security-display";
 import type { ActiveSession } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 const SESSIONS_KEY = ["auth", "sessions"];
@@ -29,7 +30,9 @@ export function useActiveSessions(repository: SecurityRepository, onSessionEnded
     onSuccess: (_result, session) => {
       if (session.current) {
         onSessionEnded();
+        return;
       }
+      notify.success(messages.feedback.sessionEnded);
     },
     onError: (error) => {
       if (statusOf(error) === 401) {
@@ -38,6 +41,7 @@ export function useActiveSessions(repository: SecurityRepository, onSessionEnded
       }
       const status = statusOf(error);
       setFailure(() => (t: typeof messages) => describeRevokeFailure(status, t));
+      notify.error(describeRevokeFailure(status, messages));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: SESSIONS_KEY }),
   });

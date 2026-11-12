@@ -1,6 +1,9 @@
+import { useState } from "react";
+
 import { LanguageSwitch } from "@/shared/i18n/language-switch";
 import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import { FormAlert } from "@/shared/ui/form-alert";
 
 interface DashboardHeaderProps {
@@ -8,7 +11,8 @@ interface DashboardHeaderProps {
   pending: boolean;
   failure: string | null;
   onLogout: () => void;
-  onLogoutAll: () => void;
+  // Asked first, then waited on: it ends every session, this one included.
+  onLogoutAll: () => Promise<unknown>;
 }
 
 export function DashboardHeader({
@@ -18,11 +22,13 @@ export function DashboardHeader({
   onLogout,
   onLogoutAll,
 }: DashboardHeaderProps) {
-  const t = useMessages().dashboard;
+  const { dashboard: t, feedback } = useMessages();
+  const [isConfirmingLogoutAll, setIsConfirmingLogoutAll] = useState(false);
   return (
     <header className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+      {/* Stacked on a phone whatever the language, so shorter labels cannot pull the buttons up beside the name. */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6">
+        <div className="flex w-full min-w-0 items-center justify-between gap-3 sm:w-auto sm:flex-1">
           <div className="flex min-w-0 flex-col">
             <h1 className="font-heading text-lg leading-tight font-bold">
               Wallet <span className="text-signal">Track</span>
@@ -35,9 +41,23 @@ export function DashboardHeader({
           <Button variant="outline" className="whitespace-nowrap" disabled={pending} onClick={onLogout}>
             {t.logOut}
           </Button>
-          <Button variant="link" className="px-2 whitespace-nowrap" disabled={pending} onClick={onLogoutAll}>
+          <Button
+            variant="link"
+            className="px-2 whitespace-nowrap"
+            disabled={pending}
+            onClick={() => setIsConfirmingLogoutAll(true)}
+          >
             {t.logOutEverywhere}
           </Button>
+          <ConfirmDialog
+            open={isConfirmingLogoutAll}
+            title={feedback.confirm.logOutEverywhere.title}
+            description={feedback.confirm.logOutEverywhere.text}
+            confirmLabel={t.logOutEverywhere}
+            destructive
+            onConfirm={onLogoutAll}
+            onClose={() => setIsConfirmingLogoutAll(false)}
+          />
         </div>
       </div>
       <FormAlert message={failure} />

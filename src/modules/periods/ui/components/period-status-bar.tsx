@@ -7,6 +7,7 @@ import type { Period } from "../../domain/types";
 import { monthLabel, monthName } from "../../domain/year-month";
 import { useI18n } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 import { FormAlert } from "@/shared/ui/form-alert";
 
@@ -32,7 +33,8 @@ interface PeriodStatusBarProps {
   isOpening: boolean;
   isClosing: boolean;
   reload: () => void;
-  openMonth: () => void;
+  // Asked first, then waited on: opening copies the recurring templates into the month.
+  openMonth: () => Promise<unknown>;
   closeMonth: () => void;
 }
 
@@ -49,6 +51,7 @@ export function PeriodStatusBar({
   closeMonth,
 }: PeriodStatusBarProps) {
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [isConfirmingOpen, setIsConfirmingOpen] = useState(false);
   const { locale, messages } = useI18n();
   const t = messages.periods;
   const month = monthLabel(period, locale);
@@ -76,6 +79,15 @@ export function PeriodStatusBar({
   return (
     <div className="flex flex-col gap-3 border-y border-rule py-3">
       <FormAlert message={failure} />
+      {/* Outside the part for a month with no period, which the answer replaces while the dialog still waits. */}
+      <ConfirmDialog
+        open={isConfirmingOpen}
+        title={messages.feedback.confirm.openMonth.title(month)}
+        description={t.notOpenedText(month)}
+        confirmLabel={t.openMonth}
+        onConfirm={openMonth}
+        onClose={() => setIsConfirmingOpen(false)}
+      />
 
       {selected === null ? (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -85,7 +97,7 @@ export function PeriodStatusBar({
               {t.notOpenedText(month)}
             </p>
           </div>
-          <Button className="shrink-0" disabled={isOpening} onClick={openMonth}>
+          <Button className="shrink-0" disabled={isOpening} onClick={() => setIsConfirmingOpen(true)}>
             {isOpening ? t.opening : t.openMonth}
           </Button>
         </div>

@@ -13,6 +13,7 @@ import type { Account, AccountCreate, AccountList, AccountUpdate } from "../doma
 import { statusOf } from "@/shared/api/http-client";
 import { ACCOUNTS_KEY } from "@/shared/api/query-keys";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 // Balances are current values, so the month is not part of the query. Every account counts toward Total
@@ -43,7 +44,9 @@ export function useAccountSection(repository: AccountsRepository, onSessionEnded
     }
     const status = statusOf(error);
     setFailure(() => (current: typeof messages) => describeAccountFailure(status, current));
+    notify.error(describeAccountFailure(status, messages));
   };
+  const nameIn = (list: AccountList | undefined, id: string) => list?.items.find((row) => row.id === id)?.name ?? "";
 
   const create = useOptimisticMutation<AccountList, AccountCreate, Account>({
     queryKey: ACCOUNTS_KEY,
@@ -64,6 +67,7 @@ export function useAccountSection(repository: AccountsRepository, onSessionEnded
       };
     },
     onStart,
+    onSuccess: (created) => notify.success(messages.feedback.added(created.name)),
     onFailure,
   });
 
@@ -82,6 +86,7 @@ export function useAccountSection(repository: AccountsRepository, onSessionEnded
       };
     },
     onStart,
+    onSuccess: (updated) => notify.success(messages.feedback.saved(updated.name)),
     onFailure,
   });
 
@@ -100,6 +105,7 @@ export function useAccountSection(repository: AccountsRepository, onSessionEnded
       };
     },
     onStart,
+    onSuccess: (_result, id, before) => notify.success(messages.feedback.deleted(nameIn(before, id))),
     onFailure,
   });
 

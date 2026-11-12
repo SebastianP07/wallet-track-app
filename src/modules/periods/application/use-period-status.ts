@@ -4,9 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PeriodsRepository } from "./periods-repository";
 import { describePeriodFailure } from "../domain/failures";
 import { findPeriod, withPeriod } from "../domain/period-list";
+import { monthLabel } from "../domain/year-month";
 import type { Period, PeriodList } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
-import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
+import { settled } from "@/shared/feedback/action-error";
+import { notify } from "@/shared/feedback/toast-store";
+import { useI18n, type Translatable } from "@/shared/i18n/use-i18n";
 import { PERIOD_ITEMS_KEY, PERIODS_KEY } from "@/shared/api/query-keys";
 
 
@@ -19,7 +22,8 @@ export function usePeriodStatus(
   onSessionEnded: () => void,
 ) {
   const queryClient = useQueryClient();
-  const messages = useMessages();
+  const { locale, messages } = useI18n();
+  const describe = (error: unknown) => describePeriodFailure(statusOf(error), messages);
   const [failure, setFailure] = useState<Translatable | null>(null);
 
   const query = useQuery({
@@ -46,6 +50,7 @@ export function usePeriodStatus(
       }
       const status = statusOf(error);
       setFailure(() => (current: typeof messages) => describePeriodFailure(status, current));
+      notify.error(describe(error));
     },
     onSettled: () =>
       Promise.all([
@@ -54,8 +59,23 @@ export function usePeriodStatus(
         queryClient.invalidateQueries({ queryKey: PERIOD_ITEMS_KEY }),
       ]),
   };
-  const open = useMutation({ mutationFn: () => repository.open(period), ...mutationOptions });
-  const close = useMutation({ mutationFn: () => repository.close(period), ...mutationOptions });
+  const month = monthLabel(period, locale);
+  const open = useMutation({
+    mutationFn: () => repository.open(period),
+    ...mutationOptions,
+    onSuccess: (updated: Period) => {
+      mutationOptions.onSuccess(updated);
+      notify.success(messages.feedback.monthOpened(month));
+    },
+  });
+  const close = useMutation({
+    mutationFn: () => repository.close(period),
+    ...mutationOptions,
+    onSuccess: (updated: Period) => {
+      mutationOptions.onSuccess(updated);
+      notify.success(messages.feedback.monthClosed(month));
+    },
+  });
 
   return {
     selected: findPeriod(query.data, period),
@@ -63,7 +83,7 @@ export function usePeriodStatus(
     loadFailed: query.isError && !query.data,
     failure: failure?.(messages) ?? null,
     reload: () => void query.refetch(),
-    openMonth: () => open.mutate(),
+    openMonth: () => settled(open.mutateAsync(), describe),
     isOpening: open.isPending,
     closeMonth: () => close.mutate(),
     isClosing: close.isPending,

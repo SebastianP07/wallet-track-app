@@ -5,6 +5,7 @@ import type { CardsRepository } from "./cards-repository";
 import { describeCardFailure } from "../domain/failures";
 import type { CreditCardCreate, CreditCardUpdate } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 import {
   CREDIT_CARDS_KEY,
@@ -42,6 +43,7 @@ export function useCardSection(repository: CardsRepository, onSessionEnded: () =
       }
       const status = statusOf(error);
       setFailure(() => (current: typeof messages) => describeCardFailure(status, current));
+      notify.error(describeCardFailure(status, messages));
     },
     onSettled: () =>
       Promise.all([
@@ -53,20 +55,25 @@ export function useCardSection(repository: CardsRepository, onSessionEnded: () =
   const create = useMutation({
     mutationFn: (card: CreditCardCreate) => repository.create(card),
     ...mutationOptions,
+    onSuccess: (created) => notify.success(messages.feedback.added(created.name)),
   });
   const update = useMutation({
     mutationFn: ({ id, changes }: { id: string; changes: CreditCardUpdate }) =>
       repository.update(id, changes),
     ...mutationOptions,
+    onSuccess: (updated) => notify.success(messages.feedback.saved(updated.name)),
   });
   const remove = useMutation({
     mutationFn: (id: string) => repository.remove(id),
     ...mutationOptions,
-    onSuccess: () =>
-      Promise.all([
+    onSuccess: (_result, id) => {
+      const name = query.data?.find((card) => card.id === id)?.name ?? "";
+      notify.success(messages.feedback.deleted(name));
+      return Promise.all([
         queryClient.invalidateQueries({ queryKey: RECURRING_TEMPLATES_KEY }),
         queryClient.invalidateQueries({ queryKey: PLATFORMS_KEY }),
-      ]),
+      ]);
+    },
   });
 
   return {

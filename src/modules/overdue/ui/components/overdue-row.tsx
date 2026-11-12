@@ -10,11 +10,11 @@ const DETAIL = "text-xs whitespace-nowrap text-muted-foreground";
 interface OverdueRowProps {
   item: PeriodItem;
   tags: Tag[];
-  onSettle: () => void;
+  onAskSettle: () => void;
 }
 
 // Editing and deleting stay in the item's own month, which the row names as where it comes from (D7).
-export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
+export function OverdueRow({ item, tags, onAskSettle }: OverdueRowProps) {
   const { locale, messages } = useI18n();
   const t = messages.overdue;
   return (
@@ -22,7 +22,7 @@ export function OverdueRow({ item, tags, onSettle }: OverdueRowProps) {
       item={item}
       tags={tags}
       doneWord={item.kind === "income" ? "received" : "paid"}
-      onSetDone={onSettle}
+      onToggleDone={onAskSettle}
       details={
         <>
           <span className="text-xs font-medium whitespace-nowrap">

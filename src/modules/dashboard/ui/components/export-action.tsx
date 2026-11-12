@@ -8,11 +8,10 @@ interface ExportActionProps {
   monthLabel: string;
   isExporting: boolean;
   failure: string | null;
-  savedFileName: string | null;
   onExport: () => void;
 }
 
-export function ExportAction({ monthLabel, isExporting, failure, savedFileName, onExport }: ExportActionProps) {
+export function ExportAction({ monthLabel, isExporting, failure, onExport }: ExportActionProps) {
   const t = useMessages().dashboard.export;
   return (
     <div className="flex flex-col items-start gap-2">
@@ -26,9 +25,6 @@ export function ExportAction({ monthLabel, isExporting, failure, savedFileName, 
         {isExporting ? t.exporting : t.action}
       </Button>
       <FormAlert message={failure} />
-      <p role="status" className="sr-only">
-        {savedFileName ? t.downloaded(savedFileName) : ""}
-      </p>
     </div>
   );
 }

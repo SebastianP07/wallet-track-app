@@ -5,6 +5,7 @@ import { cards } from "./cards";
 import { common } from "./common";
 import { dashboard } from "./dashboard";
 import { expenses } from "./expenses";
+import { feedback } from "./feedback";
 import { income } from "./income";
 import { overdue } from "./overdue";
 import { periods } from "./periods";
@@ -17,6 +18,7 @@ import { validation } from "./validation";
 // missing from either fails the typecheck.
 const NAMESPACES = {
   common,
+  feedback,
   validation,
   dashboard,
   accounts,

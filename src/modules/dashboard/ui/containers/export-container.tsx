@@ -16,7 +16,7 @@ interface ExportContainerProps {
 export function ExportContainer({ period, onSessionEnded }: ExportContainerProps) {
   const { locale } = useI18n();
   const { notOpened } = useDashboard(httpDashboardRepository, period, onSessionEnded);
-  const { exportMonth, isExporting, failure, savedFileName } = useMonthExport(
+  const { exportMonth, isExporting, failure } = useMonthExport(
     httpDashboardRepository,
     period,
     saveFile,
@@ -31,7 +31,6 @@ export function ExportContainer({ period, onSessionEnded }: ExportContainerProps
       monthLabel={monthLabel(period, locale)}
       isExporting={isExporting}
       failure={failure}
-      savedFileName={savedFileName}
       onExport={exportMonth}
     />
   );

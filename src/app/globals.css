@@ -156,7 +156,17 @@
 
 /* The Dashboard's bottom navigation. A field brought into view by focus or Tab stops above it. */
 html:has(.bottom-nav) {
-  scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  scroll-padding-bottom: calc(6.25rem + env(safe-area-inset-bottom));
+}
+
+/* Notices sit above the Dashboard's bottom navigation, whose height already counts the safe area, and above the
+   device's own edge everywhere else. */
+.toaster {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+html:has(.bottom-nav) .toaster {
+  bottom: calc(5.5rem + env(safe-area-inset-bottom));
 }
 
 /* On a narrow screen a focused text field most likely has the on-screen keyboard open, and the bar would sit

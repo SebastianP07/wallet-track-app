@@ -12,6 +12,7 @@ import { languageTag } from "@/shared/i18n/locale";
 import { getLocale, getMessages } from "@/shared/i18n/server-locale";
 import { ServiceWorkerRegistration } from "@/shared/pwa/service-worker-registration";
 import { QueryProvider } from "@/shared/ui/query-provider";
+import { Toaster } from "@/shared/ui/toaster";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { common } = await getMessages();
@@ -44,6 +45,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <QueryProvider>
             <ServiceWorkerRegistration />
             {children}
+            <Toaster />
           </QueryProvider>
         </I18nProvider>
       </body>

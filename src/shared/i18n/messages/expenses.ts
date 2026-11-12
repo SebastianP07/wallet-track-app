@@ -1,4 +1,4 @@
-type DoneWord = "paid" | "received" | "charged";
+export type DoneWord = "paid" | "received" | "charged";
 
 const en = {
   copy: {
@@ -71,7 +71,7 @@ const en = {
 
 export type ExpensesMessages = typeof en;
 
-const DONE_WORDS_ES: Record<DoneWord, string> = { paid: "pagado", received: "recibido", charged: "cobrado" };
+export const DONE_WORDS_ES: Record<DoneWord, string> = { paid: "pagado", received: "recibido", charged: "cobrado" };
 
 const es: ExpensesMessages = {
   copy: {

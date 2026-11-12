@@ -7,6 +7,7 @@ import { withPeriod } from "../domain/period-list";
 import type { Period, PeriodList } from "../domain/types";
 import { statusOf } from "@/shared/api/http-client";
 import { PERIODS_KEY } from "@/shared/api/query-keys";
+import { notify } from "@/shared/feedback/toast-store";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
 
 // The month's opening balance waits for the server like opening and closing do: the expected close and the
@@ -19,17 +20,22 @@ export function useOpeningBalance(repository: PeriodsRepository, period: string,
   const mutation = useMutation({
     mutationFn: (openingBalance: number | null) => repository.setOpeningBalance(period, openingBalance),
     onMutate: () => setFailure(null),
-    onSuccess: (updated: Period) =>
-      queryClient.setQueryData<PeriodList>(PERIODS_KEY, (list) => list && withPeriod(list, updated)),
+    onSuccess: (updated: Period, openingBalance) => {
+      queryClient.setQueryData<PeriodList>(PERIODS_KEY, (list) => list && withPeriod(list, updated));
+      notify.success(
+        openingBalance === null ? messages.feedback.openingBalanceCleared : messages.feedback.openingBalanceSaved,
+      );
+    },
     onError: (error: unknown) => {
       if (statusOf(error) === 401) {
         onSessionEnded();
         return;
       }
       const status = statusOf(error);
-      setFailure(() => (current: typeof messages) =>
-        status === 400 ? current.periods.failures.openingBalanceRejected : describePeriodFailure(status, current),
-      );
+      const describe = (current: typeof messages) =>
+        status === 400 ? current.periods.failures.openingBalanceRejected : describePeriodFailure(status, current);
+      setFailure(() => describe);
+      notify.error(describe(messages));
     },
   });
 

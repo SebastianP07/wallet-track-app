@@ -10,6 +10,7 @@ import { formatCOP, formatCopInput } from "@/modules/accounts/domain/money";
 import type { CreditCard } from "@/modules/cards/domain/types";
 import { useMessages } from "@/shared/i18n/use-i18n";
 import { Button } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import { ConfirmPanel } from "@/shared/ui/confirm-panel";
 
 const PlatformForm = dynamic(() => import("./platform-form").then((module) => module.PlatformForm));
@@ -26,7 +27,8 @@ interface PlatformRowProps {
   isChangingMembers: boolean;
   onUpdate: (changes: PlatformDraft, callbacks: { onSuccess: () => void }) => void;
   onDelete: () => void;
-  onSetMember: (personId: string, member: boolean) => void;
+  // Asked first, then waited on: shares are worked out again on the server.
+  onSetMember: (personId: string, member: boolean) => Promise<unknown>;
 }
 
 export function PlatformRow({
@@ -40,7 +42,9 @@ export function PlatformRow({
   onSetMember,
 }: PlatformRowProps) {
   const [mode, setMode] = useState<RowMode>("view");
-  const { common, expenses, platforms: t } = useMessages();
+  const [memberChange, setMemberChange] = useState<{ person: Person; member: boolean } | null>(null);
+  const { common, expenses, feedback, platforms: t } = useMessages();
+  const ask = memberChange?.member ? feedback.confirm.addMember : feedback.confirm.removeMember;
   const toView = () => setMode("view");
   const card = cards.find(({ id }) => id === platform.cardId);
   const isMember = (personId: string) => platform.members.some((member) => member.personId === personId);
@@ -71,7 +75,7 @@ export function PlatformRow({
                 aria-pressed={member}
                 aria-label={t.sharesPlatform(person.name, platform.name)}
                 disabled={isChangingMembers}
-                onClick={() => onSetMember(person.id, !member)}
+                onClick={() => setMemberChange({ person, member: !member })}
                 className={cn(
                   "min-h-11 cursor-pointer rounded-md border px-3 text-sm wrap-anywhere focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
                   member
@@ -85,6 +89,16 @@ export function PlatformRow({
           })}
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={memberChange !== null}
+        title={memberChange ? ask.title(memberChange.person.name, platform.name) : ""}
+        description={ask.text}
+        confirmLabel={ask.action}
+        destructive={memberChange?.member === false}
+        onConfirm={() => (memberChange ? onSetMember(memberChange.person.id, memberChange.member) : undefined)}
+        onClose={() => setMemberChange(null)}
+      />
 
       {mode === "view" ? (
         <div className="flex flex-wrap items-center">

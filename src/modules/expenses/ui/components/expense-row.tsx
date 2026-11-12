@@ -14,7 +14,7 @@ const ExpenseForm = dynamic(() => import("./expense-form").then((module) => modu
 interface ExpenseRowProps {
   item: PeriodItem;
   tags: Tag[];
-  onSetDone: (done: boolean) => void;
+  onSetDone: (done: boolean) => Promise<unknown>;
   repeats: boolean;
   onUpdate: (changes: PeriodItemUpdate) => void;
   onDelete: (stopRepeating: boolean) => void;

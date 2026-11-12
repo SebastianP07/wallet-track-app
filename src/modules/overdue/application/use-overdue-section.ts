@@ -5,9 +5,12 @@ import type { OverdueRepository } from "./overdue-repository";
 import { describeOverdueFailure } from "../domain/failures";
 import { groupOverdue } from "../domain/overdue-groups";
 import type { OverdueItemList } from "../domain/types";
+import { doneWordOf } from "@/modules/expenses/domain/done-word";
 import type { PeriodItem } from "@/modules/expenses/domain/types";
 import { statusOf } from "@/shared/api/http-client";
 import { OVERDUE_ITEMS_KEY, PERIOD_ITEMS_KEY } from "@/shared/api/query-keys";
+import { settled } from "@/shared/feedback/action-error";
+import { notify } from "@/shared/feedback/toast-store";
 import { withoutRow, withRow } from "@/shared/query/optimistic-rows";
 import { useOptimisticMutation } from "@/shared/query/use-optimistic-mutation";
 import { useMessages, type Translatable } from "@/shared/i18n/use-i18n";
@@ -28,6 +31,7 @@ export function useOverdueSection(
   const messages = useMessages();
   const [failure, setFailure] = useState<Translatable | null>(null);
   const queryKey = overdueItemsKey(period);
+  const describe = (cause: unknown) => describeOverdueFailure(statusOf(cause), messages);
 
   const query = useQuery({
     queryKey,
@@ -63,6 +67,8 @@ export function useOverdueSection(
       };
     },
     onStart: () => setFailure(null),
+    onSuccess: (settledItem) =>
+      notify.success(messages.feedback.markedDone(settledItem.name, doneWordOf(settledItem.kind))),
     onFailure: (cause) => {
       if (statusOf(cause) === 401) {
         onSessionEnded();
@@ -70,6 +76,7 @@ export function useOverdueSection(
       }
       const status = statusOf(cause);
       setFailure(() => (current: typeof messages) => describeOverdueFailure(status, current));
+      notify.error(describe(cause));
     },
   });
 
@@ -88,6 +95,6 @@ export function useOverdueSection(
     totalsAreSettling: inFlight > 0 || query.isFetching,
     reload: () => void query.refetch(),
     failure: failure?.(messages) ?? null,
-    settle: (id: string) => settle.mutate(id),
+    settle: (id: string) => settled(settle.mutateAsync(id), describe),
   };
 }
