@@ -166,7 +166,7 @@ html:has(.bottom-nav) {
 }
 
 html:has(.bottom-nav) .toaster {
-  bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  bottom: calc(6.25rem + env(safe-area-inset-bottom));
 }
 
 /* On a narrow screen a focused text field most likely has the on-screen keyboard open, and the bar would sit
