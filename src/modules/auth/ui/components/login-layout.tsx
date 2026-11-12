@@ -17,7 +17,7 @@ export function LoginLayout({ eyebrow, title, description, children }: LoginLayo
     <FocusKeeper>
       <main className="relative grid min-h-dvh lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         {/* First in the reading order, top right over the wordmark's empty corner at every width. */}
-        <LanguageSwitch className="absolute top-3 right-4 z-10 bg-background sm:right-6" />
+        <LanguageSwitch className="absolute top-[calc(env(safe-area-inset-top)+1.5rem)] right-4 z-10 bg-background sm:top-3 sm:right-6" />
         <div
           aria-hidden="true"
           className="ledger-rules relative flex flex-col justify-end overflow-hidden border-b border-rule py-6 pr-6 pl-[4.25rem] lg:border-r lg:border-b-0 lg:py-12"

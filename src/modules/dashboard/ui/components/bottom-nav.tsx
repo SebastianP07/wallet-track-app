@@ -36,7 +36,7 @@ export function BottomNav({ current, onNavigate }: BottomNavProps) {
       aria-label={t.label}
       className="bottom-nav pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center sm:bottom-3 sm:px-4"
     >
-      <ul className="pointer-events-auto grid w-full max-w-xl grid-cols-6 border-t border-rule bg-[#111111] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgb(0_0_0/0.5)] sm:rounded-xl sm:border sm:border-border sm:pb-0">
+      <ul className="pointer-events-auto grid w-full max-w-xl grid-cols-6 border-t border-rule bg-[#111111] pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_rgb(0_0_0/0.5)] sm:rounded-xl sm:border sm:border-border sm:pb-0">
         {DASHBOARD_DESTINATIONS.map(({ id, target }) => {
           const Icon = ICONS[id];
           const isCurrent = current === id;
